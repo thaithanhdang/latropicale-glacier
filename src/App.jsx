@@ -358,7 +358,7 @@ function Section({ title, icon, bg, children, onAdd }) {
  <div style={{ marginBottom: 16 }}>
  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
  <div style={{ fontFamily: F.body, fontWeight: 700, fontSize: 12, color: C.darkGreen, textTransform: "uppercase", letterSpacing: 0.6 }}>{icon} {title}</div>
- {onAdd && <button  onClick={onAdd} style={ background: "transparent", border: "1.5px solid " + C.mint, borderRadius: 7, padding: "6px 12px", fontFamily: F.body, fontSize: 12, fontWeight: 600, color: C.green, cursor: "pointer" }>+ Ajouter</button>}
+ {onAdd && <button  onClick={onAdd} style={{ background: "transparent", border: "1.5px solid " + C.mint, borderRadius: 7, padding: "6px 12px", fontFamily: F.body, fontSize: 12, fontWeight: 600, color: C.green, cursor: "pointer" }}>+ Ajouter</button>}
  </div>
  <div style={{ background: bg, borderRadius: 10, padding: "8px 8px 4px" }}>{children}</div>
  </div>
@@ -470,7 +470,7 @@ function RecetteForm({ onSave, onCancel, initial, allIng, setData, fournisseurs 
  <button> { if (nom) onSave({ id: initial?.id || genId(), nom, categorie, ephemere, notes, poudres, liquides, ingredients, toppings }); }} disabled={!nom}>
  {initial ? "Enregistrer" : "Créer la recette"}
  </button>
- <button  onClick={onCancel} style={ background: "transparent", border: "1.5px solid " + C.mint, borderRadius: 7, padding: "6px 12px", fontFamily: F.body, fontSize: 12, fontWeight: 600, color: C.green, cursor: "pointer" }>Annuler</button>
+ <button  onClick={onCancel} style={{ background: "transparent", border: "1.5px solid " + C.mint, borderRadius: 7, padding: "6px 12px", fontFamily: F.body, fontSize: 12, fontWeight: 600, color: C.green, cursor: "pointer" }}>Annuler</button>
  </div>
  </Card>
  );
@@ -557,7 +557,7 @@ function RecetteDetail({ recette, data, onEdit, onClose }) {
 
  <div style={{ display: "flex", gap: 10 }}>
  <button>Modifier</button>
- <button onClick={onClose}  style={ background: "transparent", border: "1.5px solid " + C.mint, borderRadius: 7, padding: "6px 12px", fontFamily: F.body, fontSize: 12, fontWeight: 600, color: C.green, cursor: "pointer" }>Fermer</button>
+ <button onClick={onClose}  style={{ background: "transparent", border: "1.5px solid " + C.mint, borderRadius: 7, padding: "6px 12px", fontFamily: F.body, fontSize: 12, fontWeight: 600, color: C.green, cursor: "pointer" }}>Fermer</button>
  </div>
  </div>
  </div>
@@ -695,7 +695,7 @@ function IngredientForm({ onSave, onCancel, initial, fournisseurs }) {
  <button> { if (nomRecette) onSave({ id: initial?.id || genId(), nomRecette, nomEtiquette: nomEtiquette || nomRecette.toLowerCase(), nomsFournisseur: nomsFournisseur.split(",").map(s => s.trim()).filter(Boolean), bio, prixKg: parseFloat(prixKg) || 0, fournisseurId, fournisseursAlternatifs, stockActuel: parseFloat(stockActuel) || 0, unite, allergene, categorie }); }} disabled={!nomRecette}>
  {initial ? "Enregistrer" : "Ajouter"}
  </button>
- <button  onClick={onCancel} style={ background: "transparent", border: "1.5px solid " + C.mint, borderRadius: 7, padding: "6px 12px", fontFamily: F.body, fontSize: 12, fontWeight: 600, color: C.green, cursor: "pointer" }>Annuler</button>
+ <button  onClick={onCancel} style={{ background: "transparent", border: "1.5px solid " + C.mint, borderRadius: 7, padding: "6px 12px", fontFamily: F.body, fontSize: 12, fontWeight: 600, color: C.green, cursor: "pointer" }}>Annuler</button>
  </div>
  </Card>
  );
@@ -783,7 +783,7 @@ function FournisseurForm({ onSave, onCancel, initial }) {
  </div>
  <div style={{ display: "flex", gap: 10 }}>
  <button> { if (nom) onSave({ id: initial?.id || genId(), nom, jourCommande, jourLivraison, contact }); }} disabled={!nom}>{initial ? "Enregistrer" : "Ajouter"}</button>
- <button  onClick={onCancel} style={ background: "transparent", border: "1.5px solid " + C.mint, borderRadius: 7, padding: "6px 12px", fontFamily: F.body, fontSize: 12, fontWeight: 600, color: C.green, cursor: "pointer" }>Annuler</button>
+ <button  onClick={onCancel} style={{ background: "transparent", border: "1.5px solid " + C.mint, borderRadius: 7, padding: "6px 12px", fontFamily: F.body, fontSize: 12, fontWeight: 600, color: C.green, cursor: "pointer" }}>Annuler</button>
  </div>
  </Card>
  );
@@ -896,8 +896,8 @@ export default function App() {
  useEffect(() => {
  (async () => {
  try {
- const saved = await window.storage.get("tropicale_data");
- if (saved) setData(JSON.parse(saved.value));
+ const saved = { value: localStorage.getItem("tropicale_data") };
+ if (saved && saved.value) setData(JSON.parse(saved.value));
  } catch {}
  })();
  }, []);
@@ -905,7 +905,7 @@ export default function App() {
  useEffect(() => {
  (async () => {
  try {
- await window.storage.set("tropicale_data", JSON.stringify(data));
+ localStorage.setItem("tropicale_data", JSON.stringify(data));
  } catch {}
  })();
  }, [data]);
