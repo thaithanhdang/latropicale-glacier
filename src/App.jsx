@@ -468,7 +468,7 @@ function RecetteForm({ onSave, onCancel, initial, allIng, setData, fournisseurs 
  </div>
 
  <div style={{ display: "flex", gap: 10 }}>
- <button> { if (nom) onSave({ id: initial?.id || genId(), nom, categorie, ephemere, notes, poudres, liquides, ingredients, toppings }); }} disabled={!nom}>
+ <button onClick={() => { if (nom) onSave({ id: initial?.id || genId(), nom, categorie, ephemere, notes, poudres, liquides, ingredients, toppings }); }} disabled={!nom} style={{ background: nom ? C.green : "#aaa", border: "none", borderRadius: 9, padding: "9px 20px", fontFamily: F.body, fontSize: 14, fontWeight: 600, color: C.white, cursor: nom ? "pointer" : "not-allowed", opacity: nom ? 1 : 0.5 }}>
  {initial ? "Enregistrer" : "Créer la recette"}
  </button>
  <button  onClick={onCancel} style={{ background: "transparent", border: `1.5px solid ${C.mint}`, borderRadius: 7, padding: "6px 12px", fontFamily: F.body, fontSize: 12, fontWeight: 600, color: C.green, cursor: "pointer" }}>Annuler</button>
@@ -557,7 +557,7 @@ function RecetteDetail({ recette, data, onEdit, onClose }) {
  </div>
 
  <div style={{ display: "flex", gap: 10 }}>
- <button>Modifier</button>
+ <button onClick={onEdit} style={{ background: C.lightMint, border: "none", borderRadius: 8, padding: "9px 18px", fontFamily: F.body, fontSize: 14, fontWeight: 600, color: C.darkGreen, cursor: "pointer" }}>Modifier</button>
  <button onClick={onClose}  style={{ background: "transparent", border: `1.5px solid ${C.mint}`, borderRadius: 7, padding: "6px 12px", fontFamily: F.body, fontSize: 12, fontWeight: 600, color: C.green, cursor: "pointer" }}>Fermer</button>
  </div>
  </div>
@@ -586,7 +586,7 @@ function RecettesTab({ data, setData }) {
  {detail && <RecetteDetail recette={detail} data={data} onEdit={() => { setEditing(detail); setDetail(null); }} onClose={() => setDetail(null)} />}
  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
  <h2 style={{ fontFamily: F.display, color: C.darkGreen, margin: 0 }}>Recettes <span style={{ fontSize: 13, fontWeight: 400, color: C.muted }}>({data.recettes.length})</span></h2>
- <button> { setShowForm(true); setEditing(null); }}>+ Nouvelle recette</button>
+ <button onClick={() => { setShowForm(true); setEditing(null); }} style={{ background: C.green, border: "none", borderRadius: 9, padding: "9px 20px", fontFamily: F.body, fontSize: 14, fontWeight: 600, color: C.white, cursor: "pointer" }}>+ Nouvelle recette</button>
  </div>
  {showForm && !editing && <RecetteForm onSave={save} onCancel={() => setShowForm(false)} allIng={data.ingredients} setData={setData} fournisseurs={data.fournisseurs} />}
  {editing && <RecetteForm initial={editing} onSave={save} onCancel={() => setEditing(null)} allIng={data.ingredients} setData={setData} fournisseurs={data.fournisseurs} />}
@@ -612,7 +612,7 @@ function RecettesTab({ data, setData }) {
  <span style={{ fontSize: 12, color: C.muted, fontFamily: F.body }}>{cout} €</span>
  </div>
  <div style={{ position: "absolute", top: 10, right: 10, display: "flex", gap: 4 }} onClick={e => e.stopPropagation()}>
- <button> setEditing(r)} style={{ background: C.lightMint, border: "none", borderRadius: 7, padding: "6px 12px", fontFamily: F.body, fontSize: 12, fontWeight: 600, color: C.darkGreen, cursor: "pointer" }}>Modifier</button>
+ <button onClick={() => setEditing(r)} style={{ background: C.lightMint, border: "none", borderRadius: 7, padding: "6px 12px", fontFamily: F.body, fontSize: 12, fontWeight: 600, color: C.darkGreen, cursor: "pointer" }}>Modifier</button>
  <button onClick={() => { if (window.confirm("Supprimer cette recette ?")) del(r.id); }} style={{ background: "#FFE5E5", border: "none", borderRadius: 7, padding: "5px 10px", fontFamily: F.body, fontSize: 11, fontWeight: 600, color: C.error, cursor: "pointer" }}>Supprimer</button>
  </div>
  </Card>
@@ -693,7 +693,7 @@ function IngredientForm({ onSave, onCancel, initial, fournisseurs }) {
  </div>
 
  <div style={{ display: "flex", gap: 10, marginTop: 6 }}>
- <button> { if (nomRecette) onSave({ id: initial?.id || genId(), nomRecette, nomEtiquette: nomEtiquette || nomRecette.toLowerCase(), nomsFournisseur: nomsFournisseur.split(",").map(s => s.trim()).filter(Boolean), bio, prixKg: parseFloat(prixKg) || 0, fournisseurId, fournisseursAlternatifs, stockActuel: parseFloat(stockActuel) || 0, unite, allergene, categorie }); }} disabled={!nomRecette}>
+ <button onClick={() => { if (nomRecette) onSave({ id: initial?.id || genId(), nomRecette, nomEtiquette: nomEtiquette || nomRecette.toLowerCase(), nomsFournisseur: nomsFournisseur.split(",").map(s => s.trim()).filter(Boolean), bio, prixKg: parseFloat(prixKg) || 0, fournisseurId, fournisseursAlternatifs, stockActuel: parseFloat(stockActuel) || 0, unite, allergene, categorie }); }} disabled={!nomRecette} style={{ background: nomRecette ? C.green : "#aaa", border: "none", borderRadius: 9, padding: "9px 20px", fontFamily: F.body, fontSize: 14, fontWeight: 600, color: C.white, cursor: nomRecette ? "pointer" : "not-allowed", opacity: nomRecette ? 1 : 0.5 }}>
  {initial ? "Enregistrer" : "Ajouter"}
  </button>
  <button  onClick={onCancel} style={{ background: "transparent", border: `1.5px solid ${C.mint}`, borderRadius: 7, padding: "6px 12px", fontFamily: F.body, fontSize: 12, fontWeight: 600, color: C.green, cursor: "pointer" }}>Annuler</button>
@@ -720,7 +720,7 @@ function IngredientsTab({ data, setData }) {
  <div>
  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
  <h2 style={{ fontFamily: F.display, color: C.darkGreen, margin: 0 }}>Ingrédients</h2>
- <button> { setShowForm(true); setEditing(null); }}>+ Ajouter</button>
+ <button onClick={() => { setShowForm(true); setEditing(null); }} style={{ background: C.green, border: "none", borderRadius: 9, padding: "9px 20px", fontFamily: F.body, fontSize: 14, fontWeight: 600, color: C.white, cursor: "pointer" }}>+ Ajouter</button>
  </div>
  {showForm && !editing && <IngredientForm onSave={save} onCancel={() => setShowForm(false)} fournisseurs={data.fournisseurs} />}
  {editing && <IngredientForm initial={editing} onSave={save} onCancel={() => setEditing(null)} fournisseurs={data.fournisseurs} />}
@@ -783,7 +783,7 @@ function FournisseurForm({ onSave, onCancel, initial }) {
  <Select label="Jour livraison" value={jourLivraison} onChange={setJL} options={jours} />
  </div>
  <div style={{ display: "flex", gap: 10 }}>
- <button> { if (nom) onSave({ id: initial?.id || genId(), nom, jourCommande, jourLivraison, contact }); }} disabled={!nom}>{initial ? "Enregistrer" : "Ajouter"}</button>
+ <button onClick={() => { if (nom) onSave({ id: initial?.id || genId(), nom, jourCommande, jourLivraison, contact }); }} disabled={!nom} style={{ background: nom ? C.green : "#aaa", border: "none", borderRadius: 9, padding: "9px 20px", fontFamily: F.body, fontSize: 14, fontWeight: 600, color: C.white, cursor: nom ? "pointer" : "not-allowed", opacity: nom ? 1 : 0.5 }}>{initial ? "Enregistrer" : "Ajouter"}</button>
  <button  onClick={onCancel} style={{ background: "transparent", border: `1.5px solid ${C.mint}`, borderRadius: 7, padding: "6px 12px", fontFamily: F.body, fontSize: 12, fontWeight: 600, color: C.green, cursor: "pointer" }}>Annuler</button>
  </div>
  </Card>
@@ -802,7 +802,7 @@ function FournisseursTab({ data, setData }) {
  <div>
  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
  <h2 style={{ fontFamily: F.display, color: C.darkGreen, margin: 0 }}>Fournisseurs</h2>
- <button> { setShowForm(true); setEditing(null); }}>+ Ajouter</button>
+ <button onClick={() => { setShowForm(true); setEditing(null); }} style={{ background: C.green, border: "none", borderRadius: 9, padding: "9px 20px", fontFamily: F.body, fontSize: 14, fontWeight: 600, color: C.white, cursor: "pointer" }}>+ Ajouter</button>
  </div>
  {showForm && !editing && <FournisseurForm onSave={save} onCancel={() => setShowForm(false)} />}
  {editing && <FournisseurForm initial={editing} onSave={save} onCancel={() => setEditing(null)} />}
@@ -819,7 +819,7 @@ function FournisseursTab({ data, setData }) {
  </div>
  </div>
  <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
- <button> setEditing(f)} style={{ background: C.lightMint, border: "none", borderRadius: 7, padding: "6px 12px", fontFamily: F.body, fontSize: 12, fontWeight: 600, color: C.darkGreen, cursor: "pointer" }}>Modifier</button>
+ <button onClick={() => setEditing(f)} style={{ background: C.lightMint, border: "none", borderRadius: 7, padding: "6px 12px", fontFamily: F.body, fontSize: 12, fontWeight: 600, color: C.darkGreen, cursor: "pointer" }}>Modifier</button>
  <button onClick={() => { if (window.confirm("Supprimer " + f.nom + " ?")) del(f.id); }} style={{ background: "#FFE5E5", border: "none", borderRadius: 7, padding: "6px 12px", fontFamily: F.body, fontSize: 12, fontWeight: 600, color: C.error, cursor: "pointer" }}>Supprimer</button>
  </div>
  </Card>
