@@ -12,6 +12,7 @@ async function sbFetch(table, method = "GET", body = null, filter = "") {
     "Authorization": `Bearer ${SUPABASE_KEY}`,
     "Content-Type": "application/json",
     "Prefer": method === "POST" ? "return=representation" : "return=minimal",
+    "Range": "0-999",
   };
   const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : null });
   if (method === "GET") return res.json();
@@ -1165,9 +1166,9 @@ export default function App() {
     (async () => {
       try {
         const [fournisseurs, ingredients, recettes] = await Promise.all([
-          sbFetch("fournisseurs", "GET", null, "?order=nom"),
-          sbFetch("ingredients", "GET", null, "?order=nomRecette"),
-          sbFetch("recettes", "GET", null, "?order=nom"),
+          sbFetch("fournisseurs", "GET", null, "?order=nom&limit=1000"),
+          sbFetch("ingredients", "GET", null, "?order=nomRecette&limit=1000"),
+          sbFetch("recettes", "GET", null, "?order=nom&limit=1000"),
         ]);
 
         if (!fournisseurs?.length && !ingredients?.length) {
@@ -1197,9 +1198,9 @@ export default function App() {
     setSyncMsg("Synchronisation en cours...");
     try {
       const [fournisseurs, ingredients, recettes] = await Promise.all([
-        sbFetch("fournisseurs", "GET", null, "?order=nom"),
-        sbFetch("ingredients", "GET", null, "?order=nomRecette"),
-        sbFetch("recettes", "GET", null, "?order=nom"),
+        sbFetch("fournisseurs", "GET", null, "?order=nom&limit=1000"),
+        sbFetch("ingredients", "GET", null, "?order=nomRecette&limit=1000"),
+        sbFetch("recettes", "GET", null, "?order=nom&limit=1000"),
       ]);
       setData({ fournisseurs: fournisseurs || [], ingredients: ingredients || [], recettes: recettes || [] });
       setSyncMsg("Données synchronisées !");
