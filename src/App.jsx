@@ -12,7 +12,6 @@ async function sbFetch(table, method = "GET", body = null, filter = "") {
     "Authorization": `Bearer ${SUPABASE_KEY}`,
     "Content-Type": "application/json",
     "Prefer": method === "POST" ? "return=representation" : "return=minimal",
-    "Range": "0-999",
   };
   const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : null });
   if (method === "GET") return res.json();
@@ -1171,11 +1170,10 @@ export default function App() {
           sbFetch("recettes", "GET", null, "?order=nom&limit=1000"),
         ]);
 
-        // Debug: afficher combien de lignes Supabase retourne
-        setSyncMsg(`Supabase: ${fournisseurs?.length || 0} fournisseurs, ${ingredients?.length || 0} ingrédients, ${recettes?.length || 0} recettes`);
-        setTimeout(() => setSyncMsg(""), 8000);
+        setSyncMsg(`Supabase: ${fournisseurs?.length || 0} fournisseurs, ${ingredients?.length || 0} ingrédients, ${recettes?.length || 0} recettes chargées`);
+        setTimeout(() => setSyncMsg(""), 6000);
 
-        if (!fournisseurs?.length && !ingredients?.length) {
+        if (!fournisseurs?.length && !ingredients?.length && !recettes?.length) {
           // Première utilisation — on seed la base avec les données initiales
           setSyncMsg("Initialisation de la base de données...");
           await Promise.all(INIT_FOURNISSEURS.map(f => sbFetch("fournisseurs", "POST", f)));
@@ -1202,16 +1200,20 @@ export default function App() {
     setSyncMsg("Synchronisation en cours...");
     try {
       const [fournisseurs, ingredients, recettes] = await Promise.all([
-        sbFetch("fournisseurs", "GET", null, "?order=nom&limit=1000"),
-        sbFetch("ingredients", "GET", null, "?order=nomRecette&limit=1000"),
-        sbFetch("recettes", "GET", null, "?order=nom&limit=1000"),
+        sbFetch("fournisseurs", "GET", null, "?order=nom&limit=500"),
+        sbFetch("ingredients", "GET", null, "?order=nomRecette&limit=500"),
+        sbFetch("recettes", "GET", null, "?order=nom&limit=500"),
       ]);
-      setData({ fournisseurs: fournisseurs || [], ingredients: ingredients || [], recettes: recettes || [] });
-      setSyncMsg("Données synchronisées !");
+      if (Array.isArray(recettes)) {
+        setData({ fournisseurs: fournisseurs || [], ingredients: ingredients || [], recettes: recettes || [] });
+        setSyncMsg(`Sync OK : ${recettes.length} recettes, ${ingredients.length} ingrédients`);
+      } else {
+        setSyncMsg("Erreur : réponse invalide de Supabase");
+      }
     } catch (err) {
-      setSyncMsg("Erreur de synchronisation");
+      setSyncMsg("Erreur de synchronisation : " + err.message);
     }
-    setTimeout(() => setSyncMsg(""), 3000);
+    setTimeout(() => setSyncMsg(""), 5000);
   };
 
   return (
