@@ -1171,6 +1171,10 @@ export default function App() {
           sbFetch("recettes", "GET", null, "?order=nom&limit=1000"),
         ]);
 
+        // Debug: afficher combien de lignes Supabase retourne
+        setSyncMsg(`Supabase: ${fournisseurs?.length || 0} fournisseurs, ${ingredients?.length || 0} ingrédients, ${recettes?.length || 0} recettes`);
+        setTimeout(() => setSyncMsg(""), 8000);
+
         if (!fournisseurs?.length && !ingredients?.length) {
           // Première utilisation — on seed la base avec les données initiales
           setSyncMsg("Initialisation de la base de données...");
@@ -1178,7 +1182,7 @@ export default function App() {
           await Promise.all(INIT_INGREDIENTS.map(i => sbFetch("ingredients", "POST", i)));
           await Promise.all(INIT_RECETTES.map(r => sbFetch("recettes", "POST", r)));
           setData({ fournisseurs: INIT_FOURNISSEURS, ingredients: INIT_INGREDIENTS, recettes: INIT_RECETTES });
-          setSyncMsg("Base initialisée avec vos données !");
+          setSyncMsg("Base initialisée !");
           setTimeout(() => setSyncMsg(""), 4000);
         } else {
           setData({ fournisseurs: fournisseurs || [], ingredients: ingredients || [], recettes: recettes || [] });
