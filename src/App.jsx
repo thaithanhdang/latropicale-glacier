@@ -1055,12 +1055,23 @@ export default function App() {
  const [data, setData] = useState(initialData);
 
  useEffect(() => {
- (async () => {
  try {
- const saved = { value: localStorage.getItem("tropicale_data") };
- if (saved && saved.value) setData(JSON.parse(saved.value));
+ const saved = localStorage.getItem("tropicale_data");
+ if (saved) {
+  const parsed = JSON.parse(saved);
+  // Fusionner avec initialData : garder les recettes initiales si localStorage vide
+  if (!parsed.recettes || parsed.recettes.length === 0) {
+   parsed.recettes = initialData.recettes;
+  }
+  // Ajouter les ingrédients manquants depuis initialData
+  if (parsed.ingredients && parsed.ingredients.length < initialData.ingredients.length) {
+   const existingIds = parsed.ingredients.map(i => i.id);
+   const missing = initialData.ingredients.filter(i => !existingIds.includes(i.id));
+   parsed.ingredients = [...parsed.ingredients, ...missing];
+  }
+  setData(parsed);
+ }
  } catch {}
- })();
  }, []);
 
  useEffect(() => {
