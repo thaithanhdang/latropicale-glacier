@@ -1184,13 +1184,30 @@ export default function App() {
         }
       } catch (err) {
         console.error("Erreur Supabase:", err);
+        setSyncMsg("Erreur de connexion — réessayez dans quelques secondes");
+        setTimeout(() => setSyncMsg(""), 5000);
         setData({ fournisseurs: INIT_FOURNISSEURS, ingredients: INIT_INGREDIENTS, recettes: INIT_RECETTES });
-        setSyncMsg("Mode hors ligne — données locales chargées");
-        setTimeout(() => setSyncMsg(""), 4000);
       }
       setLoading(false);
     })();
   }, []);
+
+  // Fonction de rechargement depuis Supabase
+  const reloadFromSupabase = async () => {
+    setSyncMsg("Synchronisation en cours...");
+    try {
+      const [fournisseurs, ingredients, recettes] = await Promise.all([
+        sbFetch("fournisseurs", "GET", null, "?order=nom"),
+        sbFetch("ingredients", "GET", null, "?order=nomRecette"),
+        sbFetch("recettes", "GET", null, "?order=nom"),
+      ]);
+      setData({ fournisseurs: fournisseurs || [], ingredients: ingredients || [], recettes: recettes || [] });
+      setSyncMsg("Données synchronisées !");
+    } catch (err) {
+      setSyncMsg("Erreur de synchronisation");
+    }
+    setTimeout(() => setSyncMsg(""), 3000);
+  };
 
   return (
     <div style={{ minHeight: "100vh", background: C.cream, fontFamily: F.body }}>
@@ -1212,9 +1229,13 @@ export default function App() {
           <div style={{ fontFamily: F.display, color: C.white, fontSize: 19, fontWeight: 700 }}>La Tropicale Glacier</div>
           <div style={{ fontFamily: F.body, color: C.lightMint, fontSize: 10, letterSpacing: 1, textTransform: "uppercase" }}>Recettes · Ingrédients · Étiquettes</div>
         </div>
-        <div style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
+        <div style={{ marginLeft: "auto", display: "flex", gap: 8, alignItems: "center" }}>
           <Badge color={C.lightMint}>{data.recettes.length} recettes</Badge>
           <Badge color={C.lightGold}>{data.ingredients.length} ingrédients</Badge>
+          <button onClick={reloadFromSupabase} title="Synchroniser"
+            style={{ background: C.mint, border: "none", borderRadius: 8, color: C.white, fontFamily: F.body, fontSize: 12, fontWeight: 600, padding: "5px 12px", cursor: "pointer" }}>
+            Sync
+          </button>
         </div>
       </div>
 
