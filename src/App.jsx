@@ -5,6 +5,51 @@ import { useState, useEffect, useRef } from "react";
 const SUPABASE_URL = "https://bedunhjdbfxguvtzxdha.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlZHVuaGpkYmZ4Z3V2dHp4ZGhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4NjUxMjgsImV4cCI6MjA5MTQ0MTEyOH0.g9sqSvWCCJElmoTX8hjJppIuOvcAKkhB1GLA8xRq9X0";
 
+// Convertit snake_case (Supabase) en camelCase (app)
+function mapIngredient(row) {
+  if (!row) return row;
+  return {
+    id: row.id,
+    nomRecette: row.nom_recette || row.nomRecette || "",
+    nomEtiquette: row.nom_etiquette || row.nomEtiquette || "",
+    nomsFournisseur: row.noms_fournisseur || row.nomsFournisseur || [],
+    bio: row.bio || false,
+    prixKg: row.prix_kg || row.prixKg || 0,
+    fournisseurId: row.fournisseur_id || row.fournisseurId || "",
+    fournisseursAlternatifs: row.fournisseurs_alternatifs || row.fournisseursAlternatifs || [],
+    stockActuel: row.stock_actuel || row.stockActuel || 0,
+    unite: row.unite || "kg",
+    allergene: row.allergene || "",
+    categorie: row.categorie || "autre",
+  };
+}
+
+function mapFournisseur(row) {
+  if (!row) return row;
+  return {
+    id: row.id,
+    nom: row.nom || "",
+    contact: row.contact || "",
+    jourCommande: row.jour_commande || row.jourCommande || "lundi",
+    jourLivraison: row.jour_livraison || row.jourLivraison || "mardi",
+  };
+}
+
+function mapRecette(row) {
+  if (!row) return row;
+  return {
+    id: row.id,
+    nom: row.nom || "",
+    categorie: row.categorie || "glace",
+    ephemere: row.ephemere || false,
+    notes: row.notes || "",
+    poudres: row.poudres || [],
+    liquides: row.liquides || [],
+    ingredients: row.ingredients || [],
+    toppings: row.toppings || [],
+  };
+}
+
 async function sbFetch(table, method = "GET", body = null, filter = "") {
   const url = SUPABASE_URL + "/rest/v1/" + table + filter;
   const headers = {
@@ -1181,7 +1226,6 @@ export default function App() {
         setTimeout(() => setSyncMsg(""), 6000);
 
         if (!fournisseurs?.length && !ingredients?.length && !recettes?.length) {
-          // Première utilisation — on seed la base avec les données initiales
           setSyncMsg("Initialisation de la base de données...");
           await Promise.all(INIT_FOURNISSEURS.map(f => sbFetch("fournisseurs", "POST", f)));
           await Promise.all(INIT_INGREDIENTS.map(i => sbFetch("ingredients", "POST", i)));
@@ -1190,7 +1234,13 @@ export default function App() {
           setSyncMsg("Base initialisée !");
           setTimeout(() => setSyncMsg(""), 4000);
         } else {
-          setData({ fournisseurs: fournisseurs || [], ingredients: ingredients || [], recettes: recettes || [] });
+          setData({
+            fournisseurs: (fournisseurs || []).map(mapFournisseur),
+            ingredients: (ingredients || []).map(mapIngredient),
+            recettes: (recettes || []).map(mapRecette),
+          });
+          setSyncMsg("Supabase: " + (fournisseurs?.length || 0) + " fournisseurs, " + (ingredients?.length || 0) + " ingredients, " + (recettes?.length || 0) + " recettes");
+          setTimeout(() => setSyncMsg(""), 5000);
         }
       } catch (err) {
         console.error("Erreur Supabase:", err);
@@ -1212,7 +1262,11 @@ export default function App() {
         sbFetch("recettes", "GET", null, "?order=nom&select=*"),
       ]);
       if (Array.isArray(recettes)) {
-        setData({ fournisseurs: fournisseurs || [], ingredients: ingredients || [], recettes: recettes || [] });
+        setData({
+          fournisseurs: (fournisseurs || []).map(mapFournisseur),
+          ingredients: (ingredients || []).map(mapIngredient),
+          recettes: (recettes || []).map(mapRecette),
+        });
         setSyncMsg("Sync OK : " + recettes.length + " recettes, " + ingredients.length + " ingredients");
       } else {
         setSyncMsg("Erreur : réponse invalide de Supabase");
