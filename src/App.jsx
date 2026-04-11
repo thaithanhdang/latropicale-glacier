@@ -5,6 +5,34 @@ import { useState, useEffect, useRef } from "react";
 const SUPABASE_URL = "https://bedunhjdbfxguvtzxdha.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlZHVuaGpkYmZ4Z3V2dHp4ZGhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4NjUxMjgsImV4cCI6MjA5MTQ0MTEyOH0.g9sqSvWCCJElmoTX8hjJppIuOvcAKkhB1GLA8xRq9X0";
 
+// camelCase -> snake_case pour écriture dans Supabase
+function toDbIngredient(ing) {
+  return {
+    id: ing.id,
+    nom_recette: ing.nomRecette,
+    nom_etiquette: ing.nomEtiquette,
+    noms_fournisseur: ing.nomsFournisseur || [],
+    bio: ing.bio,
+    prix_kg: ing.prixKg || 0,
+    fournisseur_id: ing.fournisseurId || "",
+    fournisseurs_alternatifs: ing.fournisseursAlternatifs || [],
+    stock_actuel: ing.stockActuel || 0,
+    unite: ing.unite,
+    allergene: ing.allergene || "",
+    categorie: ing.categorie || "autre",
+  };
+}
+
+function toDbFournisseur(f) {
+  return {
+    id: f.id,
+    nom: f.nom,
+    contact: f.contact || "",
+    jour_commande: f.jourCommande,
+    jour_livraison: f.jourLivraison,
+  };
+}
+
 // Convertit snake_case (Supabase) en camelCase (app)
 function mapIngredient(row) {
   if (!row) return row;
@@ -692,6 +720,7 @@ function RecetteForm({ onSave, onCancel, initial, allIng, setData, fournisseurs 
   const rm = (setter, id) => setter(p => p.filter(l => l.id !== id));
   const handleCreateIng = (setter) => ({ nom, bio }, callback) => {
     const newIng = { id: genId(), nomRecette: nom, nomEtiquette: nom.toLowerCase(), nomsFournisseur: [], bio, prixKg: 0, fournisseurId: "", fournisseursAlternatifs: [], stockActuel: 0, unite: "kg", allergene: "", categorie: "autre" };
+    sbFetch("ingredients", "POST", toDbIngredient(newIng));
     setData(d => ({ ...d, ingredients: [...d.ingredients, newIng] }));
     callback(newIng.id);
   };
@@ -999,11 +1028,11 @@ function IngredientsTab({ data, setData }) {
 
   const save = async (ing) => {
     if (editing) {
-      await sbFetch(`ingredients?id=eq.${ing.id}`, "PATCH", ing);
+      await sbFetch("ingredients?id=eq." + ing.id, "PATCH", toDbIngredient(ing));
       setData(d => ({ ...d, ingredients: d.ingredients.map(x => x.id === ing.id ? ing : x) }));
       setEditing(null);
     } else {
-      await sbFetch("ingredients", "POST", ing);
+      await sbFetch("ingredients", "POST", toDbIngredient(ing));
       setData(d => ({ ...d, ingredients: [...d.ingredients, ing] }));
       setShowForm(false);
     }
@@ -1095,11 +1124,11 @@ function FournisseursTab({ data, setData }) {
 
   const save = async (f) => {
     if (editing) {
-      await sbFetch(`fournisseurs?id=eq.${f.id}`, "PATCH", f);
+      await sbFetch("fournisseurs?id=eq." + f.id, "PATCH", toDbFournisseur(f));
       setData(d => ({ ...d, fournisseurs: d.fournisseurs.map(x => x.id === f.id ? f : x) }));
       setEditing(null);
     } else {
-      await sbFetch("fournisseurs", "POST", f);
+      await sbFetch("fournisseurs", "POST", toDbFournisseur(f));
       setData(d => ({ ...d, fournisseurs: [...d.fournisseurs, f] }));
       setShowForm(false);
     }
