@@ -1170,7 +1170,7 @@ export default function App() {
           sbFetch("recettes", "GET", null, "?order=nom&limit=1000"),
         ]);
 
-        setSyncMsg(`Supabase: ${fournisseurs?.length || 0} fournisseurs, ${ingredients?.length || 0} ingrédients, ${recettes?.length || 0} recettes chargées`);
+        setSyncMsg("Supabase: " + (fournisseurs?.length || 0) + " fournisseurs, " + (ingredients?.length || 0) + " ingredients, " + (recettes?.length || 0) + " recettes");
         setTimeout(() => setSyncMsg(""), 6000);
 
         if (!fournisseurs?.length && !ingredients?.length && !recettes?.length) {
@@ -1206,12 +1206,12 @@ export default function App() {
       ]);
       if (Array.isArray(recettes)) {
         setData({ fournisseurs: fournisseurs || [], ingredients: ingredients || [], recettes: recettes || [] });
-        setSyncMsg(`Sync OK : ${recettes.length} recettes, ${ingredients.length} ingrédients`);
+        setSyncMsg("Sync OK : " + recettes.length + " recettes, " + ingredients.length + " ingredients");
       } else {
         setSyncMsg("Erreur : réponse invalide de Supabase");
       }
     } catch (err) {
-      setSyncMsg("Erreur de synchronisation : " + err.message);
+      setSyncMsg("Erreur de synchronisation");
     }
     setTimeout(() => setSyncMsg(""), 5000);
   };
