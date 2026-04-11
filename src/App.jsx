@@ -98,7 +98,17 @@ const initialData = {
  // DIPSA
  { id: "ing_puree_citron", nomRecette: "Purée de citron jaune", nomEtiquette: "purée de citron jaune", nomsFournisseur: ["PUREE FRAIS CITRON J BIO 1KG", "Purée citron jaune"], bio: true, prixKg: 8.28, fournisseurId: "four_dipsa", stockActuel: 0, unite: "kg", allergene: "", categorie: "fruit" },
  ],
- recettes: [],
+ recettes: [
+    { id: "rec_passion_framboise", nom: "Passion Framboise", categorie: "sorbet", ephemere: false, notes: "", poudres: [ { id: "pf1", ingredientId: "ing_lin", poids: 70, unite: "g" }, { id: "pf2", ingredientId: "ing_guar", poids: 30, unite: "g" }, { id: "pf3", ingredientId: "ing_sucre_canne", poids: 2500, unite: "g" } ], liquides: [ { id: "pf4", ingredientId: "ing_eau", poids: 5, unite: "L" } ], ingredients: [ { id: "pf5", ingredientId: "ing_framboise_puree", poids: 6000, unite: "g" }, { id: "pf6", ingredientId: "ing_passion_puree", poids: 4000, unite: "g" } ], toppings: [] },
+    { id: "rec_mangue_keesar", nom: "Mangue Keesar", categorie: "sorbet", ephemere: false, notes: "Base : base de recette pour 3 boites de mangue - poids approximatif", poudres: [ { id: "mk1", ingredientId: "ing_lin", poids: 50, unite: "g" }, { id: "mk2", ingredientId: "ing_guar", poids: 30, unite: "g" }, { id: "mk3", ingredientId: "ing_sucre_canne", poids: 1200, unite: "g" } ], liquides: [ { id: "mk4", ingredientId: "ing_sirop_agave", poids: 600, unite: "g" }, { id: "mk5", ingredientId: "ing_eau", poids: 6, unite: "L" } ], ingredients: [ { id: "mk6", ingredientId: "ing_mangue_keesar", poids: 9, unite: "kg" }, { id: "mk7", ingredientId: "ing_jus_citron_vert", poids: 150, unite: "g" } ], toppings: [] },
+    { id: "rec_lychee_groseille", nom: "Lychee groseille", categorie: "sorbet", ephemere: false, notes: "TOPPING : faitout moyen - melanger sucre et groseilles - cuisson th4 20min puis th5 15min", poudres: [ { id: "lg1", ingredientId: "ing_lin", poids: 50, unite: "g" }, { id: "lg2", ingredientId: "ing_guar", poids: 30, unite: "g" }, { id: "lg3", ingredientId: "ing_sucre_canne", poids: 2000, unite: "g" } ], liquides: [ { id: "lg4", ingredientId: "ing_eau", poids: 5, unite: "L" } ], ingredients: [ { id: "lg5", ingredientId: "ing_puree_lychee", poids: 10, unite: "kg" }, { id: "lg6", ingredientId: "ing_puree_citron_vert_boiron", poids: 500, unite: "g" } ], toppings: [ { id: "lg7", ingredientId: "ing_groseille_bille", poids: 2, unite: "kg" }, { id: "lg8", ingredientId: "ing_sucre_canne", poids: 500, unite: "g" } ] },
+    { id: "rec_fleur_oranger_pistache", nom: "Fleur oranger pistache", categorie: "glace", ephemere: false, notes: "Base : incorporer eau fleur oranger a froid - infuser 24h. TOPPING : +150g pistache pour les pots", poudres: [ { id: "fo1", ingredientId: "ing_lin", poids: 40, unite: "g" }, { id: "fo2", ingredientId: "ing_guar", poids: 20, unite: "g" }, { id: "fo3", ingredientId: "ing_sucre_canne", poids: 2200, unite: "g" }, { id: "fo4", ingredientId: "ing_poudre_lait", poids: 1000, unite: "g" } ], liquides: [ { id: "fo5", ingredientId: "ing_lait_entier", poids: 12.5, unite: "L" }, { id: "fo6", ingredientId: "ing_creme_crue", poids: 2000, unite: "g" }, { id: "fo7", ingredientId: "ing_sirop_agave", poids: 400, unite: "g" } ], ingredients: [ { id: "fo8", ingredientId: "ing_eau_fleur_oranger", poids: 400, unite: "g" } ], toppings: [ { id: "fo9", ingredientId: "ing_pistaches", poids: 500, unite: "g" }, { id: "fo10", ingredientId: "ing_pistaches", poids: 150, unite: "g" } ] },
+    { id: "rec_lemon_curd", nom: "Lemon curd", categorie: "glace", ephemere: false, notes: "Base : sirop citron-sucre max 60 degres - incorporer a froid. Topping : melanger poudres + lait soja + citron. Fouet. Chauffer th4 epaississement.", poudres: [ { id: "lc1", ingredientId: "ing_lin", poids: 40, unite: "g" }, { id: "lc2", ingredientId: "ing_guar", poids: 20, unite: "g" }, { id: "lc3", ingredientId: "ing_sucre_canne", poids: 1200, unite: "g" }, { id: "lc4", ingredientId: "ing_poudre_lait", poids: 1000, unite: "g" } ], liquides: [ { id: "lc5", ingredientId: "ing_lait_entier", poids: 10, unite: "L" }, { id: "lc6", ingredientId: "ing_creme_crue", poids: 2, unite: "g" }, { id: "lc7", ingredientId: "ing_sirop_agave", poids: 400, unite: "g" } ], ingredients: [ { id: "lc8", ingredientId: "ing_puree_citron", poids: 5, unite: "L" }, { id: "lc9", ingredientId: "ing_sucre_canne", poids: 1300, unite: "g" } ], toppings: [ { id: "lc10", ingredientId: "ing_puree_citron", poids: 1, unite: "L" }, { id: "lc11", ingredientId: "ing_boisson_soja", poids: 750, unite: "g" }, { id: "lc12", ingredientId: "ing_sucre_canne", poids: 1000, unite: "g" }, { id: "lc13", ingredientId: "ing_fecule_mais", poids: 150, unite: "g" }, { id: "lc14", ingredientId: "ing_curcuma", poids: 5, unite: "g" } ] },
+    { id: "rec_praline_sesame", nom: "Praline sesame noir", categorie: "glace", ephemere: false, notes: "Base : incorporer pate sesame noir et praline a froid. Topping : sirop th5 5min - epaississement - amandes sec - sabler - carameliser th6/7", poudres: [ { id: "ps1", ingredientId: "ing_lin", poids: 70, unite: "g" }, { id: "ps2", ingredientId: "ing_guar", poids: 20, unite: "g" }, { id: "ps3", ingredientId: "ing_sucre_canne", poids: 1800, unite: "g" }, { id: "ps4", ingredientId: "ing_poudre_lait", poids: 1200, unite: "g" } ], liquides: [ { id: "ps5", ingredientId: "ing_lait_entier", poids: 12.5, unite: "L" }, { id: "ps6", ingredientId: "ing_sirop_agave", poids: 400, unite: "g" }, { id: "ps7", ingredientId: "ing_creme_uht", poids: 2, unite: "L" } ], ingredients: [ { id: "ps8", ingredientId: "ing_pate_praline_amande", poids: 1500, unite: "g" }, { id: "ps9", ingredientId: "ing_pate_sesame_noir", poids: 500, unite: "g" } ], toppings: [] },
+    { id: "rec_chocolat_feve_tonka", nom: "Chocolat feve tonka", categorie: "glace", ephemere: false, notes: "Base : incorporer feve tonka a chaud + poudre cacao - cuisson th10 23min", poudres: [ { id: "cf1", ingredientId: "ing_lin", poids: 60, unite: "g" }, { id: "cf2", ingredientId: "ing_guar", poids: 20, unite: "g" }, { id: "cf3", ingredientId: "ing_sucre_canne", poids: 2200, unite: "g" }, { id: "cf4", ingredientId: "ing_poudre_lait", poids: 1000, unite: "g" } ], liquides: [ { id: "cf5", ingredientId: "ing_lait_entier", poids: 12.5, unite: "L" }, { id: "cf6", ingredientId: "ing_creme_crue", poids: 2000, unite: "g" }, { id: "cf7", ingredientId: "ing_sirop_agave", poids: 400, unite: "g" } ], ingredients: [ { id: "cf8", ingredientId: "ing_cacao_poudre", poids: 600, unite: "g" }, { id: "cf9", ingredientId: "ing_feve_tonka", poids: 40, unite: "g" } ], toppings: [] },
+    { id: "rec_coco_sesame", nom: "Coco sesame", categorie: "végétale", ephemere: false, notes: "Base : eau th10 ebullition + lait coco + 75 degres. Topping : poele - sel 100ml eau - th4 8-12min - arreter une fois dore", poudres: [ { id: "cs1", ingredientId: "ing_lin", poids: 50, unite: "g" }, { id: "cs2", ingredientId: "ing_guar", poids: 20, unite: "g" }, { id: "cs3", ingredientId: "ing_sucre_canne", poids: 2500, unite: "g" } ], liquides: [ { id: "cs4", ingredientId: "ing_sirop_agave", poids: 600, unite: "g" }, { id: "cs5", ingredientId: "ing_eau", poids: 4, unite: "L" } ], ingredients: [ { id: "cs6", ingredientId: "ing_lait_coco_aroy", poids: 10, unite: "g" }, { id: "cs7", ingredientId: "ing_sel_guerande", poids: 15, unite: "g" } ], toppings: [ { id: "cs8", ingredientId: "ing_graine_sesame", poids: 400, unite: "g" }, { id: "cs9", ingredientId: "ing_sel_guerande", poids: 30, unite: "g" }, { id: "cs10", ingredientId: "ing_eau", poids: 100, unite: "g" } ] },
+    { id: "rec_pistache_iran", nom: "Pistache Iran", categorie: "glace", ephemere: false, notes: "Incorporation de la pate a froid", poudres: [ { id: "pi1", ingredientId: "ing_lin", poids: 20, unite: "g" }, { id: "pi2", ingredientId: "ing_guar", poids: 50, unite: "g" }, { id: "pi3", ingredientId: "ing_sucre_canne", poids: 2400, unite: "g" }, { id: "pi4", ingredientId: "ing_poudre_lait", poids: 1200, unite: "g" } ], liquides: [ { id: "pi5", ingredientId: "ing_lait_entier", poids: 12.5, unite: "L" }, { id: "pi6", ingredientId: "ing_sirop_agave", poids: 400, unite: "g" }, { id: "pi7", ingredientId: "ing_creme_uht", poids: 2, unite: "L" } ], ingredients: [ { id: "pi8", ingredientId: "ing_pate_pistache", poids: 2000, unite: "g" } ], toppings: [] },
+  ],
 };
 
 function genId() { return Math.random().toString(36).slice(2, 9); }
@@ -829,8 +839,153 @@ function FournisseursTab({ data, setData }) {
  );
 }
 
+
+// ── EXPORT / IMPORT CSV ───────────────────────────────────────────────────────
+function exportCSV(data) {
+  // Export recettes
+  const recettesRows = data.recettes.map(r => {
+    const allL = [...r.poudres, ...r.liquides, ...r.ingredients, ...r.toppings];
+    const ingredientsList = allL.filter(l => l.poids > 0 && l.ingredientId).map(l => {
+      const ing = data.ingredients.find(i => i.id === l.ingredientId);
+      return (ing?.nomRecette || l.ingredientId) + ":" + l.poids + l.unite;
+    }).join("|");
+    return [r.id, r.nom, r.categorie, r.ephemere ? "oui" : "non", ingredientsList, r.notes || ""].map(v => '"' + String(v).replace(/"/g, '""') + '"').join(",");
+  });
+  downloadCSV("recettes.csv", ["id","nom","categorie","ephemere","ingredients","notes"].join(",") + "\n" + recettesRows.join("\n"));
+
+  // Export ingredients
+  const ingRows = data.ingredients.map(i => {
+    const f = data.fournisseurs.find(f => f.id === i.fournisseurId);
+    return [i.id, i.nomRecette, i.nomEtiquette, (i.nomsFournisseur||[]).join("|"), i.bio?"oui":"non", i.prixKg, i.unite, i.allergene||"", i.categorie, f?.nom||""].map(v => '"' + String(v||"").replace(/"/g, '""') + '"').join(",");
+  });
+  downloadCSV("ingredients.csv", ["id","nom_recette","nom_etiquette","alias_fournisseurs","bio","prix_kg","unite","allergene","categorie","fournisseur"].join(",") + "\n" + ingRows.join("\n"));
+
+  // Export fournisseurs
+  const fourRows = data.fournisseurs.map(f => [f.id, f.nom, f.contact||"", f.jourCommande, f.jourLivraison].map(v => '"' + String(v||"").replace(/"/g, '""') + '"').join(","));
+  downloadCSV("fournisseurs.csv", ["id","nom","contact","jour_commande","jour_livraison"].join(",") + "\n" + fourRows.join("\n"));
+}
+
+function downloadCSV(filename, content) {
+  const BOM = "\uFEFF";
+  const blob = new Blob([BOM + content], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function ImportCSVModal({ onClose, onImport }) {
+  const [file, setFile] = useState(null);
+  const [type, setType] = useState("ingredients");
+  const [preview, setPreview] = useState("");
+  const [error, setError] = useState("");
+
+  const handleFile = (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    setFile(f);
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const text = ev.target.result;
+      const lines = text.split("\n").slice(0, 4);
+      setPreview(lines.join("\n"));
+    };
+    reader.readAsText(f, "UTF-8");
+  };
+
+  const handleImport = () => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const text = ev.target.result.replace(/^\uFEFF/, "");
+        const lines = text.split("\n").filter(l => l.trim());
+        const headers = parseCSVLine(lines[0]);
+        const rows = lines.slice(1).map(l => {
+          const vals = parseCSVLine(l);
+          const obj = {};
+          headers.forEach((h, i) => obj[h.trim()] = (vals[i]||"").trim());
+          return obj;
+        }).filter(r => r.id || r.nom || r.nom_recette);
+        onImport(type, rows);
+        onClose();
+      } catch(e) {
+        setError("Erreur de lecture du fichier : " + e.message);
+      }
+    };
+    reader.readAsText(file, "UTF-8");
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(26,58,42,0.5)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+      <div style={{ background: C.white, borderRadius: 16, padding: 24, maxWidth: 480, width: "100%", boxShadow: "0 20px 60px rgba(0,0,0,0.2)" }}>
+        <h3 style={{ fontFamily: F.display, color: C.darkGreen, marginTop: 0 }}>Importer un fichier CSV</h3>
+        <Select label="Type de donnees" value={type} onChange={setType} options={[
+          { value: "ingredients", label: "Ingredients" },
+          { value: "fournisseurs", label: "Fournisseurs" },
+        ]} />
+        <div style={{ marginBottom: 12 }}>
+          <Label>Fichier CSV (depuis Excel)</Label>
+          <input type="file" accept=".csv" onChange={handleFile}
+            style={{ fontFamily: F.body, fontSize: 13, color: C.text }} />
+        </div>
+        {preview && (
+          <div style={{ background: C.cream, borderRadius: 8, padding: 10, marginBottom: 12, fontFamily: F.mono, fontSize: 11, color: C.muted, whiteSpace: "pre", overflow: "auto", maxHeight: 100 }}>
+            {preview}
+          </div>
+        )}
+        {error && <div style={{ color: C.error, fontFamily: F.body, fontSize: 13, marginBottom: 10 }}>{error}</div>}
+        <div style={{ display: "flex", gap: 10 }}>
+          <button onClick={handleImport} disabled={!file}
+            style={{ background: C.green, border: "none", borderRadius: 9, padding: "9px 20px", fontFamily: F.body, fontSize: 14, fontWeight: 600, color: C.white, cursor: file ? "pointer" : "not-allowed", opacity: file ? 1 : 0.5 }}>
+            Importer
+          </button>
+          <button onClick={onClose} style={{ background: "transparent", border: "1.5px solid " + C.mint, borderRadius: 9, padding: "9px 20px", fontFamily: F.body, fontSize: 14, fontWeight: 600, color: C.green, cursor: "pointer" }}>
+            Annuler
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function parseCSVLine(line) {
+  const result = []; let current = ""; let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    if (line[i] === '"') {
+      if (inQuotes && line[i+1] === '"') { current += '"'; i++; }
+      else inQuotes = !inQuotes;
+    } else if (line[i] === "," && !inQuotes) {
+      result.push(current); current = "";
+    } else { current += line[i]; }
+  }
+  result.push(current);
+  return result;
+}
+
 // ── TABLEAU DE BORD ───────────────────────────────────────────────────────────
-function DashboardTab({ data }) {
+function DashboardTab({ data, setData, onExport, onImport }) {
+  const [showImport, setShowImport] = useState(false);
+
+  const handleImport = (type, rows) => {
+    if (type === "fournisseurs") {
+      const newFours = rows.map(r => ({
+        id: r.id || genId(), nom: r.nom || "", contact: r.contact || "",
+        jourCommande: r.jour_commande || "lundi", jourLivraison: r.jour_livraison || "mardi",
+      })).filter(f => f.nom);
+      setData(d => ({ ...d, fournisseurs: [...d.fournisseurs.filter(f => !newFours.find(n => n.id === f.id)), ...newFours] }));
+    } else if (type === "ingredients") {
+      const newIngs = rows.map(r => ({
+        id: r.id || genId(), nomRecette: r.nom_recette || r.nom || "",
+        nomEtiquette: r.nom_etiquette || r.nom_recette || "", nomsFournisseur: (r.alias_fournisseurs||"").split("|").filter(Boolean),
+        bio: r.bio === "oui", prixKg: parseFloat(r.prix_kg) || 0, unite: r.unite || "kg",
+        allergene: r.allergene || "", categorie: r.categorie || "autre",
+        fournisseurId: data.fournisseurs.find(f => f.nom === r.fournisseur)?.id || "",
+        stockActuel: 0, fournisseursAlternatifs: [],
+      })).filter(i => i.nomRecette);
+      setData(d => ({ ...d, ingredients: [...d.ingredients.filter(i => !newIngs.find(n => n.id === i.id)), ...newIngs] }));
+    }
+  };
  const lignesAll = data.recettes.map(r => [...r.poudres, ...r.liquides, ...r.ingredients, ...r.toppings]);
  const bio100 = data.recettes.filter((r, i) => calcBioPct(lignesAll[i], data.ingredients) === 100).length;
  const stats = [
@@ -853,6 +1008,11 @@ function DashboardTab({ data }) {
  </Card>
  ))}
  </div>
+ <div style={{ display: "flex", gap: 10, marginBottom: 22 }}>
+  <button onClick={() => exportCSV(data)} style={{ background: C.green, border: "none", borderRadius: 9, padding: "9px 18px", fontFamily: F.body, fontSize: 13, fontWeight: 600, color: C.white, cursor: "pointer" }}>Exporter CSV</button>
+  <button onClick={() => setShowImport(true)} style={{ background: "transparent", border: `1.5px solid ${C.mint}`, borderRadius: 9, padding: "9px 18px", fontFamily: F.body, fontSize: 13, fontWeight: 600, color: C.green, cursor: "pointer" }}>Importer CSV</button>
+ </div>
+ {showImport && <ImportCSVModal onClose={() => setShowImport(false)} onImport={handleImport} />}
  {data.recettes.length > 0
  ? <>
  <h3 style={{ fontFamily: F.display, color: C.darkGreen, marginBottom: 10 }}>Dernières recettes</h3>
@@ -940,7 +1100,7 @@ export default function App() {
  </div>
 
  <div style={{ maxWidth: 860, margin: "0 auto", padding: "24px 16px" }}>
- {tab === "dashboard" && <DashboardTab data={data} />}
+ {tab === "dashboard" && <DashboardTab data={data} setData={setData} />}
  {tab === "recettes" && <RecettesTab data={data} setData={setData} />}
  {tab === "ingredients" && <IngredientsTab data={data} setData={setData} />}
  {tab === "fournisseurs" && <FournisseursTab data={data} setData={setData} />}
