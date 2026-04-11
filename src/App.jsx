@@ -1218,7 +1218,7 @@ export default function App() {
       try {
         const [fournisseurs, ingredients, recettes] = await Promise.all([
           sbFetch("fournisseurs", "GET", null, "?order=nom&select=*"),
-          sbFetch("ingredients", "GET", null, "?order=nomRecette&select=*"),
+          sbFetch("ingredients", "GET", null, "?order=nom_recette&select=*"),
           sbFetch("recettes", "GET", null, "?order=nom&select=*"),
         ]);
 
@@ -1258,7 +1258,7 @@ export default function App() {
     try {
       const [fournisseurs, ingredients, recettes] = await Promise.all([
         sbFetch("fournisseurs", "GET", null, "?order=nom&select=*"),
-        sbFetch("ingredients", "GET", null, "?order=nomRecette&select=*"),
+        sbFetch("ingredients", "GET", null, "?order=nom_recette&select=*"),
         sbFetch("recettes", "GET", null, "?order=nom&select=*"),
       ]);
       if (Array.isArray(recettes)) {
