@@ -6,15 +6,22 @@ const SUPABASE_URL = "https://bedunhjdbfxguvtzxdha.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlZHVuaGpkYmZ4Z3V2dHp4ZGhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU4NjUxMjgsImV4cCI6MjA5MTQ0MTEyOH0.g9sqSvWCCJElmoTX8hjJppIuOvcAKkhB1GLA8xRq9X0";
 
 async function sbFetch(table, method = "GET", body = null, filter = "") {
-  const url = `${SUPABASE_URL}/rest/v1/${table}${filter}`;
+  const url = SUPABASE_URL + "/rest/v1/" + table + filter;
   const headers = {
     "apikey": SUPABASE_KEY,
-    "Authorization": `Bearer ${SUPABASE_KEY}`,
+    "Authorization": "Bearer " + SUPABASE_KEY,
     "Content-Type": "application/json",
     "Prefer": method === "POST" ? "return=representation" : "return=minimal",
   };
   const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : null });
-  if (method === "GET") return res.json();
+  if (method === "GET") {
+    const data = await res.json();
+    if (!Array.isArray(data)) {
+      console.error("Supabase error on " + table + ":", data);
+      return [];
+    }
+    return data;
+  }
   return res;
 }
 
@@ -1165,9 +1172,9 @@ export default function App() {
     (async () => {
       try {
         const [fournisseurs, ingredients, recettes] = await Promise.all([
-          sbFetch("fournisseurs", "GET", null, "?order=nom&limit=1000"),
-          sbFetch("ingredients", "GET", null, "?order=nomRecette&limit=1000"),
-          sbFetch("recettes", "GET", null, "?order=nom&limit=1000"),
+          sbFetch("fournisseurs", "GET", null, "?order=nom&select=*"),
+          sbFetch("ingredients", "GET", null, "?order=nomRecette&select=*"),
+          sbFetch("recettes", "GET", null, "?order=nom&select=*"),
         ]);
 
         setSyncMsg("Supabase: " + (fournisseurs?.length || 0) + " fournisseurs, " + (ingredients?.length || 0) + " ingredients, " + (recettes?.length || 0) + " recettes");
@@ -1200,9 +1207,9 @@ export default function App() {
     setSyncMsg("Synchronisation en cours...");
     try {
       const [fournisseurs, ingredients, recettes] = await Promise.all([
-        sbFetch("fournisseurs", "GET", null, "?order=nom&limit=500"),
-        sbFetch("ingredients", "GET", null, "?order=nomRecette&limit=500"),
-        sbFetch("recettes", "GET", null, "?order=nom&limit=500"),
+        sbFetch("fournisseurs", "GET", null, "?order=nom&select=*"),
+        sbFetch("ingredients", "GET", null, "?order=nomRecette&select=*"),
+        sbFetch("recettes", "GET", null, "?order=nom&select=*"),
       ]);
       if (Array.isArray(recettes)) {
         setData({ fournisseurs: fournisseurs || [], ingredients: ingredients || [], recettes: recettes || [] });
