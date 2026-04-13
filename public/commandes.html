@@ -473,6 +473,17 @@
       <label>URL Google Sheet (partagé en lecture publique)</label>
       <input type="text" id="sheetUrl" placeholder="https://docs.google.com/spreadsheets/d/XXXX/edit?usp=sharing" value="https://docs.google.com/spreadsheets/d/1IJ_I-JxafJpIF9H2pInXaET-IQw0KrTialE94rL2hoI/edit?usp=sharing">
     </div>
+    <div style="margin-top:14px;">
+      <label>Semaine à charger</label>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <select id="semaineSelect" style="width:auto; min-width:180px;">
+          <option value="">— Cliquer sur "Lister les semaines" —</option>
+        </select>
+        <button class="btn btn-secondary" onclick="listerSemaines()">
+          <span>📋</span> Lister les semaines
+        </button>
+      </div>
+    </div>
     <div style="margin-top:14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
       <button class="btn btn-primary" onclick="lancerChargement()">
         <span>🔄</span> Charger le planning
@@ -697,84 +708,157 @@ async function chargerSupabase(url, key) {
 }
 
 // ────────────────────────────────────────────────
+// GOOGLE SHEETS → LISTE DES ONGLETS
+// ────────────────────────────────────────────────
+async function listerSemaines() {
+  const sheetUrl = document.getElementById('sheetUrl').value.trim();
+  const sheetId = extractSheetId(sheetUrl);
+  if (!sheetId) { showStatus('URL Google Sheet invalide', 'error'); return; }
+
+  showStatus('Récupération des onglets…');
+  try {
+    // L'API gviz retourne les métadonnées du sheet en JSON (fonctionne en accès public)
+    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+    const r = await fetch(url);
+    const text = await r.text();
+
+    // Extraire le JSON embarqué (format : google.visualization.Query.setResponse({...}))
+    const jsonStr = text.replace(/^[^(]+\(/, '').replace(/\);?\s*$/, '');
+    const json = JSON.parse(jsonStr);
+
+    // Les infos de sheets sont dans json.table ou dans le format de réponse gviz
+    // En fait gviz ne liste pas les onglets — on utilise une autre URL
+    throw new Error('gviz ne liste pas les onglets');
+
+  } catch(e) {
+    // Méthode alternative : lire le HTML du sheet et extraire les noms d'onglets
+    try {
+      const htmlUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/htmlview`;
+      const r = await fetch(htmlUrl);
+      const html = await r.text();
+
+      // Extraire les onglets depuis le HTML (format : <li id="sheet-button-XXXXXXXX">NOM</li>)
+      const onglets = [];
+      const re = /id="sheet-button-(\d+)"[^>]*>\s*<span[^>]*>([^<]+)<\/span>/g;
+      let m;
+      while ((m = re.exec(html)) !== null) {
+        onglets.push({ gid: m[1], nom: m[2].trim() });
+      }
+
+      // Fallback regex si la première n'a rien trouvé
+      if (onglets.length === 0) {
+        const re2 = /"(\d{8,})"[^}]*"name":"([^"]+)"/g;
+        while ((m = re2.exec(html)) !== null) {
+          onglets.push({ gid: m[1], nom: m[2].trim() });
+        }
+      }
+
+      if (onglets.length === 0) {
+        throw new Error('Onglets introuvables dans le HTML');
+      }
+
+      remplirSelectSemaines(onglets);
+      return;
+
+    } catch(e2) {
+      // Dernier recours : afficher une saisie manuelle du GID
+      showStatus('Impossible de lister automatiquement les onglets. Saisissez le GID manuellement.', 'error');
+      afficherSaisieGidManuelle();
+    }
+  }
+}
+
+function remplirSelectSemaines(onglets) {
+  // Filtrer uniquement les onglets avec une date (format DD/MM/YY ou DD/MM/YYYY)
+  const ongletsDates = onglets.filter(o => /\d{1,2}[\/\-]\d{1,2}/.test(o.nom));
+
+  // Trier par date décroissante (plus récente en premier)
+  ongletsDates.sort((a, b) => {
+    const da = parseDate(a.nom), db = parseDate(b.nom);
+    if (!da || !db) return 0;
+    return db - da;
+  });
+
+  const select = document.getElementById('semaineSelect');
+  select.innerHTML = '<option value="">— Choisir une semaine —</option>';
+
+  const today = new Date();
+  let bestGid = null, bestDiff = Infinity;
+
+  for (const o of ongletsDates) {
+    const opt = document.createElement('option');
+    opt.value = o.gid;
+    opt.textContent = o.nom;
+    select.appendChild(opt);
+    // Trouver l'onglet le plus proche d'aujourd'hui
+    const d = parseDate(o.nom);
+    if (d) {
+      const diff = Math.abs(d - today);
+      if (diff < bestDiff) { bestDiff = diff; bestGid = o.gid; }
+    }
+  }
+
+  // Pré-sélectionner la semaine la plus proche
+  if (bestGid) select.value = bestGid;
+
+  hideStatus();
+  toast(`${ongletsDates.length} semaines trouvées`);
+}
+
+function parseDate(nom) {
+  const m = nom.match(/(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);
+  if (!m) return null;
+  let year = m[3] ? parseInt(m[3]) : new Date().getFullYear();
+  if (year < 100) year += 2000;
+  return new Date(year, parseInt(m[2]) - 1, parseInt(m[1]));
+}
+
+function afficherSaisieGidManuelle() {
+  // Supprimer l'ancien si existant
+  document.getElementById('gidManuelDiv')?.remove();
+  const div = document.createElement('div');
+  div.id = 'gidManuelDiv';
+  div.style.cssText = 'margin-top:10px; padding:12px; background:var(--beige); border-radius:7px; border:1px solid var(--beige-fonce);';
+  div.innerHTML = `
+    <label style="margin-bottom:6px;">GID de l'onglet (visible dans l'URL du sheet : ...#gid=<strong>XXXXXXXX</strong>)</label>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <input type="text" id="gidManuel" placeholder="ex: 1166307452" style="width:180px;">
+      <span style="font-size:12px; color:var(--gris);">Ouvre le sheet, clique sur l'onglet voulu, copie le numéro après #gid= dans l'URL</span>
+    </div>
+  `;
+  document.getElementById('semaineSelect').closest('div').after(div);
+}
+
+// ────────────────────────────────────────────────
 // GOOGLE SHEETS → PLANNING
 // ────────────────────────────────────────────────
 async function chargerPlanning(sheetUrl) {
   const sheetId = extractSheetId(sheetUrl);
   if (!sheetId) throw new Error('URL Google Sheet invalide');
 
-  // Récupérer la liste des onglets via l'API public gviz
-  const metaUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/sheets/0`;
-  
-  // Essayer de trouver l'onglet de la semaine en cours
-  const today = new Date();
-  const gid = await trouverOngletSemaine(sheetId, today);
+  // Récupérer le GID depuis le sélecteur ou la saisie manuelle
+  let gid = document.getElementById('semaineSelect').value;
+  const gidManuel = document.getElementById('gidManuel')?.value?.trim();
+  if (gidManuel) gid = gidManuel;
+
+  // Si aucun GID, essayer d'extraire depuis l'URL
+  if (!gid) {
+    const m = sheetUrl.match(/gid=(\d+)/);
+    gid = m ? m[1] : '0';
+  }
+
+  showStatus(`Lecture de l'onglet (gid=${gid})…`);
 
   const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
   const resp = await fetch(csvUrl);
   if (!resp.ok) {
-    throw new Error(`Impossible de lire le sheet (${resp.status}). Vérifiez que le sheet est partagé en accès public "Lecteur".`);
+    throw new Error(`Impossible de lire le sheet (${resp.status}). Vérifiez que le sheet est partagé en lecture publique.`);
   }
   const csv = await resp.text();
+  if (!csv || csv.trim().length < 10) {
+    throw new Error('Le sheet semble vide ou inaccessible.');
+  }
   parserPlanning(csv);
-}
-
-async function trouverOngletSemaine(sheetId, today) {
-  // Lire les métadonnées via gviz/tq pour lister les onglets
-  try {
-    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=`;
-    // Essayer l'onglet par défaut (gid=0) pour lister
-    const r = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`);
-    const text = await r.text();
-    // Parser le JSON embarqué dans la réponse gviz
-    const jsonStr = text.replace(/^[^{]+/, '').replace(/[^}]+$/, '');
-  } catch(e) {}
-
-  // Fallback : utiliser l'API feeds pour récupérer les onglets
-  try {
-    const feedUrl = `https://spreadsheets.google.com/feeds/worksheets/${sheetId}/public/basic?alt=json`;
-    const r = await fetch(feedUrl);
-    if (r.ok) {
-      const data = await r.json();
-      const entries = data.feed.entry || [];
-      // Trouver l'onglet dont la date correspond à la semaine en cours
-      const bestGid = trouverMeilleurOnglet(entries, today);
-      if (bestGid) return bestGid;
-    }
-  } catch(e) {}
-
-  // Dernier fallback : GID 0 (premier onglet)
-  return 0;
-}
-
-function trouverMeilleurOnglet(entries, today) {
-  // Les entrées ont un lien avec le gid
-  let bestEntry = null;
-  let bestDiff = Infinity;
-
-  for (const entry of entries) {
-    const title = entry.title?.$t || '';
-    // Format DD/MM/YY ou DD/MM/YYYY
-    const m = title.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
-    if (!m) continue;
-    let year = parseInt(m[3]);
-    if (year < 100) year += 2000;
-    const dateOnglet = new Date(year, parseInt(m[2]) - 1, parseInt(m[1]));
-    const diff = Math.abs(today - dateOnglet);
-    if (diff < bestDiff) {
-      bestDiff = diff;
-      bestEntry = entry;
-    }
-  }
-
-  if (!bestEntry) return null;
-  // Extraire le gid depuis le lien
-  const links = bestEntry.link || [];
-  for (const link of links) {
-    const m = link.href?.match(/gid=(\d+)/);
-    if (m) return parseInt(m[1]);
-  }
-  return null;
 }
 
 // ── Parser CSV robuste (gère les guillemets et virgules dans les cellules) ──
