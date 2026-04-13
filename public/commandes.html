@@ -474,14 +474,18 @@
       <input type="text" id="sheetUrl" placeholder="https://docs.google.com/spreadsheets/d/XXXX/edit?usp=sharing" value="https://docs.google.com/spreadsheets/d/1IJ_I-JxafJpIF9H2pInXaET-IQw0KrTialE94rL2hoI/edit?usp=sharing">
     </div>
     <div style="margin-top:14px;">
-      <label>Semaine à charger</label>
-      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-        <select id="semaineSelect" style="width:auto; min-width:180px;">
-          <option value="">— Cliquer sur "Lister les semaines" —</option>
-        </select>
-        <button class="btn btn-secondary" onclick="listerSemaines()">
-          <span>📋</span> Lister les semaines
-        </button>
+      <label>Semaine à charger — GID de l'onglet</label>
+      <div style="display:flex; gap:10px; align-items:flex-start; flex-wrap:wrap;">
+        <div>
+          <input type="text" id="gidManuel" placeholder="ex: 1166307452" style="width:200px;" value="">
+          <div style="font-size:11px; color:var(--gris); margin-top:5px; line-height:1.5;">
+            💡 Ouvre ton Google Sheet → clique sur l'onglet de la semaine voulue → copie le numéro après <strong>#gid=</strong> dans l'URL du navigateur
+          </div>
+        </div>
+        <div style="background:var(--beige-fonce); border-radius:7px; padding:8px 12px; font-size:11px; color:var(--texte); line-height:1.6; max-width:300px;">
+          Exemple d'URL :<br>
+          <code style="font-size:10px; color:var(--vert-clair);">...edit#gid=<strong>1166307452</strong></code>
+        </div>
       </div>
     </div>
     <div style="margin-top:14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
@@ -597,6 +601,7 @@ function chargerConfig() {
   if (cfg.supabaseUrl) document.getElementById('supabaseUrl').value = cfg.supabaseUrl;
   if (cfg.supabaseKey) document.getElementById('supabaseKey').value = cfg.supabaseKey;
   if (cfg.sheetUrl)    document.getElementById('sheetUrl').value    = cfg.sheetUrl;
+  if (cfg.gidManuel)   document.getElementById('gidManuel').value   = cfg.gidManuel;
   if (cfg.mapping)     state.mapping = cfg.mapping;
   if (Object.keys(cfg).length) toast('Configuration chargée');
   else toast('Aucune config sauvegardée');
@@ -608,6 +613,7 @@ function sauvegarderConfig() {
     supabaseUrl: document.getElementById('supabaseUrl').value.trim(),
     supabaseKey: document.getElementById('supabaseKey').value.trim(),
     sheetUrl:    document.getElementById('sheetUrl').value.trim(),
+    gidManuel:   document.getElementById('gidManuel').value.trim(),
     mapping:     state.mapping,
   }));
 }
@@ -836,28 +842,27 @@ async function chargerPlanning(sheetUrl) {
   const sheetId = extractSheetId(sheetUrl);
   if (!sheetId) throw new Error('URL Google Sheet invalide');
 
-  // Récupérer le GID depuis le sélecteur ou la saisie manuelle
-  let gid = document.getElementById('semaineSelect').value;
-  const gidManuel = document.getElementById('gidManuel')?.value?.trim();
-  if (gidManuel) gid = gidManuel;
+  // Lire le GID saisi manuellement
+  const gid = document.getElementById('gidManuel')?.value?.trim() || '0';
 
-  // Si aucun GID, essayer d'extraire depuis l'URL
-  if (!gid) {
-    const m = sheetUrl.match(/gid=(\d+)/);
-    gid = m ? m[1] : '0';
+  if (!gid || gid === '0') {
+    throw new Error('Veuillez saisir le GID de l\'onglet (visible dans l\'URL du sheet après #gid=)');
   }
 
-  showStatus(`Lecture de l'onglet (gid=${gid})…`);
+  showStatus(`Lecture de l'onglet gid=${gid}…`);
 
   const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
   const resp = await fetch(csvUrl);
+
   if (!resp.ok) {
-    throw new Error(`Impossible de lire le sheet (${resp.status}). Vérifiez que le sheet est partagé en lecture publique.`);
+    throw new Error(`Impossible de lire le sheet (erreur ${resp.status}). Vérifiez que le sheet est partagé en lecture publique et que le GID est correct.`);
   }
+
   const csv = await resp.text();
   if (!csv || csv.trim().length < 10) {
-    throw new Error('Le sheet semble vide ou inaccessible.');
+    throw new Error('Contenu vide — vérifiez le GID et le partage du sheet.');
   }
+
   parserPlanning(csv);
 }
 
