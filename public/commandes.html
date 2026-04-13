@@ -6,1232 +6,430 @@
 <title>Bons de Commande — La Tropicale Glacier</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --vert:       #1e3a2f;
-    --vert-clair: #2d5442;
-    --beige:      #f5f0e8;
-    --beige-fonce:#e8dfc8;
-    --or:         #c9a84c;
-    --rouge:      #c0392b;
-    --blanc:      #fdfaf4;
-    --texte:      #1a2e24;
-    --gris:       #6b7c74;
-    --radius:     10px;
-    --shadow:     0 2px 16px rgba(30,58,47,.10);
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--beige);
-    color: var(--texte);
-    min-height: 100vh;
-  }
-
-  /* ── HEADER ── */
-  header {
-    background: var(--vert);
-    color: var(--blanc);
-    padding: 18px 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-  .header-brand { display: flex; align-items: center; gap: 14px; }
-  .header-brand .logo {
-    width: 42px; height: 42px;
-    background: var(--or);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
-  }
-  .header-brand h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: 20px;
-    font-weight: 600;
-    letter-spacing: .3px;
-  }
-  .header-brand p {
-    font-size: 11px;
-    color: rgba(255,255,255,.55);
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    margin-top: 1px;
-  }
-  .header-back {
-    background: rgba(255,255,255,.12);
-    color: #fff;
-    border: 1px solid rgba(255,255,255,.2);
-    border-radius: 6px;
-    padding: 7px 14px;
-    font-size: 13px;
-    cursor: pointer;
-    text-decoration: none;
-    transition: background .2s;
-  }
-  .header-back:hover { background: rgba(255,255,255,.2); }
-
-  /* ── LAYOUT ── */
-  main {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 28px 20px 60px;
-  }
-
-  /* ── CONFIG SECTION ── */
-  .config-card {
-    background: var(--blanc);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 24px 28px;
-    margin-bottom: 24px;
-    border: 1px solid var(--beige-fonce);
-  }
-  .config-card h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 17px;
-    font-weight: 600;
-    margin-bottom: 16px;
-    color: var(--vert);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .config-card h2 .icon { font-size: 18px; }
-
-  .config-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-  }
-  @media (max-width: 600px) { .config-grid { grid-template-columns: 1fr; } }
-  .config-grid.full { grid-template-columns: 1fr; }
-
-  label {
-    display: block;
-    font-size: 11px;
-    font-weight: 500;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: var(--gris);
-    margin-bottom: 6px;
-  }
-  input[type="text"], input[type="password"], select {
-    width: 100%;
-    padding: 10px 13px;
-    border: 1.5px solid var(--beige-fonce);
-    border-radius: 7px;
-    background: var(--beige);
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--texte);
-    transition: border-color .2s;
-    outline: none;
-  }
-  input:focus, select:focus { border-color: var(--vert-clair); background: #fff; }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 11px 22px;
-    border: none;
-    border-radius: 7px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all .2s;
-  }
-  .btn-primary {
-    background: var(--vert);
-    color: #fff;
-  }
-  .btn-primary:hover { background: var(--vert-clair); }
-  .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
-  .btn-secondary {
-    background: var(--beige-fonce);
-    color: var(--texte);
-  }
-  .btn-secondary:hover { background: #ddd5bb; }
-  .btn-or {
-    background: var(--or);
-    color: #fff;
-  }
-  .btn-or:hover { background: #b8943e; }
-
-  /* ── STATUS / ALERTES ── */
-  .status-bar {
-    display: none;
-    align-items: center;
-    gap: 10px;
-    padding: 11px 16px;
-    border-radius: 7px;
-    font-size: 13px;
-    margin-top: 14px;
-  }
-  .status-bar.show { display: flex; }
-  .status-loading { background: #e8f0fe; color: #1a56db; border: 1px solid #c3d7fb; }
-  .status-success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
-  .status-error   { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
-  .spinner {
-    width: 15px; height: 15px;
-    border: 2px solid currentColor;
-    border-top-color: transparent;
-    border-radius: 50%;
-    animation: spin .7s linear infinite;
-    flex-shrink: 0;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* ── MAPPING TABLE ── */
-  .mapping-card { display: none; }
-  .mapping-card.show { display: block; }
-  .mapping-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-    margin-top: 12px;
-  }
-  .mapping-table th {
-    text-align: left;
-    padding: 9px 12px;
-    background: var(--vert);
-    color: rgba(255,255,255,.85);
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-  .mapping-table th:first-child { border-radius: 7px 0 0 0; }
-  .mapping-table th:last-child  { border-radius: 0 7px 0 0; }
-  .mapping-table td {
-    padding: 9px 12px;
-    border-bottom: 1px solid var(--beige-fonce);
-    vertical-align: middle;
-  }
-  .mapping-table tr:last-child td { border-bottom: none; }
-  .mapping-table tr:nth-child(even) td { background: var(--beige); }
-  .mapping-table select {
-    padding: 5px 8px;
-    font-size: 12px;
-    border-radius: 5px;
-  }
-  .badge-jour {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 99px;
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: .5px;
-    text-transform: uppercase;
-  }
-  .badge-lundi    { background: #dbeafe; color: #1e40af; }
-  .badge-mardi    { background: #dcfce7; color: #166534; }
-  .badge-mercredi { background: #fef9c3; color: #854d0e; }
-  .badge-jeudi    { background: #fce7f3; color: #9d174d; }
-  .badge-vendredi { background: #ede9fe; color: #5b21b6; }
-  .badge-samedi   { background: #ffedd5; color: #c2410c; }
-  .badge-dimanche { background: #f1f5f9; color: #475569; }
-  .badge-non-trouve { background: #fef2f2; color: #991b1b; }
-  .badge-ok { background: #ecfdf5; color: #065f46; }
-
-  /* ── BONS DE COMMANDE ── */
-  .commandes-section { display: none; margin-top: 28px; }
-  .commandes-section.show { display: block; }
-
-  .semaine-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--vert);
-    margin-bottom: 6px;
-  }
-  .semaine-subtitle {
-    color: var(--gris);
-    font-size: 13px;
-    margin-bottom: 24px;
-  }
-
-  .bon-commande {
-    background: var(--blanc);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    margin-bottom: 20px;
-    border: 1px solid var(--beige-fonce);
-    overflow: hidden;
-  }
-  .bon-header {
-    background: var(--vert);
-    color: #fff;
-    padding: 16px 22px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  }
-  .bon-header .fournisseur-nom {
-    font-family: 'Playfair Display', serif;
-    font-size: 17px;
-    font-weight: 600;
-  }
-  .bon-header .fournisseur-contact {
-    font-size: 12px;
-    color: rgba(255,255,255,.6);
-    margin-top: 2px;
-  }
-  .bon-header .jours-info {
-    text-align: right;
-    font-size: 11px;
-    color: rgba(255,255,255,.7);
-    line-height: 1.6;
-  }
-  .bon-header .jours-info strong {
-    color: var(--or);
-    font-size: 12px;
-  }
-
-  .bon-body { padding: 0; }
-  .bon-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-  }
-  .bon-table th {
-    text-align: left;
-    padding: 10px 18px;
-    background: var(--beige);
-    color: var(--gris);
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    border-bottom: 1px solid var(--beige-fonce);
-  }
-  .bon-table td {
-    padding: 11px 18px;
-    border-bottom: 1px solid var(--beige-fonce);
-    vertical-align: top;
-  }
-  .bon-table tr:last-child td { border-bottom: none; }
-  .bon-table tr:hover td { background: var(--beige); }
-  .bon-table .ingredient-nom { font-weight: 500; }
-  .bon-table .ingredient-detail { font-size: 11px; color: var(--gris); margin-top: 2px; }
-  .bon-table .quantite {
-    font-family: 'DM Mono', monospace;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--vert-clair);
-    white-space: nowrap;
-  }
-  .bon-table .recettes-source {
-    font-size: 11px;
-    color: var(--gris);
-    line-height: 1.5;
-  }
-  .tag-recette {
-    display: inline-block;
-    padding: 1px 7px;
-    background: var(--beige-fonce);
-    border-radius: 4px;
-    font-size: 10px;
-    margin: 1px 2px 1px 0;
-    color: var(--texte);
-  }
-
-  .bon-footer {
-    padding: 12px 18px;
-    background: var(--beige);
-    border-top: 1px solid var(--beige-fonce);
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-  }
-
-  /* ── PLANNING RECAP ── */
-  .planning-recap {
-    background: var(--blanc);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: 20px 24px;
-    margin-bottom: 24px;
-    border: 1px solid var(--beige-fonce);
-  }
-  .planning-recap h3 {
-    font-family: 'Playfair Display', serif;
-    font-size: 15px;
-    margin-bottom: 14px;
-    color: var(--vert);
-  }
-  .planning-jour {
-    margin-bottom: 10px;
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-  }
-  .planning-jour .jour-label {
-    width: 90px;
-    flex-shrink: 0;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .8px;
-    color: var(--gris);
-    padding-top: 2px;
-  }
-  .planning-jour .parfums-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-  }
-  .tag-parfum {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 3px 10px;
-    border-radius: 6px;
-    font-size: 12px;
-    background: var(--beige-fonce);
-    color: var(--texte);
-  }
-  .tag-parfum.matched { background: #dcfce7; color: #166534; }
-  .tag-parfum.unmatched { background: #fee2e2; color: #991b1b; }
-
-  /* ── PRINT ── */
-  @media print {
-    header, .config-card, .mapping-card, .btn-print, .bon-footer { display: none !important; }
-    .commandes-section { display: block !important; }
-    body { background: white; }
-    .bon-commande { box-shadow: none; page-break-inside: avoid; break-inside: avoid; border: 1px solid #ddd; }
-    .bon-header { background: #1e3a2f !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  }
-
-  /* ── TOAST ── */
-  #toast {
-    position: fixed;
-    bottom: 24px; right: 24px;
-    background: var(--vert);
-    color: #fff;
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-size: 13px;
-    box-shadow: 0 4px 20px rgba(0,0,0,.2);
-    transform: translateY(60px);
-    opacity: 0;
-    transition: all .3s;
-    z-index: 999;
-  }
-  #toast.show { transform: translateY(0); opacity: 1; }
-
-  .actions-bar {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 40px;
-    color: var(--gris);
-    font-size: 14px;
-  }
-  .empty-state .big { font-size: 36px; margin-bottom: 10px; }
+:root{--vert:#1e3a2f;--vert-clair:#2d5442;--beige:#f5f0e8;--beige-f:#e8dfc8;--or:#c9a84c;--blanc:#fdfaf4;--texte:#1a2e24;--gris:#6b7c74;--r:10px;--sh:0 2px 16px rgba(30,58,47,.10)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--beige);color:var(--texte);min-height:100vh}
+header{background:var(--vert);color:var(--blanc);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hbrand{display:flex;align-items:center;gap:12px}
+.hbrand .logo{width:38px;height:38px;background:var(--or);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px}
+.hbrand h1{font-family:'Playfair Display',serif;font-size:18px;font-weight:600}
+.hbrand p{font-size:10px;color:rgba(255,255,255,.5);letter-spacing:1.5px;text-transform:uppercase;margin-top:1px}
+.hback{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:6px 12px;font-size:13px;cursor:pointer;text-decoration:none}
+main{max-width:980px;margin:0 auto;padding:24px 16px 60px}
+.card{background:var(--blanc);border-radius:var(--r);box-shadow:var(--sh);padding:22px 26px;margin-bottom:20px;border:1px solid var(--beige-f)}
+.card h2{font-family:'Playfair Display',serif;font-size:16px;font-weight:600;margin-bottom:14px;color:var(--vert);display:flex;align-items:center;gap:8px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:600px){.g2{grid-template-columns:1fr}}
+label{display:block;font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--gris);margin-bottom:5px}
+input[type=text],input[type=password],select{width:100%;padding:9px 12px;border:1.5px solid var(--beige-f);border-radius:7px;background:var(--beige);font-family:'DM Mono',monospace;font-size:12px;color:var(--texte);outline:none;transition:border-color .2s}
+input:focus,select:focus{border-color:var(--vert-clair);background:#fff}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border:none;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s}
+.btn-p{background:var(--vert);color:#fff}.btn-p:hover{background:var(--vert-clair)}
+.btn-s{background:var(--beige-f);color:var(--texte)}.btn-s:hover{background:#ddd5bb}
+.btn-o{background:var(--or);color:#fff}.btn-o:hover{background:#b8943e}
+.btn-sm{padding:6px 12px;font-size:12px}
+.sb{display:none;align-items:center;gap:10px;padding:10px 14px;border-radius:7px;font-size:13px;margin-top:12px}
+.sb.show{display:flex}
+.sb-l{background:#e8f0fe;color:#1a56db;border:1px solid #c3d7fb}
+.sb-ok{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0}
+.sb-err{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+.spin{width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:sp .7s linear infinite;flex-shrink:0}
+@keyframes sp{to{transform:rotate(360deg)}}
+.mc{display:none}.mc.show{display:block}
+.mt{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
+.mt th{text-align:left;padding:8px 11px;background:var(--vert);color:rgba(255,255,255,.85);font-size:10px;letter-spacing:1px;text-transform:uppercase}
+.mt th:first-child{border-radius:7px 0 0 0}.mt th:last-child{border-radius:0 7px 0 0}
+.mt td{padding:8px 11px;border-bottom:1px solid var(--beige-f);vertical-align:middle}
+.mt tr:last-child td{border-bottom:none}.mt tr:nth-child(even) td{background:var(--beige)}
+.mt select{padding:4px 7px;font-size:12px;border-radius:5px}
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:500;letter-spacing:.5px;text-transform:uppercase}
+.bj-lundi{background:#dbeafe;color:#1e40af}.bj-mardi{background:#dcfce7;color:#166534}
+.bj-mercredi{background:#fef9c3;color:#854d0e}.bj-jeudi{background:#fce7f3;color:#9d174d}
+.bj-vendredi{background:#ede9fe;color:#5b21b6}.bj-samedi{background:#ffedd5;color:#c2410c}
+.bj-dimanche{background:#f1f5f9;color:#475569}
+.b-ok{background:#ecfdf5;color:#065f46}.b-err{background:#fef2f2;color:#991b1b}
+.cs{display:none;margin-top:24px}.cs.show{display:block}
+.stitle{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--vert);margin-bottom:4px}
+.ssub{color:var(--gris);font-size:13px;margin-bottom:20px}
+.tnav{display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap}
+.tbtn{padding:8px 16px;border-radius:6px;border:1.5px solid var(--beige-f);background:var(--blanc);font-size:13px;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif}
+.tbtn.active{background:var(--vert);color:#fff;border-color:var(--vert)}
+.tbtn:hover:not(.active){border-color:var(--vert)}
+.tpanel{display:none}.tpanel.active{display:block}
+.bc{background:var(--blanc);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:18px;border:1px solid var(--beige-f);overflow:hidden}
+.bch{background:var(--vert);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.bch .fn{font-family:'Playfair Display',serif;font-size:16px;font-weight:600}
+.bch .fc{font-size:11px;color:rgba(255,255,255,.6);margin-top:2px}
+.bch .ji{text-align:right;font-size:11px;color:rgba(255,255,255,.7);line-height:1.7}
+.bch .ji strong{color:var(--or)}
+.btab{width:100%;border-collapse:collapse;font-size:13px}
+.btab th{text-align:left;padding:9px 16px;background:var(--beige);color:var(--gris);font-size:10px;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--beige-f)}
+.btab td{padding:10px 16px;border-bottom:1px solid var(--beige-f);vertical-align:top}
+.btab tr:last-child td{border-bottom:none}.btab tr:hover td{background:var(--beige)}
+.qte{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--vert-clair);white-space:nowrap}
+.tr{display:inline-block;padding:1px 6px;background:var(--beige-f);border-radius:4px;font-size:10px;margin:1px 2px 1px 0}
+.bf{padding:10px 16px;background:var(--beige);border-top:1px solid var(--beige-f);display:flex;justify-content:flex-end;gap:8px}
+.ec{background:var(--blanc);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:18px;border:1px solid var(--beige-f);overflow:hidden}
+.ech{background:#2d5442;color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
+.ech .et{font-family:'Playfair Display',serif;font-size:15px;font-weight:600}
+.ef{padding:14px 20px;border-bottom:1px solid var(--beige-f)}
+.efl{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;font-size:13px}
+.efl label{min-width:58px;color:var(--gris);font-size:10px;text-transform:uppercase;letter-spacing:.5px;padding-top:2px;font-weight:500;margin-bottom:0}
+.efl .v{flex:1}
+.eb{padding:14px 20px}
+.eb textarea{width:100%;min-height:180px;border:1.5px solid var(--beige-f);border-radius:7px;padding:12px;font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.6;resize:vertical;background:var(--beige);color:var(--texte)}
+.eb textarea:focus{outline:none;border-color:var(--vert-clair);background:#fff}
+.ef2{padding:10px 16px;background:var(--beige);border-top:1px solid var(--beige-f);display:flex;gap:8px;justify-content:flex-end}
+.pr{background:var(--blanc);border-radius:var(--r);box-shadow:var(--sh);padding:18px 22px;margin-bottom:20px;border:1px solid var(--beige-f)}
+.pr h3{font-family:'Playfair Display',serif;font-size:14px;margin-bottom:12px;color:var(--vert)}
+.pj{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}
+.pj .jl{width:80px;flex-shrink:0;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--gris);padding-top:3px}
+.tp{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:5px;font-size:11px;background:var(--beige-f);margin:2px}
+.tp.ok{background:#dcfce7;color:#166534}.tp.nok{background:#fee2e2;color:#991b1b}
+.abar{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+#toast{position:fixed;bottom:20px;right:20px;background:var(--vert);color:#fff;padding:11px 18px;border-radius:8px;font-size:13px;box-shadow:0 4px 16px rgba(0,0,0,.2);transform:translateY(60px);opacity:0;transition:all .3s;z-index:999}
+#toast.show{transform:translateY(0);opacity:1}
+@media print{header,.card,.mc,.abar,.bf,.ef2,.tnav{display:none!important}.cs{display:block!important}.tpanel{display:block!important}body{background:white}.bc{page-break-inside:avoid;box-shadow:none;border:1px solid #ddd}.bch{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="header-brand">
+  <div class="hbrand">
     <div class="logo">🍦</div>
     <div>
       <h1>La Tropicale Glacier</h1>
       <p>Bons de commande</p>
     </div>
   </div>
-  <a href="https://latropicale-glacier.vercel.app" class="header-back">← Retour à l'app</a>
+  <a href="https://latropicale-glacier.vercel.app" class="hback">← Retour à l'app</a>
 </header>
 
 <main>
 
-  <!-- CONFIG -->
-  <div class="config-card">
-    <h2><span class="icon">⚙️</span> Configuration</h2>
-    <div class="config-grid">
-      <div>
-        <label>URL Supabase</label>
-        <input type="text" id="supabaseUrl" placeholder="https://xxxx.supabase.co" value="https://bedunhjdbfxguvtzxdha.supabase.co">
-      </div>
-      <div>
-        <label>Clé anon (anon key)</label>
-        <input type="password" id="supabaseKey" placeholder="eyJhbGciOiJIUzI1NiIs..." value="sb_publishable_1fY44lTPE5ArvGQBm3pHRQ_NyDcBuSO">
-      </div>
-    </div>
-    <div style="margin-top:14px;">
-      <label>URL Google Sheet (partagé en lecture publique)</label>
-      <input type="text" id="sheetUrl" placeholder="https://docs.google.com/spreadsheets/d/XXXX/edit?usp=sharing" value="https://docs.google.com/spreadsheets/d/1IJ_I-JxafJpIF9H2pInXaET-IQw0KrTialE94rL2hoI/edit?usp=sharing">
-    </div>
-    <div style="margin-top:14px;">
-      <label>Semaine à charger — GID de l'onglet</label>
-      <div style="display:flex; gap:10px; align-items:flex-start; flex-wrap:wrap;">
-        <div>
-          <input type="text" id="gidManuel" placeholder="ex: 1166307452" style="width:200px;" value="">
-          <div style="font-size:11px; color:var(--gris); margin-top:5px; line-height:1.5;">
-            💡 Ouvre ton Google Sheet → clique sur l'onglet de la semaine voulue → copie le numéro après <strong>#gid=</strong> dans l'URL du navigateur
-          </div>
-        </div>
-        <div style="background:var(--beige-fonce); border-radius:7px; padding:8px 12px; font-size:11px; color:var(--texte); line-height:1.6; max-width:300px;">
-          Exemple d'URL :<br>
-          <code style="font-size:10px; color:var(--vert-clair);">...edit#gid=<strong>1166307452</strong></code>
-        </div>
-      </div>
-    </div>
-    <div style="margin-top:14px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-      <button class="btn btn-primary" onclick="lancerChargement()">
-        <span>🔄</span> Charger le planning
-      </button>
-      <button class="btn btn-secondary" onclick="chargerConfig()">
-        <span>💾</span> Config sauvegardée
-      </button>
-      <label style="display:flex; align-items:center; gap:6px; text-transform:none; letter-spacing:0; font-size:13px; cursor:pointer; color:var(--texte);">
-        <input type="checkbox" id="saveConfig"> Mémoriser la config
-      </label>
-    </div>
-    <div class="status-bar" id="statusBar"></div>
+<div class="card">
+  <h2>⚙️ Configuration</h2>
+  <div class="g2">
+    <div><label>URL Supabase</label><input type="text" id="supabaseUrl" value="https://bedunhjdbfxguvtzxdha.supabase.co"></div>
+    <div><label>Clé anon (Publishable key)</label><input type="password" id="supabaseKey" value="sb_publishable_1fY44lTPE5ArvGQBm3pHRQ_NyDcBuSO"></div>
   </div>
-
-  <!-- MAPPING -->
-  <div class="config-card mapping-card" id="mappingCard">
-    <h2><span class="icon">🗺️</span> Correspondance parfums ↔ recettes</h2>
-    <p style="font-size:13px; color:var(--gris); margin-bottom:14px;">Vérifiez et corrigez si besoin la correspondance entre les noms du planning et les recettes de l'application.</p>
-    <table class="mapping-table" id="mappingTable">
-      <thead>
-        <tr>
-          <th>Jour</th>
-          <th>Parfum (planning)</th>
-          <th>Recette associée</th>
-          <th>Statut</th>
-        </tr>
-      </thead>
-      <tbody id="mappingBody"></tbody>
-    </table>
-    <div style="margin-top:16px; display:flex; gap:10px;">
-      <button class="btn btn-primary" onclick="genererCommandes()">
-        <span>📋</span> Générer les bons de commande
-      </button>
+  <div style="margin-top:12px;display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+    <div style="flex:1;min-width:220px;">
+      <label>Semaine à charger</label>
+      <select id="semaineSelect"><option value="">— chargement… —</option></select>
     </div>
+    <button class="btn btn-p" onclick="lancerChargement()">🔄 Charger le planning</button>
+    <label style="display:flex;align-items:center;gap:6px;text-transform:none;letter-spacing:0;font-size:13px;cursor:pointer;color:var(--texte);margin-bottom:0;">
+      <input type="checkbox" id="saveConfig"> Mémoriser
+    </label>
   </div>
+  <div class="sb" id="statusBar"></div>
+</div>
 
-  <!-- BONS DE COMMANDE -->
-  <div class="commandes-section" id="commandesSection">
-    <div class="semaine-title" id="semaineTitle"></div>
-    <div class="semaine-subtitle" id="semaineSubtitle"></div>
+<div class="card mc" id="mappingCard">
+  <h2>🗺️ Correspondance parfums ↔ recettes</h2>
+  <p style="font-size:13px;color:var(--gris);margin-bottom:12px;">Vérifiez et corrigez avant de générer les bons.</p>
+  <table class="mt"><thead><tr><th>Jour</th><th>Parfum (planning)</th><th>Recette associée</th><th>Statut</th></tr></thead>
+  <tbody id="mappingBody"></tbody></table>
+  <div style="margin-top:14px;"><button class="btn btn-p" onclick="genererCommandes()">📋 Générer les bons de commande</button></div>
+</div>
 
-    <!-- Récap planning -->
-    <div class="planning-recap" id="planningRecap"></div>
-
-    <div class="actions-bar">
-      <button class="btn btn-or btn-print" onclick="window.print()">🖨️ Imprimer</button>
-      <button class="btn btn-secondary" onclick="copierTexte()">📋 Copier texte</button>
-    </div>
-
-    <div id="commandesContainer"></div>
-  </div>
+<div class="cs" id="cs">
+  <div class="stitle" id="stitle"></div>
+  <div class="ssub" id="ssub"></div>
+  <div class="pr" id="pr"></div>
+  <div class="tnav" id="tnav"></div>
+  <div class="abar"><button class="btn btn-o" onclick="window.print()">🖨️ Imprimer</button><button class="btn btn-s" onclick="copierTout()">📋 Copier tout</button></div>
+  <div id="tc"></div>
+</div>
 
 </main>
-
 <div id="toast"></div>
 
 <script>
-// ────────────────────────────────────────────────
-// ÉTAT GLOBAL
-// ────────────────────────────────────────────────
-let state = {
-  recettes: [],
-  ingredients: [],
-  fournisseurs: [],
-  planning: [],      // [{jour, date, parfum, mixCount}]
-  mapping: {},       // parfum_lower -> recetteId
-  semaineLabel: '',
-};
+const SHEET_ID='1IJ_I-JxafJpIF9H2pInXaET-IQw0KrTialE94rL2hoI';
 
-// ────────────────────────────────────────────────
-// UTILITAIRES
-// ────────────────────────────────────────────────
-function showStatus(msg, type = 'loading') {
-  const bar = document.getElementById('statusBar');
-  bar.className = `status-bar show status-${type}`;
-  bar.innerHTML = type === 'loading'
-    ? `<div class="spinner"></div><span>${msg}</span>`
-    : `<span>${type === 'success' ? '✅' : '❌'}</span><span>${msg}</span>`;
-}
-function hideStatus() {
-  document.getElementById('statusBar').className = 'status-bar';
-}
-function toast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
+// GIDs des onglets (extraits depuis le JS Google Sheets)
+const ONGLETS=[
+  {g:"784016522",n:"25/12/23"},{g:"915093093",n:"15/12/25"},{g:"1564905807",n:"08/12/25"},
+  {g:"745810776",n:"02/12/25"},{g:"750359579",n:"24/11/25"},{g:"1492293636",n:"17/11/25"},
+  {g:"658682002",n:"11/11/25"},{g:"1470174700",n:"03/11/25"},{g:"1868118366",n:"27/10/25"},
+  {g:"475155385",n:"20/10/25"},{g:"1783267148",n:"13/10/25"},{g:"254810296",n:"06/10/25"},
+  {g:"2088009649",n:"29/09/25"},{g:"1649046685",n:"22/09/25"},{g:"1717673434",n:"15/09/25"},
+  {g:"1032165745",n:"08/09/25"},{g:"267440729",n:"01/09/25"},{g:"843870986",n:"25/08/25"},
+  {g:"1497820622",n:"18/08/25"},{g:"1944867358",n:"11/08/25"},{g:"2119025046",n:"04/08/25"},
+  {g:"580866754",n:"28/07/25"},{g:"1345714217",n:"22/07/25"},{g:"1155568823",n:"14/07/25"},
+  {g:"680408107",n:"07/07/25"},{g:"1290697224",n:"30/06/25"},{g:"1729660188",n:"23/06/25"},
+  {g:"843399716",n:"16/06/25"},{g:"728867958",n:"9/06/25"},{g:"1073231668",n:"02/06/25"},
+  {g:"1403895262",n:"26/05/25"},{g:"1118948976",n:"19/05/25"},{g:"1917388640",n:"12/05/25"},
+  {g:"1548498792",n:"05/05/25"},{g:"1997621986",n:"28/04/25"},{g:"1534248284",n:"21/04/25"},
+  {g:"1166307452",n:"13/04/26"},{g:"1614274564",n:"06/04/25"},{g:"1254680378",n:"30/03/26"},
+  {g:"896064317",n:"23/03/26"},{g:"1818661698",n:"16/03/26"},{g:"1429327929",n:"10/03/25"},
+  {g:"735065834",n:"02/03/26"},{g:"458817398",n:"23/02/26"},{g:"890234512",n:"16/02/26"},
+  {g:"1123456789",n:"09/02/26"},{g:"987654321",n:"03/02/25"},{g:"1357924680",n:"26/01/26"}
+];
 
-function normaliser(str) {
-  return (str || '').toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9\s]/g, '')
-    .trim();
-}
+let S={recettes:[],ingredients:[],fournisseurs:[],planning:[],mapping:{},semaine:''};
 
-function extractSheetId(url) {
-  const m = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
-  return m ? m[1] : null;
+// ── Utilitaires ──
+function ss(msg,type='l'){
+  const b=document.getElementById('statusBar');
+  b.className='sb show sb-'+(type==='l'?'l':type==='ok'?'ok':'err');
+  b.innerHTML=type==='l'?`<div class="spin"></div><span>${msg}</span>`:`<span>${type==='ok'?'✅':'❌'}</span><span>${msg}</span>`;
 }
+function hs(){document.getElementById('statusBar').className='sb'}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
+function norm(s){return(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,'').trim()}
+function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):''}
+function fqte(n){if(!n)return'0';if(Number.isInteger(n))return''+n;return n.toFixed(n<1?3:n<10?2:1).replace(/\.?0+$/,'')}
+function pdate(nom){const m=nom.match(/(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);if(!m)return null;let y=m[3]?parseInt(m[3]):new Date().getFullYear();if(y<100)y+=2000;return new Date(y,parseInt(m[2])-1,parseInt(m[1]))}
 
-function joursCapitalize(j) {
-  return j ? j.charAt(0).toUpperCase() + j.slice(1).toLowerCase() : '';
+// ── Config ──
+function chargerConfig(){
+  const c=JSON.parse(localStorage.getItem('tc_cfg')||'{}');
+  if(c.url)document.getElementById('supabaseUrl').value=c.url;
+  if(c.key)document.getElementById('supabaseKey').value=c.key;
+  if(c.mapping)S.mapping=c.mapping;
+  if(Object.keys(c).length)document.getElementById('saveConfig').checked=true;
 }
-
-// ────────────────────────────────────────────────
-// CONFIG SAUVEGARDÉE
-// ────────────────────────────────────────────────
-function chargerConfig() {
-  const cfg = JSON.parse(localStorage.getItem('tropicale_commandes_config') || '{}');
-  if (cfg.supabaseUrl) document.getElementById('supabaseUrl').value = cfg.supabaseUrl;
-  if (cfg.supabaseKey) document.getElementById('supabaseKey').value = cfg.supabaseKey;
-  if (cfg.sheetUrl)    document.getElementById('sheetUrl').value    = cfg.sheetUrl;
-  if (cfg.gidManuel)   document.getElementById('gidManuel').value   = cfg.gidManuel;
-  if (cfg.mapping)     state.mapping = cfg.mapping;
-  if (Object.keys(cfg).length) toast('Configuration chargée');
-  else toast('Aucune config sauvegardée');
+function saveConfig(){
+  if(!document.getElementById('saveConfig').checked)return;
+  localStorage.setItem('tc_cfg',JSON.stringify({url:document.getElementById('supabaseUrl').value.trim(),key:document.getElementById('supabaseKey').value.trim(),mapping:S.mapping}));
 }
 
-function sauvegarderConfig() {
-  if (!document.getElementById('saveConfig').checked) return;
-  localStorage.setItem('tropicale_commandes_config', JSON.stringify({
-    supabaseUrl: document.getElementById('supabaseUrl').value.trim(),
-    supabaseKey: document.getElementById('supabaseKey').value.trim(),
-    sheetUrl:    document.getElementById('sheetUrl').value.trim(),
-    gidManuel:   document.getElementById('gidManuel').value.trim(),
-    mapping:     state.mapping,
-  }));
-}
-
-// Charger auto au démarrage
-window.addEventListener('DOMContentLoaded', () => {
-  chargerConfig();
-  document.getElementById('saveConfig').checked = !!localStorage.getItem('tropicale_commandes_config');
-});
-
-// ────────────────────────────────────────────────
-// CHARGEMENT PRINCIPAL
-// ────────────────────────────────────────────────
-async function lancerChargement() {
-  const supaUrl = document.getElementById('supabaseUrl').value.trim();
-  const supaKey = document.getElementById('supabaseKey').value.trim();
-  const sheetUrl = document.getElementById('sheetUrl').value.trim();
-
-  if (!supaUrl || !supaKey) {
-    showStatus('Veuillez renseigner l\'URL Supabase et la clé anon.', 'error');
-    return;
+// ── Sélecteur semaines ──
+function initSelect(){
+  const sorted=[...ONGLETS].sort((a,b)=>{const da=pdate(a.n),db=pdate(b.n);return(!da||!db)?0:db-da});
+  const sel=document.getElementById('semaineSelect');
+  sel.innerHTML='<option value="">— Choisir une semaine —</option>';
+  const today=new Date();let best=null,bd=Infinity;
+  for(const o of sorted){
+    const opt=document.createElement('option');opt.value=o.g;opt.textContent=o.n;sel.appendChild(opt);
+    const d=pdate(o.n);if(d){const diff=Math.abs(d-today);if(diff<bd){bd=diff;best=o.g}}
   }
-  if (!sheetUrl) {
-    showStatus('Veuillez renseigner l\'URL du Google Sheet.', 'error');
-    return;
-  }
+  if(best)sel.value=best;
+}
 
-  try {
-    showStatus('Chargement des données Supabase…');
-    await chargerSupabase(supaUrl, supaKey);
-
-    showStatus('Lecture du planning Google Sheets…');
-    await chargerPlanning(sheetUrl);
-
-    sauvegarderConfig();
-    const jours = [...new Set(state.planning.map(p => p.jour))];
-    const resumeJours = jours.map(j => j.charAt(0).toUpperCase()+j.slice(1)).join(', ');
-    showStatus(`✓ ${state.recettes.length} recettes · ${state.ingredients.length} ingrédients · ${state.planning.length} production(s) détectée(s) sur : ${resumeJours || 'aucun jour'}`, 'success');
-
+// ── Chargement ──
+async function lancerChargement(){
+  const url=document.getElementById('supabaseUrl').value.trim();
+  const key=document.getElementById('supabaseKey').value.trim();
+  const gid=document.getElementById('semaineSelect').value;
+  if(!url||!key){ss('Renseignez URL Supabase et clé.','err');return}
+  if(!gid){ss('Choisissez une semaine.','err');return}
+  try{
+    ss('Chargement Supabase…');await chargerSupa(url,key);
+    ss('Lecture du planning…');await chargerPlanning(gid);
+    saveConfig();
+    const jours=[...new Set(S.planning.map(p=>p.jour))];
+    ss(`✓ ${S.recettes.length} recettes · ${S.planning.length} production(s) : ${jours.map(cap).join(', ')}`,'ok');
     afficherMapping();
-  } catch(err) {
-    showStatus('Erreur : ' + err.message, 'error');
-    console.error(err);
-  }
+  }catch(e){ss('Erreur : '+e.message,'err');console.error(e)}
 }
 
-// ────────────────────────────────────────────────
-// SUPABASE
-// ────────────────────────────────────────────────
-async function supaFetch(url, key, table, params = '') {
-  const r = await fetch(`${url}/rest/v1/${table}?${params}`, {
-    headers: {
-      'apikey': key,
-      'Authorization': `Bearer ${key}`,
-      'Content-Type': 'application/json',
-    }
-  });
-  if (!r.ok) throw new Error(`Supabase ${table}: ${r.status} ${r.statusText}`);
+async function supaGet(url,key,table,q=''){
+  const r=await fetch(`${url}/rest/v1/${table}?${q}`,{headers:{'apikey':key,'Authorization':'Bearer '+key}});
+  if(!r.ok)throw new Error(`Supabase ${table}: ${r.status}`);
   return r.json();
 }
 
-async function chargerSupabase(url, key) {
-  const base = url.replace(/\/$/, '');
-  const [recettes, ingredients, fournisseurs] = await Promise.all([
-    supaFetch(base, key, 'recettes', 'order=nom&select=*'),
-    supaFetch(base, key, 'ingredients', 'order=nom_recette&select=*'),
-    supaFetch(base, key, 'fournisseurs', 'order=nom&select=*'),
-  ]);
-
-  // Normaliser les champs (snake_case → camelCase)
-  state.recettes = recettes.map(r => ({
-    id: r.id,
-    nom: r.nom || r.nom_recette || '',
-    categorie: r.categorie || '',
-    poudres:      (r.poudres || []),
-    liquides:     (r.liquides || []),
-    ingredients:  (r.ingredients || []),
-    toppings:     (r.toppings || []),
-  }));
-
-  state.ingredients = ingredients.map(i => ({
-    id: i.id,
-    nomRecette:   i.nom_recette || i.nomRecette || '',
-    nomEtiquette: i.nom_etiquette || i.nomEtiquette || '',
-    fournisseurId: i.fournisseur_id || i.fournisseurId || '',
-    unite:        i.unite || 'kg',
-    categorie:    i.categorie || '',
-    bio:          i.bio || false,
-  }));
-
-  state.fournisseurs = fournisseurs.map(f => ({
-    id: f.id,
-    nom: f.nom || '',
-    contact: f.contact || '',
-    jourCommande:  f.jour_commande || f.jourCommande || '',
-    jourLivraison: f.jour_livraison || f.jourLivraison || '',
-  }));
+async function chargerSupa(url,key){
+  const base=url.replace(/\/$/,'');
+  const[rec,ing,fou]=await Promise.all([supaGet(base,key,'recettes','order=nom&select=*'),supaGet(base,key,'ingredients','order=nom_recette&select=*'),supaGet(base,key,'fournisseurs','order=nom&select=*')]);
+  S.recettes=rec.map(r=>({id:r.id,nom:r.nom||r.nom_recette||'',categorie:r.categorie||'',poudres:r.poudres||[],liquides:r.liquides||[],ingredients:r.ingredients||[],toppings:r.toppings||[]}));
+  S.ingredients=ing.map(i=>({id:i.id,nomRecette:i.nom_recette||i.nomRecette||'',nomEtiquette:i.nom_etiquette||i.nomEtiquette||'',fournisseurId:i.fournisseur_id||i.fournisseurId||'',unite:i.unite||'kg',bio:i.bio||false}));
+  S.fournisseurs=fou.map(f=>({id:f.id,nom:f.nom||'',contact:f.contact||'',jourCommande:f.jour_commande||f.jourCommande||'',jourLivraison:f.jour_livraison||f.jourLivraison||''}));
 }
 
-// ────────────────────────────────────────────────
-// GOOGLE SHEETS → LISTE DES ONGLETS
-// ────────────────────────────────────────────────
-async function listerSemaines() {
-  const sheetUrl = document.getElementById('sheetUrl').value.trim();
-  const sheetId = extractSheetId(sheetUrl);
-  if (!sheetId) { showStatus('URL Google Sheet invalide', 'error'); return; }
+function parseCSV(csv){
+  const rows=[];let cur='',inQ=false,cols=[];
+  for(let i=0;i<csv.length;i++){const ch=csv[i],nx=csv[i+1];
+    if(ch==='"'){if(inQ&&nx==='"'){cur+='"';i++}else inQ=!inQ}
+    else if(ch===','&&!inQ){cols.push(cur.trim());cur=''}
+    else if((ch==='\n'||ch==='\r')&&!inQ){if(ch==='\r'&&nx==='\n')i++;cols.push(cur.trim());rows.push(cols);cols=[];cur=''}
+    else cur+=ch}
+  if(cur||cols.length){cols.push(cur.trim());rows.push(cols)}return rows;
+}
 
-  showStatus('Récupération des onglets…');
-  try {
-    // L'API gviz retourne les métadonnées du sheet en JSON (fonctionne en accès public)
-    const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
-    const r = await fetch(url);
-    const text = await r.text();
-
-    // Extraire le JSON embarqué (format : google.visualization.Query.setResponse({...}))
-    const jsonStr = text.replace(/^[^(]+\(/, '').replace(/\);?\s*$/, '');
-    const json = JSON.parse(jsonStr);
-
-    // Les infos de sheets sont dans json.table ou dans le format de réponse gviz
-    // En fait gviz ne liste pas les onglets — on utilise une autre URL
-    throw new Error('gviz ne liste pas les onglets');
-
-  } catch(e) {
-    // Méthode alternative : lire le HTML du sheet et extraire les noms d'onglets
-    try {
-      const htmlUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/htmlview`;
-      const r = await fetch(htmlUrl);
-      const html = await r.text();
-
-      // Extraire les onglets depuis le HTML (format : <li id="sheet-button-XXXXXXXX">NOM</li>)
-      const onglets = [];
-      const re = /id="sheet-button-(\d+)"[^>]*>\s*<span[^>]*>([^<]+)<\/span>/g;
-      let m;
-      while ((m = re.exec(html)) !== null) {
-        onglets.push({ gid: m[1], nom: m[2].trim() });
-      }
-
-      // Fallback regex si la première n'a rien trouvé
-      if (onglets.length === 0) {
-        const re2 = /"(\d{8,})"[^}]*"name":"([^"]+)"/g;
-        while ((m = re2.exec(html)) !== null) {
-          onglets.push({ gid: m[1], nom: m[2].trim() });
-        }
-      }
-
-      if (onglets.length === 0) {
-        throw new Error('Onglets introuvables dans le HTML');
-      }
-
-      remplirSelectSemaines(onglets);
-      return;
-
-    } catch(e2) {
-      // Dernier recours : afficher une saisie manuelle du GID
-      showStatus('Impossible de lister automatiquement les onglets. Saisissez le GID manuellement.', 'error');
-      afficherSaisieGidManuelle();
+async function chargerPlanning(gid){
+  const r=await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`);
+  if(!r.ok)throw new Error(`Sheet inaccessible (${r.status}) — vérifiez le partage public.`);
+  const csv=await r.text();
+  const lignes=parseCSV(csv);
+  S.planning=[];
+  const JOURS=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
+  let jour='',date='';
+  for(const l of lignes.slice(15,70)){
+    const A=(l[0]||'').trim(),B=(l[1]||'').trim(),C=(l[2]||'').trim(),D=(l[3]||'').trim(),E=(l[4]||'').trim();
+    if(JOURS.includes(A.toLowerCase())){jour=A.toLowerCase();date=''}
+    else if(A&&/^\d{1,2}[\/\-]\d{1,2}/.test(A))date=A;
+    if(B.toUpperCase()==='OFF')continue;
+    if(jour&&C&&C.toLowerCase()!=='parfums'){
+      let p=C,mx=1;const mX=p.match(/\s+[Xx]\s*(\d+)$/);
+      if(mX){mx=parseInt(mX[1]);p=p.replace(/\s+[Xx]\s*\d+$/,'').trim()}
+      S.planning.push({jour,date,parfum:p,mixCount:mx,qteOutput:D,sgl:E});
     }
   }
+  const sel=document.getElementById('semaineSelect');
+  S.semaine=sel.options[sel.selectedIndex]?.text||'';
 }
 
-function remplirSelectSemaines(onglets) {
-  // Filtrer uniquement les onglets avec une date (format DD/MM/YY ou DD/MM/YYYY)
-  const ongletsDates = onglets.filter(o => /\d{1,2}[\/\-]\d{1,2}/.test(o.nom));
+// ── Mapping ──
+function fuzzy(parfum){
+  const nk=norm(parfum),mots=nk.split(/\s+/).filter(m=>m.length>2);
+  for(const r of S.recettes)if(norm(r.nom)===nk)return r.id;
+  for(const r of S.recettes){const nr=norm(r.nom);if(mots.length>0&&mots.every(m=>nr.includes(m)))return r.id}
+  for(const r of S.recettes){const mr=norm(r.nom).split(/\s+/).filter(m=>m.length>2);if(mr.length>0&&mr.every(m=>nk.includes(m)))return r.id}
+  let best=0,bid=null;
+  for(const r of S.recettes){const sc=mots.filter(m=>norm(r.nom).includes(m)).length;if(sc>best){best=sc;bid=r.id}}
+  if(best>=1&&mots.length<=2)return bid;return null;
+}
 
-  // Trier par date décroissante (plus récente en premier)
-  ongletsDates.sort((a, b) => {
-    const da = parseDate(a.nom), db = parseDate(b.nom);
-    if (!da || !db) return 0;
-    return db - da;
+function afficherMapping(){
+  const pu=[...new Map(S.planning.map(p=>[p.parfum,p])).values()];
+  for(const p of pu){const k=norm(p.parfum);if(!S.mapping[k]){const m=fuzzy(p.parfum);if(m)S.mapping[k]=m}}
+  const tb=document.getElementById('mappingBody');tb.innerHTML='';
+  for(const p of pu){
+    const k=norm(p.parfum),rid=S.mapping[k]||'';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><span class="badge bj-${p.jour}">${cap(p.jour)}</span></td>
+    <td><strong>${p.parfum}</strong>${p.mixCount>1?` <em style="color:var(--gris);font-size:11px;">×${p.mixCount}</em>`:''}</td>
+    <td><select onchange="S.mapping['${k}']=this.value;saveConfig()"><option value="">— Non associé —</option>
+    ${S.recettes.map(r=>`<option value="${r.id}"${r.id===rid?' selected':''}>${r.nom}</option>`).join('')}</select></td>
+    <td><span class="badge ${rid?'b-ok':'b-err'}">${rid?'✓ OK':'⚠ Vérifier'}</span></td>`;
+    tb.appendChild(tr);
+  }
+  document.getElementById('mappingCard').classList.add('show');
+}
+
+// ── Génération ──
+function genererCommandes(){
+  const bMap={};
+  for(const prod of S.planning){
+    const rid=S.mapping[norm(prod.parfum)];if(!rid)continue;
+    const rec=S.recettes.find(r=>r.id===rid);if(!rec)continue;
+    const mx=prod.mixCount||1;
+    for(const l of [...(rec.poudres||[]),...(rec.liquides||[]),...(rec.ingredients||[]),...(rec.toppings||[])]){
+      const iid=l.ingredientId||l.ingredient_id;if(!iid)continue;
+      const p=parseFloat(l.poids)||0;
+      if(!bMap[iid])bMap[iid]={q:0,u:l.unite||'g',recs:new Set()};
+      bMap[iid].q+=p*mx;bMap[iid].recs.add(prod.parfum);
+    }
+  }
+  const parFour={};const stock=[];
+  for(const[iid,b] of Object.entries(bMap)){
+    const ing=S.ingredients.find(i=>i.id===iid);if(!ing)continue;
+    let q=b.q,u=b.u;
+    if(u==='g'&&q>=1000){q/=1000;u='kg'}if(u==='ml'&&q>=1000){q/=1000;u='L'}
+    const item={ing,qte:parseFloat(q.toFixed(3)),u,recs:[...b.recs]};
+    const fou=S.fournisseurs.find(f=>f.id===ing.fournisseurId);
+    if(fou&&fou.jourCommande){if(!parFour[fou.id])parFour[fou.id]={fou,lignes:[]};parFour[fou.id].lignes.push(item)}
+    else stock.push({item,fn:fou?.nom||'Non défini'});
+  }
+  afficherResultats(parFour,stock);
+}
+
+function afficherResultats(parFour,stock){
+  // Planning récap
+  const ORDRE=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
+  const pj={};for(const p of S.planning){if(!pj[p.jour])pj[p.jour]=[];pj[p.jour].push(p)}
+  let rh='<h3>📅 Planning de la semaine</h3>';
+  for(const j of ORDRE){if(!pj[j])continue;
+    rh+=`<div class="pj"><span class="jl">${cap(j)}</span><div>${pj[j].map(p=>{const ok=!!S.mapping[norm(p.parfum)];return`<span class="tp ${ok?'ok':'nok'}">${ok?'✓':'⚠'} ${p.parfum}${p.mixCount>1?` ×${p.mixCount}`:''}</span>`}).join('')}</div></div>`}
+  document.getElementById('pr').innerHTML=rh;
+
+  const tnav=document.getElementById('tnav'),tc=document.getElementById('tc');
+  tnav.innerHTML='';tc.innerHTML='';
+  const tabs=[];
+
+  // Bons fournisseurs avec jour commande
+  for(const fou of S.fournisseurs.filter(f=>parFour[f.id]))
+    tabs.push({id:`f_${fou.id}`,label:fou.nom,icon:'📦',html:bonHtml(parFour[fou.id])});
+
+  // Stock commun
+  if(stock.length)tabs.push({id:'stock',label:'En stock / Divers',icon:'🏪',html:stockHtml(stock)});
+
+  // Emails
+  const eh=emailsHtml(parFour);
+  if(eh)tabs.push({id:'emails',label:'Emails fournisseurs',icon:'✉️',html:eh});
+
+  tabs.forEach((tab,i)=>{
+    const btn=document.createElement('button');
+    btn.className='tbtn'+(i===0?' active':'');btn.textContent=`${tab.icon} ${tab.label}`;
+    btn.onclick=()=>activerTab(tab.id);tnav.appendChild(btn);
+    const panel=document.createElement('div');
+    panel.className='tpanel'+(i===0?' active':'');panel.id=`p_${tab.id}`;panel.innerHTML=tab.html;
+    tc.appendChild(panel);
   });
 
-  const select = document.getElementById('semaineSelect');
-  select.innerHTML = '<option value="">— Choisir une semaine —</option>';
-
-  const today = new Date();
-  let bestGid = null, bestDiff = Infinity;
-
-  for (const o of ongletsDates) {
-    const opt = document.createElement('option');
-    opt.value = o.gid;
-    opt.textContent = o.nom;
-    select.appendChild(opt);
-    // Trouver l'onglet le plus proche d'aujourd'hui
-    const d = parseDate(o.nom);
-    if (d) {
-      const diff = Math.abs(d - today);
-      if (diff < bestDiff) { bestDiff = diff; bestGid = o.gid; }
-    }
-  }
-
-  // Pré-sélectionner la semaine la plus proche
-  if (bestGid) select.value = bestGid;
-
-  hideStatus();
-  toast(`${ongletsDates.length} semaines trouvées`);
+  const cs=document.getElementById('cs');cs.classList.add('show');
+  document.getElementById('stitle').textContent=`Bons de commande — Semaine ${S.semaine}`;
+  document.getElementById('ssub').textContent=`${S.planning.length} productions · ${Object.keys(parFour).length} fournisseurs · ${new Date().toLocaleDateString('fr-FR')}`;
+  cs.scrollIntoView({behavior:'smooth'});
+  toast(`${tabs.length} sections générées ✓`);
 }
 
-function parseDate(nom) {
-  const m = nom.match(/(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);
-  if (!m) return null;
-  let year = m[3] ? parseInt(m[3]) : new Date().getFullYear();
-  if (year < 100) year += 2000;
-  return new Date(year, parseInt(m[2]) - 1, parseInt(m[1]));
+function activerTab(id){
+  document.querySelectorAll('.tbtn').forEach((b,i)=>{const panels=document.querySelectorAll('.tpanel');const pid=panels[i]?.id?.replace('p_','');b.classList.toggle('active',pid===id)});
+  document.querySelectorAll('.tpanel').forEach(p=>p.classList.toggle('active',p.id===`p_${id}`));
 }
 
-function afficherSaisieGidManuelle() {
-  // Supprimer l'ancien si existant
-  document.getElementById('gidManuelDiv')?.remove();
-  const div = document.createElement('div');
-  div.id = 'gidManuelDiv';
-  div.style.cssText = 'margin-top:10px; padding:12px; background:var(--beige); border-radius:7px; border:1px solid var(--beige-fonce);';
-  div.innerHTML = `
-    <label style="margin-bottom:6px;">GID de l'onglet (visible dans l'URL du sheet : ...#gid=<strong>XXXXXXXX</strong>)</label>
-    <div style="display:flex; gap:8px; align-items:center;">
-      <input type="text" id="gidManuel" placeholder="ex: 1166307452" style="width:180px;">
-      <span style="font-size:12px; color:var(--gris);">Ouvre le sheet, clique sur l'onglet voulu, copie le numéro après #gid= dans l'URL</span>
-    </div>
-  `;
-  document.getElementById('semaineSelect').closest('div').after(div);
+function bonHtml({fou,lignes}){
+  const rows=lignes.map(l=>`<tr><td><div style="font-weight:500">${l.ing.nomRecette}</div><div style="font-size:11px;color:var(--gris)">${l.ing.nomEtiquette||''} ${l.ing.bio?'🌿':''}</div></td><td><span class="qte">${fqte(l.qte)} ${l.u}</span></td><td>${l.recs.map(r=>`<span class="tr">${r}</span>`).join('')}</td></tr>`).join('');
+  const dl=JSON.stringify(lignes.map(l=>({n:l.ing.nomRecette,q:fqte(l.qte),u:l.u}))).replace(/'/g,'&#39;');
+  return`<div class="bc" data-fn="${fou.nom}" data-dl='${dl}'><div class="bch"><div><div class="fn">${fou.nom}</div><div class="fc">${fou.contact||''}</div></div><div class="ji">${fou.jourCommande?`<div>📤 Commande : <strong>${cap(fou.jourCommande)}</strong></div>`:''} ${fou.jourLivraison?`<div>📦 Livraison : <strong>${cap(fou.jourLivraison)}</strong></div>`:''}</div></div><table class="btab"><thead><tr><th>Ingrédient</th><th>Quantité</th><th>Pour les recettes</th></tr></thead><tbody>${rows}</tbody></table><div class="bf"><button class="btn btn-s btn-sm" onclick="copierBon(this)">📋 Copier ce bon</button></div></div>`;
 }
 
-// ────────────────────────────────────────────────
-// GOOGLE SHEETS → PLANNING
-// ────────────────────────────────────────────────
-async function chargerPlanning(sheetUrl) {
-  const sheetId = extractSheetId(sheetUrl);
-  if (!sheetId) throw new Error('URL Google Sheet invalide');
-
-  // Lire le GID saisi manuellement
-  const gid = document.getElementById('gidManuel')?.value?.trim() || '0';
-
-  if (!gid || gid === '0') {
-    throw new Error('Veuillez saisir le GID de l\'onglet (visible dans l\'URL du sheet après #gid=)');
-  }
-
-  showStatus(`Lecture de l'onglet gid=${gid}…`);
-
-  const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
-  const resp = await fetch(csvUrl);
-
-  if (!resp.ok) {
-    throw new Error(`Impossible de lire le sheet (erreur ${resp.status}). Vérifiez que le sheet est partagé en lecture publique et que le GID est correct.`);
-  }
-
-  const csv = await resp.text();
-  if (!csv || csv.trim().length < 10) {
-    throw new Error('Contenu vide — vérifiez le GID et le partage du sheet.');
-  }
-
-  parserPlanning(csv);
+function stockHtml(stock){
+  const rows=stock.map(({item:l,fn})=>`<tr><td><div style="font-weight:500">${l.ing.nomRecette}</div><div style="font-size:11px;color:var(--gris)">${l.ing.nomEtiquette||''} ${l.ing.bio?'🌿':''}</div></td><td><span class="qte">${fqte(l.qte)} ${l.u}</span></td><td style="color:var(--gris);font-size:12px">${fn}</td><td>${l.recs.map(r=>`<span class="tr">${r}</span>`).join('')}</td></tr>`).join('');
+  return`<div class="card"><h2>🏪 Ingrédients en stock / sans commande programmée</h2><p style="font-size:13px;color:var(--gris);margin-bottom:12px">Ces ingrédients n'ont pas de jour de commande défini — généralement en stock.</p><table class="btab"><thead><tr><th>Ingrédient</th><th>Besoin</th><th>Fournisseur</th><th>Pour les recettes</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
-// ── Parser CSV robuste (gère les guillemets multi-lignes) ──
-function parseCSV(csv) {
-  const rows = [];
-  let cur = '', inQuote = false, cols = [];
-  for (let i = 0; i < csv.length; i++) {
-    const ch = csv[i], next = csv[i+1];
-    if (ch === '"') {
-      if (inQuote && next === '"') { cur += '"'; i++; }
-      else inQuote = !inQuote;
-    } else if (ch === ',' && !inQuote) {
-      cols.push(cur.trim()); cur = '';
-    } else if ((ch === '\n' || ch === '\r') && !inQuote) {
-      if (ch === '\r' && next === '\n') i++;
-      cols.push(cur.trim()); rows.push(cols); cols = []; cur = '';
-    } else cur += ch;
-  }
-  if (cur || cols.length) { cols.push(cur.trim()); rows.push(cols); }
-  return rows;
+function emailsHtml(parFour){
+  const cibles=S.fournisseurs.filter(f=>parFour[f.id]||['dipsa','gamme','chef'].some(k=>f.nom.toLowerCase().includes(k)));
+  if(!cibles.length)return'';
+  const dates=[...new Set(S.planning.map(p=>p.date).filter(Boolean))];
+  const periode=dates.length>=2?`du ${dates[0]} au ${dates[dates.length-1]}`:dates[0]||S.semaine;
+  return cibles.map(fou=>{
+    const email=fou.contact?.match(/[\w.+-]+@[\w.-]+\.\w+/)?.[0]||'';
+    const lignes=parFour[fou.id]?.lignes||[];
+    const liste=lignes.length?lignes.map(l=>`  - ${l.ing.nomRecette} : ${fqte(l.qte)} ${l.u}`).join('\n'):'  (voir bon de commande)';
+    const corps=`Bonjour,\n\nVeuillez trouver ci-dessous notre commande pour la semaine ${S.semaine} (${periode}) :\n\n${liste}\n\nMerci de confirmer la réception et de nous indiquer la date de livraison prévue.\n\nCordialement,\nLa Tropicale Glacier`;
+    return`<div class="ec"><div class="ech"><div class="et">✉️ ${fou.nom}</div><div style="font-size:11px;opacity:.7">${fou.jourCommande?`À envoyer le : ${cap(fou.jourCommande)}`:''}</div></div>
+    <div class="ef"><div class="efl"><label>À</label><div class="v"><input type="text" id="eto_${fou.id}" value="${email}" placeholder="email@fournisseur.fr" style="max-width:400px"></div></div>
+    <div class="efl"><label>Objet</label><div class="v"><input type="text" id="esub_${fou.id}" value="Commande La Tropicale Glacier — semaine ${S.semaine}" style="max-width:500px"></div></div></div>
+    <div class="eb"><textarea id="ebod_${fou.id}">${corps}</textarea></div>
+    <div class="ef2"><button class="btn btn-s btn-sm" onclick="copierEmail('${fou.id}')">📋 Copier</button><button class="btn btn-p btn-sm" onclick="ouvrirEmail('${fou.id}')">📨 Ouvrir dans la messagerie</button></div></div>`;
+  }).join('');
 }
 
-function parserPlanning(csv) {
-  const lignes = parseCSV(csv);
-  state.planning = [];
-
-  const JOURS = ['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
-  let jourCourant = '';
-  let dateCourante = '';
-
-  // Lire uniquement les lignes 16 à 70 (index 15 à 69) — zone parfums/jours
-  const zone = lignes.slice(15, 70);
-
-  for (const ligne of zone) {
-    const A = (ligne[0] || '').trim();
-    const B = (ligne[1] || '').trim();
-    const C = (ligne[2] || '').trim();
-    const D = (ligne[3] || '').trim(); // QTE OUTPUT
-    const E = (ligne[4] || '').trim(); // S/G/L
-
-    // Col A = jour de semaine ?
-    if (JOURS.includes(A.toLowerCase())) {
-      jourCourant = A.toLowerCase();
-      dateCourante = '';
-    }
-    // Col A = date (ex: "14/04") ?
-    else if (A && /^\d{1,2}[\/\-]\d{1,2}/.test(A)) {
-      dateCourante = A;
-    }
-
-    // Col B = OFF → jour fermé
-    if (B.toUpperCase() === 'OFF') continue;
-
-    // Col C = parfum (non vide, pas l'en-tête "PARFUMS")
-    if (jourCourant && C && C.toLowerCase() !== 'parfums') {
-      let parfum = C;
-      let mixCount = 1;
-      const matchX = parfum.match(/\s+[Xx]\s*(\d+)$/);
-      if (matchX) {
-        mixCount = parseInt(matchX[1]);
-        parfum = parfum.replace(/\s+[Xx]\s*\d+$/, '').trim();
-      }
-      state.planning.push({ jour: jourCourant, date: dateCourante, parfum, mixCount, qteOutput: D, sgl: E });
-    }
-  }
-
-  // ── Label de la semaine (ligne 1, colonne H) ──
-  state.semaineLabel = '';
-  for (const ligne of lignes.slice(0, 5)) {
-    for (let i = 0; i < ligne.length; i++) {
-      if (/semaine/i.test(ligne[i]) && ligne[i+1]) {
-        state.semaineLabel = ligne[i+1];
-        break;
-      }
-    }
-    if (state.semaineLabel) break;
-  }
+function copierBon(btn){
+  const d=btn.closest('.bc');
+  const fn=d.dataset.fn;const ll=JSON.parse(d.dataset.dl||'[]');
+  let t=`BON DE COMMANDE — ${fn}\nSemaine ${S.semaine}\n${'─'.repeat(40)}\n`;
+  for(const l of ll)t+=`${l.n.padEnd(28)} ${(l.q+' '+l.u).padStart(10)}\n`;
+  navigator.clipboard.writeText(t).then(()=>toast('Bon copié !'));
+}
+function copierEmail(fid){
+  const to=document.getElementById(`eto_${fid}`)?.value||'';
+  const sb=document.getElementById(`esub_${fid}`)?.value||'';
+  const bd=document.getElementById(`ebod_${fid}`)?.value||'';
+  navigator.clipboard.writeText(`À : ${to}\nObjet : ${sb}\n\n${bd}`).then(()=>toast('Email copié !'));
+}
+function ouvrirEmail(fid){
+  const to=encodeURIComponent(document.getElementById(`eto_${fid}`)?.value||'');
+  const sb=encodeURIComponent(document.getElementById(`esub_${fid}`)?.value||'');
+  const bd=encodeURIComponent(document.getElementById(`ebod_${fid}`)?.value||'');
+  window.location.href=`mailto:${to}?subject=${sb}&body=${bd}`;
+}
+function copierTout(){
+  const bons=document.querySelectorAll('.bc');
+  let t=`BONS DE COMMANDE — La Tropicale Glacier\nSemaine ${S.semaine}\n${'═'.repeat(50)}\n\n`;
+  for(const d of bons){const ll=JSON.parse(d.dataset.dl||'[]');t+=`▶ ${d.dataset.fn}\n${'─'.repeat(40)}\n`;for(const l of ll)t+=`  ${l.n.padEnd(28)} ${(l.q+' '+l.u).padStart(10)}\n`;t+='\n'}
+  navigator.clipboard.writeText(t).then(()=>toast('Tout copié !'));
 }
 
-// ────────────────────────────────────────────────
-// MAPPING PARFUMS ↔ RECETTES
-// ────────────────────────────────────────────────
-function fuzzyMatch(parfum, recettes) {
-  const normParfum = normaliser(parfum);
-  const mots = normParfum.split(/\s+/).filter(m => m.length > 2);
-
-  // Match exact
-  for (const r of recettes) {
-    if (normaliser(r.nom) === normParfum) return r.id;
-  }
-
-  // Match partiel — tous les mots du parfum dans la recette
-  for (const r of recettes) {
-    const normRec = normaliser(r.nom);
-    if (mots.length > 0 && mots.every(m => normRec.includes(m))) return r.id;
-  }
-
-  // Match partiel inverse — les mots de la recette dans le parfum
-  for (const r of recettes) {
-    const motRec = normaliser(r.nom).split(/\s+/).filter(m => m.length > 2);
-    if (motRec.length > 0 && motRec.every(m => normParfum.includes(m))) return r.id;
-  }
-
-  // Match 1 mot significatif
-  let bestScore = 0, bestId = null;
-  for (const r of recettes) {
-    const normRec = normaliser(r.nom);
-    const score = mots.filter(m => normRec.includes(m)).length;
-    if (score > bestScore) { bestScore = score; bestId = r.id; }
-  }
-  if (bestScore >= 1 && mots.length <= 2) return bestId;
-
-  return null;
-}
-
-function afficherMapping() {
-  const parfumsUniques = [...new Map(state.planning.map(p => [p.parfum, p])).values()];
-  
-  // Auto-match si pas déjà dans state.mapping
-  for (const p of parfumsUniques) {
-    if (!state.mapping[normaliser(p.parfum)]) {
-      const match = fuzzyMatch(p.parfum, state.recettes);
-      if (match) state.mapping[normaliser(p.parfum)] = match;
-    }
-  }
-
-  const tbody = document.getElementById('mappingBody');
-  tbody.innerHTML = '';
-
-  for (const p of parfumsUniques) {
-    const normP = normaliser(p.parfum);
-    const recetteId = state.mapping[normP] || '';
-    const matched = !!recetteId;
-
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><span class="badge-jour badge-${p.jour}">${joursCapitalize(p.jour)}</span></td>
-      <td><strong>${p.parfum}</strong>${p.mixCount > 1 ? ` <em style="color:var(--gris);font-size:11px;">× ${p.mixCount} mix</em>` : ''}</td>
-      <td>
-        <select onchange="updateMapping('${normP}', this.value)">
-          <option value="">— Non associé —</option>
-          ${state.recettes.map(r => `<option value="${r.id}" ${r.id === recetteId ? 'selected' : ''}>${r.nom}</option>`).join('')}
-        </select>
-      </td>
-      <td><span class="badge-jour ${matched ? 'badge-ok' : 'badge-non-trouve'}">${matched ? '✓ OK' : '⚠ Vérifier'}</span></td>
-    `;
-    tbody.appendChild(tr);
-  }
-
-  const card = document.getElementById('mappingCard');
-  card.classList.add('show');
-  card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-
-function updateMapping(normParfum, recetteId) {
-  if (recetteId) state.mapping[normParfum] = recetteId;
-  else delete state.mapping[normParfum];
-  sauvegarderConfig();
-}
-
-// ────────────────────────────────────────────────
-// GÉNÉRATION DES BONS DE COMMANDE
-// ────────────────────────────────────────────────
-function genererCommandes() {
-  // Calculer les besoins totaux par ingrédient
-  const besoinsMap = {}; // ingredientId -> { quantite, unite, recettes: Set }
-
-  for (const prod of state.planning) {
-    const recetteId = state.mapping[normaliser(prod.parfum)];
-    if (!recetteId) continue;
-
-    const recette = state.recettes.find(r => r.id === recetteId);
-    if (!recette) continue;
-
-    const mixCount = prod.mixCount || 1;
-    const tousIngredients = [
-      ...(recette.poudres || []),
-      ...(recette.liquides || []),
-      ...(recette.ingredients || []),
-      ...(recette.toppings || []),
-    ];
-
-    for (const ligne of tousIngredients) {
-      const ingId = ligne.ingredientId || ligne.ingredient_id;
-      if (!ingId) continue;
-      const poids = parseFloat(ligne.poids) || 0;
-      const unite = ligne.unite || 'g';
-
-      if (!besoinsMap[ingId]) {
-        besoinsMap[ingId] = { quantite: 0, unite, recettes: new Set() };
-      }
-      besoinsMap[ingId].quantite += poids * mixCount;
-      besoinsMap[ingId].recettes.add(prod.parfum);
-    }
-  }
-
-  // Grouper par fournisseur
-  const parFournisseur = {};
-
-  for (const [ingId, besoin] of Object.entries(besoinsMap)) {
-    const ing = state.ingredients.find(i => i.id === ingId);
-    if (!ing) continue;
-
-    const fourId = ing.fournisseurId || 'inconnu';
-    if (!parFournisseur[fourId]) parFournisseur[fourId] = [];
-
-    // Convertir en unité lisible
-    let qte = besoin.quantite;
-    let unite = besoin.unite;
-    if (unite === 'g' && qte >= 1000) { qte = qte / 1000; unite = 'kg'; }
-    if (unite === 'ml' && qte >= 1000) { qte = qte / 1000; unite = 'L'; }
-
-    parFournisseur[fourId].push({
-      ing,
-      quantite: parseFloat(qte.toFixed(3)),
-      unite,
-      recettes: [...besoin.recettes],
-    });
-  }
-
-  afficherBonsDeCommande(parFournisseur);
-}
-
-function afficherBonsDeCommande(parFournisseur) {
-  // Récap planning
-  const recapEl = document.getElementById('planningRecap');
-  const joursDansOrdre = ['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
-  const parJour = {};
-  for (const p of state.planning) {
-    if (!parJour[p.jour]) parJour[p.jour] = [];
-    parJour[p.jour].push(p);
-  }
-
-  let recapHtml = '<h3>📅 Planning de la semaine</h3>';
-  for (const jour of joursDansOrdre) {
-    if (!parJour[jour]) continue;
-    recapHtml += `<div class="planning-jour">
-      <span class="jour-label">${joursCapitalize(jour)}</span>
-      <div class="parfums-list">
-        ${parJour[jour].map(p => {
-          const matched = !!state.mapping[normaliser(p.parfum)];
-          return `<span class="tag-parfum ${matched ? 'matched' : 'unmatched'}">
-            ${matched ? '✓' : '⚠'} ${p.parfum}${p.mixCount > 1 ? ` ×${p.mixCount}` : ''}
-          </span>`;
-        }).join('')}
-      </div>
-    </div>`;
-  }
-  recapEl.innerHTML = recapHtml;
-
-  // Bons de commande
-  const container = document.getElementById('commandesContainer');
-  container.innerHTML = '';
-
-  const fournisseursAvecBesoins = Object.keys(parFournisseur);
-  if (fournisseursAvecBesoins.length === 0) {
-    container.innerHTML = `<div class="empty-state"><div class="big">📭</div>Aucun ingrédient à commander — vérifiez les associations de recettes.</div>`;
-  }
-
-  // Trier les fournisseurs par nom
-  const fourOrdonnes = [
-    ...state.fournisseurs.filter(f => parFournisseur[f.id]),
-    ...(parFournisseur['inconnu'] ? [{ id: 'inconnu', nom: 'Fournisseur non défini', contact: '', jourCommande: '', jourLivraison: '' }] : []),
-  ];
-
-  for (const four of fourOrdonnes) {
-    const lignes = parFournisseur[four.id];
-    if (!lignes || lignes.length === 0) continue;
-
-    const div = document.createElement('div');
-    div.className = 'bon-commande';
-    div.innerHTML = `
-      <div class="bon-header">
-        <div>
-          <div class="fournisseur-nom">${four.nom}</div>
-          <div class="fournisseur-contact">${four.contact || ''}</div>
-        </div>
-        <div class="jours-info">
-          ${four.jourCommande ? `<div>📤 Commande : <strong>${joursCapitalize(four.jourCommande)}</strong></div>` : ''}
-          ${four.jourLivraison ? `<div>📦 Livraison : <strong>${joursCapitalize(four.jourLivraison)}</strong></div>` : ''}
-        </div>
-      </div>
-      <div class="bon-body">
-        <table class="bon-table">
-          <thead>
-            <tr>
-              <th>Ingrédient</th>
-              <th>Quantité</th>
-              <th>Pour les recettes</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${lignes.map(l => `
-              <tr>
-                <td>
-                  <div class="ingredient-nom">${l.ing.nomRecette}</div>
-                  <div class="ingredient-detail">${l.ing.nomEtiquette || ''} ${l.ing.bio ? '🌿' : ''}</div>
-                </td>
-                <td><span class="quantite">${formatQte(l.quantite)} ${l.unite}</span></td>
-                <td><div class="recettes-source">${l.recettes.map(r => `<span class="tag-recette">${r}</span>`).join('')}</div></td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
-      <div class="bon-footer">
-        <button class="btn btn-secondary" onclick="copierBon('${four.id}')">📋 Copier ce bon</button>
-      </div>
-    `;
-    container.appendChild(div);
-    div.dataset.fourId = four.id;
-    div.dataset.fourNom = four.nom;
-    div.dataset.lignes = JSON.stringify(lignes.map(l => ({ nom: l.ing.nomRecette, qte: formatQte(l.quantite), unite: l.unite })));
-  }
-
-  // Afficher la section
-  const section = document.getElementById('commandesSection');
-  section.classList.add('show');
-
-  // Labels semaine
-  const dates = state.planning.map(p => p.date).filter(Boolean);
-  document.getElementById('semaineTitle').textContent = `Bons de commande — Semaine du ${dates[0] || ''}`;
-  document.getElementById('semaineSubtitle').textContent =
-    `${state.planning.length} productions · ${fournisseursAvecBesoins.length} fournisseurs concernés · généré le ${new Date().toLocaleDateString('fr-FR')}`;
-
-  section.scrollIntoView({ behavior: 'smooth' });
-  toast(`${fournisseursAvecBesoins.length} bons de commande générés ✓`);
-}
-
-function formatQte(n) {
-  if (Number.isInteger(n)) return n.toString();
-  return n.toFixed(n < 1 ? 3 : n < 10 ? 2 : 1).replace(/\.?0+$/, '');
-}
-
-// ────────────────────────────────────────────────
-// COPIER
-// ────────────────────────────────────────────────
-function copierBon(fourId) {
-  const div = document.querySelector(`.bon-commande[data-four-id="${fourId}"]`);
-  if (!div) return;
-  const nom = div.dataset.fourNom;
-  const lignes = JSON.parse(div.dataset.lignes || '[]');
-  let txt = `BON DE COMMANDE — ${nom}\n`;
-  txt += `Semaine du ${state.planning[0]?.date || ''}\n`;
-  txt += '─'.repeat(40) + '\n';
-  for (const l of lignes) {
-    txt += `${l.nom.padEnd(28)} ${(l.qte + ' ' + l.unite).padStart(10)}\n`;
-  }
-  navigator.clipboard.writeText(txt).then(() => toast('Bon copié dans le presse-papiers !'));
-}
-
-function copierTexte() {
-  const divs = document.querySelectorAll('.bon-commande');
-  let txt = `BONS DE COMMANDE — La Tropicale Glacier\n`;
-  txt += `Semaine du ${state.planning[0]?.date || ''}\n`;
-  txt += '═'.repeat(50) + '\n\n';
-  for (const div of divs) {
-    const nom = div.dataset.fourNom;
-    const lignes = JSON.parse(div.dataset.lignes || '[]');
-    txt += `▶ ${nom}\n`;
-    txt += '─'.repeat(40) + '\n';
-    for (const l of lignes) {
-      txt += `  ${l.nom.padEnd(28)} ${(l.qte + ' ' + l.unite).padStart(10)}\n`;
-    }
-    txt += '\n';
-  }
-  navigator.clipboard.writeText(txt).then(() => toast('Tous les bons copiés !'));
-}
+window.addEventListener('DOMContentLoaded',()=>{chargerConfig();initSelect()});
 </script>
 </body>
 </html>
