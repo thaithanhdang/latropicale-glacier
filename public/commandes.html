@@ -866,133 +866,76 @@ async function chargerPlanning(sheetUrl) {
   parserPlanning(csv);
 }
 
-// ── Parser CSV robuste (gère les guillemets et virgules dans les cellules) ──
+// ── Parser CSV robuste (gère les guillemets multi-lignes) ──
 function parseCSV(csv) {
   const rows = [];
-  const lines = csv.split('\n');
-  for (const line of lines) {
-    const cols = [];
-    let cur = '';
-    let inQuote = false;
-    for (let i = 0; i < line.length; i++) {
-      const ch = line[i];
-      if (ch === '"') {
-        if (inQuote && line[i+1] === '"') { cur += '"'; i++; }
-        else inQuote = !inQuote;
-      } else if (ch === ',' && !inQuote) {
-        cols.push(cur.trim());
-        cur = '';
-      } else {
-        cur += ch;
-      }
-    }
-    cols.push(cur.trim());
-    rows.push(cols);
+  let cur = '', inQuote = false, cols = [];
+  for (let i = 0; i < csv.length; i++) {
+    const ch = csv[i], next = csv[i+1];
+    if (ch === '"') {
+      if (inQuote && next === '"') { cur += '"'; i++; }
+      else inQuote = !inQuote;
+    } else if (ch === ',' && !inQuote) {
+      cols.push(cur.trim()); cur = '';
+    } else if ((ch === '\n' || ch === '\r') && !inQuote) {
+      if (ch === '\r' && next === '\n') i++;
+      cols.push(cur.trim()); rows.push(cols); cols = []; cur = '';
+    } else cur += ch;
   }
+  if (cur || cols.length) { cols.push(cur.trim()); rows.push(cols); }
   return rows;
 }
 
 function parserPlanning(csv) {
   const lignes = parseCSV(csv);
-
   state.planning = [];
+
+  const JOURS = ['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
   let jourCourant = '';
   let dateCourante = '';
 
-  const JOURS = ['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
-  const IGNORER = ['off', 'parfums', 'bacs', 'pots', '', 'pf'];
+  // Lire uniquement les lignes 16 à 70 (index 15 à 69) — zone parfums/jours
+  const zone = lignes.slice(15, 70);
 
-  // Mots-clés à ignorer absolument en col C (en-têtes, notes)
-  const ENTETES = ['parfums paris plages', 'planning production', 'priorite'];
+  for (const ligne of zone) {
+    const A = (ligne[0] || '').trim();
+    const B = (ligne[1] || '').trim();
+    const C = (ligne[2] || '').trim();
+    const D = (ligne[3] || '').trim(); // QTE OUTPUT
+    const E = (ligne[4] || '').trim(); // S/G/L
 
-  for (const ligne of lignes) {
-    // Nettoyer chaque cellule
-    const cols = ligne.map(c => c.trim());
-    const A = cols[0] || '';
-    const B = cols[1] || '';
-    const C = cols[2] || '';
-    const D = cols[3] || '';  // QTE OUTPUT
-    const E = cols[4] || '';  // S/G/L
-
-    const aLow = A.toLowerCase();
-    const cLow = C.toLowerCase();
-
-    // ── Détection d'un jour de semaine en colonne A ──
-    if (JOURS.includes(aLow)) {
-      jourCourant = aLow;
-      // La date peut être en col B sur la même ligne ou sur la ligne suivante
-      if (B && /^\d{1,2}[\/\-]\d{1,2}/.test(B)) {
-        dateCourante = B;
-      } else {
-        dateCourante = ''; // sera remplie à la prochaine ligne
-      }
-      continue;
+    // Col A = jour de semaine ?
+    if (JOURS.includes(A.toLowerCase())) {
+      jourCourant = A.toLowerCase();
+      dateCourante = '';
+    }
+    // Col A = date (ex: "14/04") ?
+    else if (A && /^\d{1,2}[\/\-]\d{1,2}/.test(A)) {
+      dateCourante = A;
     }
 
-    // ── Date sur la ligne suivant le jour (ex: "14/04" en col A ou B) ──
-    if (jourCourant && !dateCourante) {
-      if (A && /^\d{1,2}[\/\-]\d{1,2}/.test(A)) {
-        dateCourante = A;
-        continue;
+    // Col B = OFF → jour fermé
+    if (B.toUpperCase() === 'OFF') continue;
+
+    // Col C = parfum (non vide, pas l'en-tête "PARFUMS")
+    if (jourCourant && C && C.toLowerCase() !== 'parfums') {
+      let parfum = C;
+      let mixCount = 1;
+      const matchX = parfum.match(/\s+[Xx]\s*(\d+)$/);
+      if (matchX) {
+        mixCount = parseInt(matchX[1]);
+        parfum = parfum.replace(/\s+[Xx]\s*\d+$/, '').trim();
       }
-      if (B && /^\d{1,2}[\/\-]\d{1,2}/.test(B)) {
-        dateCourante = B;
-        // Ne pas "continue" — il peut y avoir un parfum sur cette même ligne
-      }
-    }
-
-    // ── Ignorer si pas dans un jour ──
-    if (!jourCourant) continue;
-
-    // ── Parfum en colonne C ──
-    if (C && C.length > 1) {
-      const skip =
-        IGNORER.includes(cLow) ||
-        ENTETES.some(e => cLow.includes(e)) ||
-        /^nb\s/i.test(C) ||         // "NB GLACE ŒUF..."
-        /^\d/.test(C) ||             // commence par un chiffre = quantité
-        /^semaine/i.test(C) ||
-        /^stock/i.test(C) ||
-        /^commande/i.test(C);
-
-      if (!skip) {
-        // Détecter multiplier : "GINGEMBRE CARAMEL X2" ou "GINGEMBRE X 2"
-        let parfum = C;
-        let mixCount = 1;
-        const matchX = parfum.match(/\s+[Xx]\s*(\d+)$/);
-        if (matchX) {
-          mixCount = parseInt(matchX[1]);
-          parfum = parfum.replace(/\s+[Xx]\s*\d+$/, '').trim();
-        }
-
-        // Ignorer les lignes "OFF" ou vides de sens
-        if (parfum.toUpperCase() === 'OFF') continue;
-
-        state.planning.push({
-          jour: jourCourant,
-          date: dateCourante,
-          parfum: parfum,
-          mixCount: mixCount,
-          qteOutput: D,
-          sgl: E,
-        });
-      }
+      state.planning.push({ jour: jourCourant, date: dateCourante, parfum, mixCount, qteOutput: D, sgl: E });
     }
   }
 
-  // ── Label de la semaine : chercher "SEMAINE DU" dans le sheet ──
-  for (const ligne of lignes) {
+  // ── Label de la semaine (ligne 1, colonne H) ──
+  state.semaineLabel = '';
+  for (const ligne of lignes.slice(0, 5)) {
     for (let i = 0; i < ligne.length; i++) {
-      if (/semaine\s+du/i.test(ligne[i])) {
-        // La date est soit dans la même cellule, soit dans la suivante
-        const cell = ligne[i];
-        const dateInCell = cell.replace(/semaine\s+du/i, '').trim();
-        state.semaineLabel = dateInCell || ligne[i+1] || '';
-        break;
-      }
-      // Format "SEMAINE DU" réparti sur deux cellules : "SEMAINE" | "DU" | date
-      if (/^semaine$/i.test(ligne[i]) && /^du$/i.test(ligne[i+1] || '')) {
-        state.semaineLabel = ligne[i+2] || '';
+      if (/semaine/i.test(ligne[i]) && ligne[i+1]) {
+        state.semaineLabel = ligne[i+1];
         break;
       }
     }
