@@ -556,23 +556,53 @@ function ImportExportPanel({ data, setData }) {
           {/* ── EXPORT GOOGLE SHEETS ── */}
           <div style={{ marginTop: 12 }}>
             <button
-              onClick={async () => {
-                setSheetsEtat('loading'); setSheetsPct(0);
-                const recettes = data.recettes || [];
-                const ingredients = data.ingredients || [];
-                const BATCH = 20, total = recettes.length;
-                let done = 0;
-                for (let i = 0; i < total; i += BATCH) {
-                  const lot = recettes.slice(i, i + BATCH);
-                  await fetch('https://script.google.com/macros/s/AKfycbxlFxpyRxwpqxRUGqf2hT2XcQXfjN_4XE7S3TeLwoeCUwgMhlfX7K6y3t-VWgPqszWVwA/exec', {
-                    method: 'POST', mode: 'no-cors',
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify({ action: 'export_recettes', recettes: lot, ingredients, batchIndex: Math.floor(i/BATCH), batchTotal: Math.ceil(total/BATCH) })
-                  });
-                  done += lot.length;
-                  setSheetsPct(Math.round((done/total)*100));
-                  if (i + BATCH < total) await new Promise(r => setTimeout(r, 800));
-                }
+             onClick={async () => {
+  setSheetsEtat('loading'); setSheetsPct(0);
+
+  // 1. Récupérer TOUTES les recettes + ingrédients depuis Supabase
+  let toutesRecettes = data.recettes || [];
+  let tousIngredients = data.ingredients || [];
+
+  try {
+    const headers = { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY };
+    const [rResp, iResp] = await Promise.all([
+      fetch(SUPABASE_URL + '/rest/v1/recettes?order=nom&select=*', { headers }),
+      fetch(SUPABASE_URL + '/rest/v1/ingredients?order=nom_recette&select=*', { headers })
+    ]);
+    if (rResp.ok) toutesRecettes = await rResp.json();
+    if (iResp.ok) tousIngredients = await iResp.json();
+  } catch (e) {
+    console.warn('Supabase fetch error, using local data:', e);
+  }
+
+  // 2. Envoyer par lots de 20 vers Apps Script
+  const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxlFxpyRxwpqxRUGqf2hT2XcQXfjN_4XE7S3TeLwoeCUwgMhlfX7K6y3t-VWgPqszWVwA/exec';
+  const BATCH = 20;
+  const total = toutesRecettes.length;
+  let done = 0;
+
+  for (let i = 0; i < total; i += BATCH) {
+    const lot = toutesRecettes.slice(i, i + BATCH);
+    await fetch(SHEETS_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({
+        action: 'export_recettes',
+        recettes: lot,
+        ingredients: tousIngredients,
+        batchIndex: Math.floor(i / BATCH),
+        batchTotal: Math.ceil(total / BATCH)
+      })
+    });
+    done += lot.length;
+    setSheetsPct(Math.round((done / total) * 100));
+    if (i + BATCH < total) await new Promise(r => setTimeout(r, 1000));
+  }
+
+  setSheetsEtat('succes');
+  setTimeout(() => { setSheetsEtat('idle'); setSheetsPct(0); }, 6000);
+}}
+
                 setSheetsEtat('succes');
                 setTimeout(() => { setSheetsEtat('idle'); setSheetsPct(0); }, 6000);
               }}
