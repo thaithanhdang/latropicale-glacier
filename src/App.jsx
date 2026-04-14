@@ -532,6 +532,8 @@ function Btn({ onClick, children, variant = "primary", style, disabled }) {
 // ─── IMPORT CSV PANEL ─────────────────────────────────────────────────────────
 function ImportExportPanel({ data, setData }) {
   const [msg, setMsg] = useState("");
+  const [sheetsEtat, setSheetsEtat] = useState('idle');
+  const [sheetsPct, setSheetsPct] = useState(0);  
   const fRef = useRef(), iRef = useRef(), rRef = useRef();
 
   const showMsg = (m) => { setMsg(m); setTimeout(() => setMsg(""), 4000); };
@@ -551,6 +553,45 @@ function ImportExportPanel({ data, setData }) {
             style={{ background: C.green, color: C.white, border: "none", borderRadius: 8, padding: "8px 16px", fontFamily: F.body, fontSize: 13, fontWeight: 600, cursor: "pointer", width: "100%" }}>
             Exporter tout (3 CSV)
           </button>
+          {/* ── EXPORT GOOGLE SHEETS ── */}
+          <div style={{ marginTop: 12 }}>
+            <button
+              onClick={async () => {
+                setSheetsEtat('loading'); setSheetsPct(0);
+                const recettes = data.recettes || [];
+                const ingredients = data.ingredients || [];
+                const BATCH = 20, total = recettes.length;
+                let done = 0;
+                for (let i = 0; i < total; i += BATCH) {
+                  const lot = recettes.slice(i, i + BATCH);
+                  await fetch('https://script.google.com/macros/s/AKfycbxlFxpyRxwpqxRUGqf2hT2XcQXfjN_4XE7S3TeLwoeCUwgMhlfX7K6y3t-VWgPqszWVwA/exec', {
+                    method: 'POST', mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain' },
+                    body: JSON.stringify({ action: 'export_recettes', recettes: lot, ingredients, batchIndex: Math.floor(i/BATCH), batchTotal: Math.ceil(total/BATCH) })
+                  });
+                  done += lot.length;
+                  setSheetsPct(Math.round((done/total)*100));
+                  if (i + BATCH < total) await new Promise(r => setTimeout(r, 800));
+                }
+                setSheetsEtat('succes');
+                setTimeout(() => { setSheetsEtat('idle'); setSheetsPct(0); }, 6000);
+              }}
+              disabled={sheetsEtat === 'loading'}
+              style={{ background: sheetsEtat === 'succes' ? '#2D7A3D' : C.green, color: C.white, border: 'none', borderRadius: 8, padding: '10px 18px', fontSize: 13, fontWeight: 600, cursor: sheetsEtat === 'loading' ? 'not-allowed' : 'pointer', width: '100%' }}
+            >
+              {sheetsEtat === 'loading' ? `⏳ Export… ${sheetsPct}%` : sheetsEtat === 'succes' ? `✅ ${data.recettes.length} recettes exportées !` : '📊 Exporter vers Google Sheets'}
+            </button>
+            {sheetsEtat === 'loading' && (
+              <div style={{ height: 4, background: '#e0e0d0', borderRadius: 2, marginTop: 6, overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: sheetsPct + '%', background: '#C8A84B', borderRadius: 2, transition: 'width 0.3s' }} />
+              </div>
+            )}
+            {sheetsEtat === 'succes' && (
+              <a href="https://docs.google.com/spreadsheets/d/15XE22A7uXv0NnZ_9H3qpNCCYxEeOqLNsAotFIrRK764/edit" target="_blank" rel="noopener noreferrer" style={{ display: 'block', textAlign: 'center', fontSize: 12, color: '#2D7A3D', marginTop: 4, textDecoration: 'underline' }}>
+                Ouvrir Google Sheets →
+              </a>
+            )}
+          </div>
         </div>
 
         {/* IMPORT */}
