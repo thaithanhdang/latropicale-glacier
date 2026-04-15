@@ -270,7 +270,7 @@ async function chargerPlanning(gid){
   S.planning=[];
   const JOURS=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
   let jour='',date='';
-  for(const l of lignes.slice(15,70)){
+  for(const l of lignes.slice(15,80)){
     const A=(l[0]||'').trim(),B=(l[1]||'').trim(),C=(l[2]||'').trim(),D=(l[3]||'').trim(),E=(l[4]||'').trim();
     if(JOURS.includes(A.toLowerCase())){jour=A.toLowerCase();date=''}
     else if(A&&/^\d{1,2}[\/\-]\d{1,2}/.test(A))date=A;
@@ -278,7 +278,10 @@ async function chargerPlanning(gid){
     if(jour&&C&&C.toLowerCase()!=='parfums'){
       let p=C,mx=1;const mX=p.match(/\s+[Xx]\s*(\d+)$/);
       if(mX){mx=parseInt(mX[1]);p=p.replace(/\s+[Xx]\s*\d+$/,'').trim()}
-      S.planning.push({jour,date,parfum:p,mixCount:mx,qteOutput:D,sgl:E});
+      // Si ce parfum existe déjà pour ce jour, incrémenter mixCount au lieu d'ajouter
+      const existing=S.planning.find(x=>x.parfum===p&&x.jour===jour);
+      if(existing){existing.mixCount+=mx;}
+      else{S.planning.push({jour,date,parfum:p,mixCount:mx,qteOutput:D,sgl:E});}
     }
   }
   const sel=document.getElementById('semaineSelect');
