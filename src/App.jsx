@@ -602,10 +602,6 @@ function ImportExportPanel({ data, setData }) {
   setSheetsEtat('succes');
   setTimeout(() => { setSheetsEtat('idle'); setSheetsPct(0); }, 6000);
 }}
-
-                setSheetsEtat('succes');
-                setTimeout(() => { setSheetsEtat('idle'); setSheetsPct(0); }, 6000);
-              }}
               disabled={sheetsEtat === 'loading'}
               style={{ background: sheetsEtat === 'succes' ? '#2D7A3D' : C.green, color: C.white, border: 'none', borderRadius: 8, padding: '10px 18px', fontSize: 13, fontWeight: 600, cursor: sheetsEtat === 'loading' ? 'not-allowed' : 'pointer', width: '100%' }}
             >
@@ -1299,12 +1295,636 @@ function DashboardTab({ data, setData }) {
   );
 }
 
+// ─── MODULE HACCP ─────────────────────────────────────────────────────────────
+
+// Extraire tous les ingrédients d'une recette (toutes sections)
+function getAllIngredientsFromRecette(recette) {
+  return [
+    ...(recette.poudres || []),
+    ...(recette.liquides || []),
+    ...(recette.ingredients || []),
+    ...(recette.toppings || []),
+  ];
+}
+
+// Dédupliquer les ingrédients d'une liste de recettes
+function getIngredientsUniques(recettes) {
+  const map = new Map();
+  recettes.forEach(r => {
+    getAllIngredientsFromRecette(r).forEach(l => {
+      if (l.ingredientId && !map.has(l.ingredientId)) {
+        map.set(l.ingredientId, l.ingredientId);
+      }
+    });
+  });
+  return Array.from(map.keys());
+}
+
+// ── Sous-composant : carte lot actif ──
+function LotCard({ lot, ingredient, onEdit, onArchive }) {
+  return (
+    <div style={{ background: C.white, borderRadius: 10, border: `1.5px solid ${C.lightMint}`, padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontFamily: F.body, fontWeight: 700, fontSize: 13, color: C.darkGreen }}>{ingredient?.nomRecette || lot.ingredient_id}</div>
+        <div style={{ display: "flex", gap: 10, marginTop: 3, flexWrap: "wrap" }}>
+          <span style={{ fontFamily: F.mono, fontSize: 12, color: C.green, background: C.s1, borderRadius: 5, padding: "1px 7px" }}>Lot : {lot.numero_lot}</span>
+          {lot.dlc && <span style={{ fontFamily: F.mono, fontSize: 12, color: C.muted, background: C.cream, borderRadius: 5, padding: "1px 7px" }}>DLC : {lot.dlc}</span>}
+          {lot.date_ouverture && <span style={{ fontFamily: F.body, fontSize: 11, color: C.muted }}>Ouvert le {lot.date_ouverture}</span>}
+        </div>
+        {lot.notes && <div style={{ fontFamily: F.body, fontSize: 11, color: C.muted, marginTop: 3, fontStyle: "italic" }}>{lot.notes}</div>}
+      </div>
+      <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+        <button onClick={() => onEdit(lot)} style={{ background: C.lightMint, border: "none", borderRadius: 7, padding: "5px 10px", fontFamily: F.body, fontSize: 11, fontWeight: 600, color: C.darkGreen, cursor: "pointer" }}>Modifier</button>
+        <button onClick={() => onArchive(lot)} style={{ background: "#FFE5E5", border: "none", borderRadius: 7, padding: "5px 10px", fontFamily: F.body, fontSize: 11, fontWeight: 600, color: C.error, cursor: "pointer" }}>Épuisé</button>
+      </div>
+    </div>
+  );
+}
+
+// ── Formulaire ajout/modif lot ──
+function LotForm({ initial, ingredients, onSave, onCancel }) {
+  const [ingredientId, setIngredientId] = useState(initial?.ingredient_id || "");
+  const [numeroLot, setNumeroLot] = useState(initial?.numero_lot || "");
+  const [dlc, setDlc] = useState(initial?.dlc || "");
+  const [dateOuverture, setDateOuverture] = useState(initial?.date_ouverture || new Date().toISOString().slice(0, 10));
+  const [notes, setNotes] = useState(initial?.notes || "");
+  const [photo, setPhoto] = useState(null);
+  const [extracting, setExtracting] = useState(false);
+  const [extractMsg, setExtractMsg] = useState("");
+  const fileRef = useRef();
+
+  const handlePhoto = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setPhoto(file);
+    setExtracting(true);
+    setExtractMsg("Analyse de l'étiquette en cours...");
+    try {
+      const base64 = await new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = () => res(r.result.split(",")[1]);
+        r.onerror = rej;
+        r.readAsDataURL(file);
+      });
+      const mediaType = file.type || "image/jpeg";
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 300,
+          messages: [{
+            role: "user",
+            content: [
+              { type: "image", source: { type: "base64", media_type: mediaType, data: base64 } },
+              { type: "text", text: "Lis cette étiquette de produit alimentaire. Extrait UNIQUEMENT le numéro de lot (ou batch number) et la date limite (DLC, DDM, DLUO, EXP, Best before). Réponds UNIQUEMENT en JSON : {\"lot\": \"valeur\", \"dlc\": \"valeur\"}. Si une valeur est absente, mets null." }
+            ]
+          }]
+        })
+      });
+      const data = await response.json();
+      const text = data.content?.map(c => c.text || "").join("") || "";
+      const clean = text.replace(/```json|```/g, "").trim();
+      const parsed = JSON.parse(clean);
+      if (parsed.lot) setNumeroLot(parsed.lot);
+      if (parsed.dlc) setDlc(parsed.dlc);
+      setExtractMsg("✅ Extraction réussie — vérifiez et confirmez");
+    } catch (err) {
+      setExtractMsg("⚠️ Extraction impossible — saisissez manuellement");
+    }
+    setExtracting(false);
+  };
+
+  const handleSave = () => {
+    if (!ingredientId || !numeroLot) return;
+    onSave({
+      id: initial?.id || genId(),
+      ingredient_id: ingredientId,
+      numero_lot: numeroLot,
+      dlc: dlc || null,
+      date_ouverture: dateOuverture,
+      actif: true,
+      notes: notes || null,
+    });
+  };
+
+  const ingsSorted = [...ingredients].sort((a, b) => a.nomRecette.localeCompare(b.nomRecette));
+
+  return (
+    <Card style={{ marginBottom: 16, background: C.lightCream }}>
+      <h3 style={{ fontFamily: F.display, color: C.darkGreen, marginTop: 0, marginBottom: 14 }}>
+        {initial ? "Modifier le lot" : "Nouveau lot"}
+      </h3>
+
+      {/* Photo / extraction IA */}
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ fontFamily: F.body, fontSize: 12, color: C.muted, fontWeight: 600, marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>
+          📷 Scanner étiquette ou facture
+        </div>
+        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+          <button onClick={() => fileRef.current?.click()} style={{ background: C.mint, border: "none", borderRadius: 8, color: C.white, fontFamily: F.body, fontSize: 13, fontWeight: 600, padding: "8px 16px", cursor: "pointer" }}>
+            {extracting ? "Analyse..." : "📷 Prendre / choisir photo"}
+          </button>
+          <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handlePhoto} style={{ display: "none" }} />
+          {extractMsg && <span style={{ fontFamily: F.body, fontSize: 12, color: extractMsg.startsWith("✅") ? C.green : extractMsg.startsWith("⚠️") ? "#856404" : C.muted }}>{extractMsg}</span>}
+        </div>
+      </div>
+
+      {/* Ingrédient */}
+      <div style={{ marginBottom: 10 }}>
+        <label style={{ fontFamily: F.body, fontSize: 12, color: C.muted, fontWeight: 600, display: "block", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>Ingrédient *</label>
+        <select value={ingredientId} onChange={e => setIngredientId(e.target.value)}
+          style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: `1.5px solid ${C.lightMint}`, fontFamily: F.body, fontSize: 13, color: C.text, background: C.white, outline: "none" }}>
+          <option value="">— Sélectionner —</option>
+          {ingsSorted.map(i => <option key={i.id} value={i.id}>{i.nomRecette}{i.bio ? " (Bio)" : ""}</option>)}
+        </select>
+      </div>
+
+      {/* Lot + DLC */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+        <div>
+          <label style={{ fontFamily: F.body, fontSize: 12, color: C.muted, fontWeight: 600, display: "block", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>N° de lot *</label>
+          <input value={numeroLot} onChange={e => setNumeroLot(e.target.value)} placeholder="ex: LC5445A"
+            style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: `1.5px solid ${C.lightMint}`, fontFamily: F.mono, fontSize: 13, color: C.text, background: C.white, outline: "none", boxSizing: "border-box" }} />
+        </div>
+        <div>
+          <label style={{ fontFamily: F.body, fontSize: 12, color: C.muted, fontWeight: 600, display: "block", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>DLC / DDM</label>
+          <input value={dlc} onChange={e => setDlc(e.target.value)} placeholder="ex: 31/10/2027"
+            style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: `1.5px solid ${C.lightMint}`, fontFamily: F.mono, fontSize: 13, color: C.text, background: C.white, outline: "none", boxSizing: "border-box" }} />
+        </div>
+      </div>
+
+      <div style={{ marginBottom: 10 }}>
+        <label style={{ fontFamily: F.body, fontSize: 12, color: C.muted, fontWeight: 600, display: "block", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>Date d'ouverture</label>
+        <input type="date" value={dateOuverture} onChange={e => setDateOuverture(e.target.value)}
+          style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: `1.5px solid ${C.lightMint}`, fontFamily: F.body, fontSize: 13, color: C.text, background: C.white, outline: "none", boxSizing: "border-box" }} />
+      </div>
+
+      <div style={{ marginBottom: 14 }}>
+        <label style={{ fontFamily: F.body, fontSize: 12, color: C.muted, fontWeight: 600, display: "block", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>Notes</label>
+        <input value={notes} onChange={e => setNotes(e.target.value)} placeholder="Remarques éventuelles..."
+          style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: `1.5px solid ${C.lightMint}`, fontFamily: F.body, fontSize: 13, color: C.text, background: C.white, outline: "none", boxSizing: "border-box" }} />
+      </div>
+
+      <div style={{ display: "flex", gap: 10 }}>
+        <button onClick={handleSave} disabled={!ingredientId || !numeroLot}
+          style={{ background: C.green, border: "none", borderRadius: 9, color: C.white, fontFamily: F.body, fontWeight: 600, cursor: !ingredientId || !numeroLot ? "not-allowed" : "pointer", fontSize: 14, padding: "9px 20px", opacity: !ingredientId || !numeroLot ? 0.5 : 1 }}>
+          {initial ? "Enregistrer" : "Ajouter le lot"}
+        </button>
+        <button onClick={onCancel} style={{ background: "transparent", border: `1.5px solid ${C.mint}`, borderRadius: 9, color: C.green, fontFamily: F.body, fontWeight: 600, cursor: "pointer", fontSize: 14, padding: "9px 20px" }}>Annuler</button>
+      </div>
+    </Card>
+  );
+}
+
+// ── Onglet Lots Actifs ──
+function LotsActifsTab({ data }) {
+  const [lots, setLots] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadLots();
+  }, []);
+
+  const loadLots = async () => {
+    setLoading(true);
+    const rows = await sbFetch("lots_actifs", "GET", null, "?actif=eq.true&order=created_at.desc&select=*");
+    setLots(Array.isArray(rows) ? rows : []);
+    setLoading(false);
+  };
+
+  const saveLot = async (lot) => {
+    if (editing) {
+      await sbFetch(`lots_actifs?id=eq.${lot.id}`, "PATCH", lot);
+      setLots(ls => ls.map(l => l.id === lot.id ? { ...l, ...lot } : l));
+      setEditing(null);
+    } else {
+      const res = await sbFetch("lots_actifs", "POST", lot);
+      setLots(ls => [lot, ...ls]);
+      setShowForm(false);
+    }
+  };
+
+  const archiveLot = async (lot) => {
+    if (window.confirm(`Marquer "${lot.numero_lot}" comme épuisé ?`)) {
+      await sbFetch(`lots_actifs?id=eq.${lot.id}`, "PATCH", { actif: false });
+      setLots(ls => ls.filter(l => l.id !== lot.id));
+    }
+  };
+
+  const getIng = (id) => data.ingredients.find(i => i.id === id);
+
+  return (
+    <div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
+        <div>
+          <h2 style={{ fontFamily: F.display, color: C.darkGreen, margin: 0 }}>Lots actifs</h2>
+          <div style={{ fontFamily: F.body, fontSize: 12, color: C.muted, marginTop: 2 }}>Lots en cours d'utilisation</div>
+        </div>
+        <button onClick={() => { setShowForm(true); setEditing(null); }}
+          style={{ background: C.green, color: C.white, border: "none", borderRadius: 9, padding: "9px 20px", fontFamily: F.body, fontWeight: 600, cursor: "pointer", fontSize: 14 }}>
+          + Nouveau lot
+        </button>
+      </div>
+
+      {(showForm && !editing) && <LotForm ingredients={data.ingredients} onSave={saveLot} onCancel={() => setShowForm(false)} />}
+      {editing && <LotForm initial={editing} ingredients={data.ingredients} onSave={saveLot} onCancel={() => setEditing(null)} />}
+
+      {loading ? (
+        <div style={{ textAlign: "center", color: C.muted, fontFamily: F.body, padding: 40 }}>Chargement...</div>
+      ) : lots.length === 0 ? (
+        <Card style={{ textAlign: "center", color: C.muted, fontFamily: F.body, padding: 32 }}>
+          <div style={{ fontSize: 32, marginBottom: 8 }}>📦</div>
+          <div style={{ fontFamily: F.display, fontSize: 16, color: C.darkGreen, marginBottom: 6 }}>Aucun lot actif</div>
+          <div style={{ fontSize: 13 }}>Ajoutez vos premiers lots en cours d'utilisation</div>
+        </Card>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {lots.map(lot => (
+            <LotCard key={lot.id} lot={lot} ingredient={getIng(lot.ingredient_id)} onEdit={setEditing} onArchive={archiveLot} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Session HACCP ──
+function SessionHaccp({ data, onBack }) {
+  const [dateSession, setDateSession] = useState(new Date().toISOString().slice(0, 10));
+  const [dateTurbinage, setDateTurbinage] = useState("");
+  const [selectedRecettes, setSelectedRecettes] = useState([]);
+  const [lotsDispos, setLotsDispos] = useState([]);
+  const [lotsChoisis, setLotsChoisis] = useState({});
+  const [notes, setNotes] = useState("");
+  const [texte, setTexte] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [step, setStep] = useState(1);
+
+  useEffect(() => {
+    sbFetch("lots_actifs", "GET", null, "?actif=eq.true&order=ingredient_id&select=*").then(rows => {
+      setLotsDispos(Array.isArray(rows) ? rows : []);
+    });
+  }, []);
+
+  const toggleRecette = (id) => {
+    setSelectedRecettes(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id]);
+  };
+
+  const getIng = (id) => data.ingredients.find(i => i.id === id);
+  const getLotsByIng = (ingId) => lotsDispos.filter(l => l.ingredient_id === ingId);
+
+  const recettesSelectionnees = data.recettes.filter(r => selectedRecettes.includes(r.id));
+
+  // Ingrédients uniques pour les recettes sélectionnées
+  const ingsUniques = getIngredientsUniques(recettesSelectionnees);
+
+  const toggleLot = (ingId, lotId) => {
+    setLotsChoisis(prev => {
+      const current = prev[ingId] || [];
+      const exists = current.includes(lotId);
+      return { ...prev, [ingId]: exists ? current.filter(x => x !== lotId) : [...current, lotId] };
+    });
+  };
+
+  const genererTexte = () => {
+    const dateF = new Date(dateSession).toLocaleDateString("fr-FR", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+    let t = `SESSION MIXES — ${dateF.charAt(0).toUpperCase() + dateF.slice(1)}\n`;
+    if (dateTurbinage) t += `Turbinage prévu : ${new Date(dateTurbinage).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}\n`;
+    t += "\n";
+
+    recettesSelectionnees.forEach(r => {
+      t += `━━━ ${r.nom.toUpperCase()} ━━━\n`;
+      const lignes = getAllIngredientsFromRecette(r);
+      const ingIds = [...new Set(lignes.map(l => l.ingredientId).filter(Boolean))];
+
+      ingIds.forEach(ingId => {
+        const ing = getIng(ingId);
+        if (!ing) return;
+        const lotsIng = getLotsByIng(ingId);
+        const choixIds = lotsChoisis[ingId] || [];
+        const lotsAffich = choixIds.length > 0
+          ? lotsDispos.filter(l => choixIds.includes(l.id) && l.ingredient_id === ingId)
+          : lotsIng;
+
+        if (lotsAffich.length === 0) {
+          t += `  • ${ing.nomRecette} — ⚠️ Lot non renseigné\n`;
+        } else {
+          lotsAffich.forEach(lot => {
+            t += `  • ${ing.nomRecette} — Lot : ${lot.numero_lot}${lot.dlc ? ` — DLC : ${lot.dlc}` : ""}\n`;
+          });
+        }
+      });
+      t += "\n";
+    });
+
+    if (notes) t += `Notes : ${notes}\n`;
+    setTexte(t);
+    setStep(3);
+  };
+
+  const copier = () => {
+    navigator.clipboard.writeText(texte).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    });
+  };
+
+  const sauvegarder = async () => {
+    setSaving(true);
+    const session = {
+      id: genId(),
+      date_session: dateSession,
+      date_turbinage: dateTurbinage || null,
+      recettes_ids: selectedRecettes,
+      lots_utilises: lotsChoisis,
+      notes: notes || null,
+      texte_diaro: texte,
+    };
+    await sbFetch("sessions_haccp", "POST", session);
+    setSaving(false);
+    alert("Session enregistrée ✅");
+  };
+
+  const recettesSorted = [...data.recettes].sort((a, b) => a.nom.localeCompare(b.nom));
+
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+        <button onClick={onBack} style={{ background: "transparent", border: `1.5px solid ${C.lightMint}`, borderRadius: 8, padding: "6px 12px", fontFamily: F.body, fontSize: 13, color: C.muted, cursor: "pointer" }}>← Retour</button>
+        <h2 style={{ fontFamily: F.display, color: C.darkGreen, margin: 0 }}>Nouvelle session HACCP</h2>
+      </div>
+
+      {/* Étape 1 : Dates + recettes */}
+      <Card style={{ marginBottom: 16 }}>
+        <div style={{ fontFamily: F.body, fontWeight: 700, fontSize: 13, color: C.green, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 }}>
+          1 — Date et parfums du jour
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
+          <div>
+            <label style={{ fontFamily: F.body, fontSize: 12, color: C.muted, fontWeight: 600, display: "block", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>Date de préparation</label>
+            <input type="date" value={dateSession} onChange={e => setDateSession(e.target.value)}
+              style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: `1.5px solid ${C.lightMint}`, fontFamily: F.body, fontSize: 13, color: C.text, background: C.white, outline: "none", boxSizing: "border-box" }} />
+          </div>
+          <div>
+            <label style={{ fontFamily: F.body, fontSize: 12, color: C.muted, fontWeight: 600, display: "block", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 }}>Date turbinage</label>
+            <input type="date" value={dateTurbinage} onChange={e => setDateTurbinage(e.target.value)}
+              style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: `1.5px solid ${C.lightMint}`, fontFamily: F.body, fontSize: 13, color: C.text, background: C.white, outline: "none", boxSizing: "border-box" }} />
+          </div>
+        </div>
+
+        <div style={{ fontFamily: F.body, fontSize: 12, color: C.muted, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>
+          Parfums préparés ({selectedRecettes.length} sélectionné{selectedRecettes.length > 1 ? "s" : ""})
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 4, maxHeight: 300, overflowY: "auto" }}>
+          {recettesSorted.map(r => (
+            <div key={r.id} onClick={() => toggleRecette(r.id)}
+              style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", borderRadius: 8, cursor: "pointer", background: selectedRecettes.includes(r.id) ? C.s1 : "transparent", border: `1.5px solid ${selectedRecettes.includes(r.id) ? C.mint : C.lightMint}`, transition: "all 0.15s" }}>
+              <div style={{ width: 18, height: 18, borderRadius: 5, border: `2px solid ${selectedRecettes.includes(r.id) ? C.green : C.lightMint}`, background: selectedRecettes.includes(r.id) ? C.green : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                {selectedRecettes.includes(r.id) && <span style={{ color: C.white, fontSize: 11, fontWeight: 700 }}>✓</span>}
+              </div>
+              <span style={{ fontFamily: F.body, fontSize: 13, color: C.darkGreen, fontWeight: selectedRecettes.includes(r.id) ? 700 : 400 }}>{r.nom}</span>
+              <Badge color={r.categorie === "sorbet" ? C.s2 : r.categorie === "végétale" ? C.s1 : C.cream}>{r.categorie}</Badge>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {/* Étape 2 : Lots par ingrédient */}
+      {selectedRecettes.length > 0 && (
+        <Card style={{ marginBottom: 16 }}>
+          <div style={{ fontFamily: F.body, fontWeight: 700, fontSize: 13, color: C.green, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 12 }}>
+            2 — Lots utilisés par ingrédient
+          </div>
+          <div style={{ fontFamily: F.body, fontSize: 12, color: C.muted, marginBottom: 12, fontStyle: "italic" }}>
+            Si plusieurs lots sont disponibles pour un ingrédient, cochez ceux utilisés. Un seul lot = sélection automatique.
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {ingsUniques.map(ingId => {
+              const ing = getIng(ingId);
+              if (!ing) return null;
+              const lotsIng = getLotsByIng(ingId);
+              const choixIds = lotsChoisis[ingId] || [];
+              return (
+                <div key={ingId} style={{ background: C.cream, borderRadius: 9, padding: "10px 12px" }}>
+                  <div style={{ fontFamily: F.body, fontWeight: 700, fontSize: 13, color: C.darkGreen, marginBottom: 6 }}>
+                    {ing.nomRecette}
+                    {ing.bio && <span style={{ marginLeft: 6, fontFamily: F.body, fontSize: 10, background: C.lightMint, color: C.darkGreen, borderRadius: 4, padding: "1px 5px", fontWeight: 600 }}>Bio</span>}
+                  </div>
+                  {lotsIng.length === 0 ? (
+                    <div style={{ fontFamily: F.body, fontSize: 12, color: "#856404", background: "#FFF3CD", borderRadius: 6, padding: "5px 10px" }}>
+                      ⚠️ Aucun lot actif — pensez à en créer un
+                    </div>
+                  ) : lotsIng.length === 1 ? (
+                    <div style={{ fontFamily: F.mono, fontSize: 12, color: C.green, background: C.s1, borderRadius: 6, padding: "5px 10px" }}>
+                      ✅ Lot : {lotsIng[0].numero_lot}{lotsIng[0].dlc ? ` — DLC : ${lotsIng[0].dlc}` : ""}
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                      {lotsIng.map(lot => (
+                        <div key={lot.id} onClick={() => toggleLot(ingId, lot.id)}
+                          style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", borderRadius: 7, cursor: "pointer", background: choixIds.includes(lot.id) ? C.s1 : C.white, border: `1.5px solid ${choixIds.includes(lot.id) ? C.mint : C.lightMint}` }}>
+                          <div style={{ width: 16, height: 16, borderRadius: 4, border: `2px solid ${choixIds.includes(lot.id) ? C.green : C.lightMint}`, background: choixIds.includes(lot.id) ? C.green : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                            {choixIds.includes(lot.id) && <span style={{ color: C.white, fontSize: 10, fontWeight: 700 }}>✓</span>}
+                          </div>
+                          <span style={{ fontFamily: F.mono, fontSize: 12, color: C.darkGreen }}>Lot : {lot.numero_lot}{lot.dlc ? ` — DLC : ${lot.dlc}` : ""}</span>
+                          {lot.date_ouverture && <span style={{ fontFamily: F.body, fontSize: 11, color: C.muted }}>ouvert le {lot.date_ouverture}</span>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      )}
+
+      {/* Notes */}
+      {selectedRecettes.length > 0 && (
+        <Card style={{ marginBottom: 16 }}>
+          <div style={{ fontFamily: F.body, fontWeight: 700, fontSize: 13, color: C.green, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>
+            Notes de session (optionnel)
+          </div>
+          <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Modifications de recettes, observations..."
+            style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: `1.5px solid ${C.lightMint}`, fontFamily: F.body, fontSize: 13, color: C.text, background: C.white, outline: "none", minHeight: 70, resize: "vertical", boxSizing: "border-box" }} />
+        </Card>
+      )}
+
+      {/* Bouton générer */}
+      {selectedRecettes.length > 0 && (
+        <button onClick={genererTexte}
+          style={{ width: "100%", background: C.green, border: "none", borderRadius: 10, color: C.white, fontFamily: F.body, fontWeight: 700, fontSize: 15, padding: "13px", cursor: "pointer", marginBottom: 16 }}>
+          Générer le texte Diaro →
+        </button>
+      )}
+
+      {/* Étape 3 : Texte généré */}
+      {texte && (
+        <Card style={{ background: C.darkGreen }}>
+          <div style={{ fontFamily: F.body, fontWeight: 700, fontSize: 13, color: C.lightMint, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 10 }}>
+            3 — Texte prêt à coller dans Diaro
+          </div>
+          <pre style={{ fontFamily: F.mono, fontSize: 12, color: C.white, background: "rgba(0,0,0,0.3)", borderRadius: 8, padding: "12px 14px", whiteSpace: "pre-wrap", wordBreak: "break-word", margin: "0 0 12px", lineHeight: 1.6 }}>
+            {texte}
+          </pre>
+          <div style={{ display: "flex", gap: 10 }}>
+            <button onClick={copier}
+              style={{ flex: 1, background: copied ? C.mint : C.gold, border: "none", borderRadius: 9, color: C.darkGreen, fontFamily: F.body, fontWeight: 700, fontSize: 14, padding: "11px", cursor: "pointer" }}>
+              {copied ? "✅ Copié !" : "📋 Copier"}
+            </button>
+            <button onClick={sauvegarder} disabled={saving}
+              style={{ flex: 1, background: C.mint, border: "none", borderRadius: 9, color: C.white, fontFamily: F.body, fontWeight: 700, fontSize: 14, padding: "11px", cursor: saving ? "not-allowed" : "pointer", opacity: saving ? 0.6 : 1 }}>
+              {saving ? "Enregistrement..." : "💾 Sauvegarder"}
+            </button>
+          </div>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+// ── Historique sessions ──
+function HistoriqueTab({ data }) {
+  const [sessions, setSessions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    sbFetch("sessions_haccp", "GET", null, "?order=date_session.desc&select=*").then(rows => {
+      setSessions(Array.isArray(rows) ? rows : []);
+      setLoading(false);
+    });
+  }, []);
+
+  const getRecetteNom = (id) => data.recettes.find(r => r.id === id)?.nom || id;
+
+  const filtered = sessions.filter(s => {
+    if (!search) return true;
+    const recettesStr = (s.recettes_ids || []).map(id => getRecetteNom(id)).join(" ").toLowerCase();
+    return recettesStr.includes(search.toLowerCase()) || (s.date_session || "").includes(search) || (s.texte_diaro || "").toLowerCase().includes(search.toLowerCase());
+  });
+
+  return (
+    <div>
+      <h2 style={{ fontFamily: F.display, color: C.darkGreen, marginBottom: 6 }}>Historique HACCP</h2>
+      <div style={{ fontFamily: F.body, fontSize: 12, color: C.muted, marginBottom: 14 }}>Recherchez par parfum, date ou numéro de lot</div>
+      <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher (parfum, date, lot...)"
+        style={{ width: "100%", padding: "9px 12px", borderRadius: 9, border: `1.5px solid ${C.lightMint}`, fontFamily: F.body, fontSize: 13, color: C.text, background: C.white, outline: "none", marginBottom: 14, boxSizing: "border-box" }} />
+
+      {loading ? (
+        <div style={{ textAlign: "center", color: C.muted, fontFamily: F.body, padding: 40 }}>Chargement...</div>
+      ) : filtered.length === 0 ? (
+        <Card style={{ textAlign: "center", color: C.muted, fontFamily: F.body, padding: 32 }}>
+          {search ? "Aucun résultat pour cette recherche" : "Aucune session enregistrée"}
+        </Card>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {filtered.map(s => (
+            <Card key={s.id} style={{ padding: "12px 16px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                <div>
+                  <div style={{ fontFamily: F.body, fontWeight: 700, fontSize: 14, color: C.darkGreen }}>
+                    {new Date(s.date_session).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                  </div>
+                  {s.date_turbinage && (
+                    <div style={{ fontFamily: F.body, fontSize: 12, color: C.muted }}>
+                      Turbinage : {new Date(s.date_turbinage).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
+                    </div>
+                  )}
+                </div>
+                <Badge color={C.lightMint}>{(s.recettes_ids || []).length} parfum{(s.recettes_ids || []).length > 1 ? "s" : ""}</Badge>
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: s.notes ? 8 : 0 }}>
+                {(s.recettes_ids || []).map(id => (
+                  <Badge key={id} color={C.s3}>{getRecetteNom(id)}</Badge>
+                ))}
+              </div>
+              {s.notes && <div style={{ fontFamily: F.body, fontSize: 12, color: C.muted, fontStyle: "italic", marginTop: 6 }}>{s.notes}</div>}
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Onglet HACCP principal ──
+function HaccpTab({ data }) {
+  const [vue, setVue] = useState("accueil");
+
+  if (vue === "session") return <SessionHaccp data={data} onBack={() => setVue("accueil")} />;
+  if (vue === "lots") return (
+    <div>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+        <button onClick={() => setVue("accueil")} style={{ background: "transparent", border: `1.5px solid ${C.lightMint}`, borderRadius: 8, padding: "6px 12px", fontFamily: F.body, fontSize: 13, color: C.muted, cursor: "pointer" }}>← Retour</button>
+      </div>
+      <LotsActifsTab data={data} />
+    </div>
+  );
+  if (vue === "historique") return (
+    <div>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+        <button onClick={() => setVue("accueil")} style={{ background: "transparent", border: `1.5px solid ${C.lightMint}`, borderRadius: 8, padding: "6px 12px", fontFamily: F.body, fontSize: 13, color: C.muted, cursor: "pointer" }}>← Retour</button>
+      </div>
+      <HistoriqueTab data={data} />
+    </div>
+  );
+
+  // Accueil HACCP
+  return (
+    <div>
+      <div style={{ marginBottom: 24 }}>
+        <h2 style={{ fontFamily: F.display, color: C.darkGreen, margin: 0 }}>Traçabilité HACCP</h2>
+        <div style={{ fontFamily: F.body, fontSize: 13, color: C.muted, marginTop: 4 }}>Suivi des lots et sessions de fabrication</div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 14 }}>
+        {/* Carte session */}
+        <div onClick={() => setVue("session")}
+          style={{ background: C.darkGreen, borderRadius: 14, padding: "22px 22px", cursor: "pointer", position: "relative", overflow: "hidden" }}>
+          <div style={{ position: "absolute", right: -10, top: -10, fontSize: 80, opacity: 0.08 }}>📋</div>
+          <div style={{ fontSize: 28, marginBottom: 8 }}>📋</div>
+          <div style={{ fontFamily: F.display, fontSize: 18, color: C.white, fontWeight: 700, marginBottom: 4 }}>Nouvelle session</div>
+          <div style={{ fontFamily: F.body, fontSize: 13, color: C.lightMint, lineHeight: 1.5 }}>
+            Sélectionner les parfums du jour, associer les lots et générer le texte à coller dans Diaro
+          </div>
+        </div>
+
+        {/* Carte lots */}
+        <div onClick={() => setVue("lots")}
+          style={{ background: C.white, border: `2px solid ${C.lightMint}`, borderRadius: 14, padding: "20px 22px", cursor: "pointer" }}>
+          <div style={{ fontSize: 26, marginBottom: 8 }}>📦</div>
+          <div style={{ fontFamily: F.display, fontSize: 17, color: C.darkGreen, fontWeight: 700, marginBottom: 4 }}>Lots actifs</div>
+          <div style={{ fontFamily: F.body, fontSize: 13, color: C.muted, lineHeight: 1.5 }}>
+            Gérer les lots en cours d'utilisation — ajouter, modifier, épuiser
+          </div>
+        </div>
+
+        {/* Carte historique */}
+        <div onClick={() => setVue("historique")}
+          style={{ background: C.white, border: `2px solid ${C.lightMint}`, borderRadius: 14, padding: "20px 22px", cursor: "pointer" }}>
+          <div style={{ fontSize: 26, marginBottom: 8 }}>🗂️</div>
+          <div style={{ fontFamily: F.display, fontSize: 17, color: C.darkGreen, fontWeight: 700, marginBottom: 4 }}>Historique</div>
+          <div style={{ fontFamily: F.body, fontSize: 13, color: C.muted, lineHeight: 1.5 }}>
+            Consulter les sessions passées — recherche par parfum, date ou numéro de lot
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── APP SHELL ────────────────────────────────────────────────────────────────
 const TABS = [
   { id: "dashboard", label: "Accueil" },
   { id: "recettes", label: "Recettes" },
   { id: "ingredients", label: "Ingrédients" },
   { id: "fournisseurs", label: "Fournisseurs" },
+  { id: "haccp", label: "🧊 HACCP" },
 ];
 
 export default function App() {
@@ -1425,6 +2045,7 @@ export default function App() {
           {tab === "recettes" && <RecettesTab data={data} setData={setData} />}
           {tab === "ingredients" && <IngredientsTab data={data} setData={setData} />}
           {tab === "fournisseurs" && <FournisseursTab data={data} setData={setData} />}
+          {tab === "haccp" && <HaccpTab data={data} />}
         </div>
       )}
     </div>
