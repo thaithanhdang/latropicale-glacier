@@ -1805,20 +1805,36 @@ function SessionHaccp({ data, onBack }) {
         </div>
 
         <div style={{ fontFamily: F.body, fontSize: 12, color: C.muted, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>
-          Parfums préparés ({selectedRecettes.length} sélectionné{selectedRecettes.length > 1 ? "s" : ""})
+          Parfums du jour ({selectedRecettes.length})
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 4, maxHeight: 300, overflowY: "auto" }}>
-          {recettesSorted.map(r => (
-            <div key={r.id} onClick={() => toggleRecette(r.id)}
-              style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", borderRadius: 8, cursor: "pointer", background: selectedRecettes.includes(r.id) ? C.s1 : "transparent", border: `1.5px solid ${selectedRecettes.includes(r.id) ? C.mint : C.lightMint}`, transition: "all 0.15s" }}>
-              <div style={{ width: 18, height: 18, borderRadius: 5, border: `2px solid ${selectedRecettes.includes(r.id) ? C.green : C.lightMint}`, background: selectedRecettes.includes(r.id) ? C.green : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                {selectedRecettes.includes(r.id) && <span style={{ color: C.white, fontSize: 11, fontWeight: 700 }}>✓</span>}
-              </div>
-              <span style={{ fontFamily: F.body, fontSize: 13, color: C.darkGreen, fontWeight: selectedRecettes.includes(r.id) ? 700 : 400 }}>{r.nom}</span>
-              <Badge color={r.categorie === "sorbet" ? C.s2 : r.categorie === "végétale" ? C.s1 : C.cream}>{r.categorie}</Badge>
-            </div>
+
+        {/* Parfums sélectionnés — pills supprimables */}
+        {selectedRecettes.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 7, marginBottom: 10 }}>
+            {selectedRecettes.map(id => {
+              const r = data.recettes.find(x => x.id === id);
+              if (!r) return null;
+              return (
+                <div key={id} style={{ display: "flex", alignItems: "center", gap: 5, background: C.s1, border: `1.5px solid ${C.mint}`, borderRadius: 20, padding: "5px 10px 5px 12px", fontFamily: F.body, fontSize: 13, color: C.darkGreen, fontWeight: 600 }}>
+                  {r.nom}
+                  <button onClick={() => toggleRecette(id)}
+                    style={{ background: "none", border: "none", cursor: "pointer", color: C.muted, fontSize: 15, lineHeight: 1, padding: "0 2px", fontWeight: 700 }}>×</button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Ajouter un parfum manuellement */}
+        <select
+          value=""
+          onChange={e => { if (e.target.value) toggleRecette(e.target.value); }}
+          style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: `1.5px solid ${C.lightMint}`, fontFamily: F.body, fontSize: 13, color: C.muted, background: C.white, outline: "none" }}>
+          <option value="">+ Ajouter un parfum manuellement…</option>
+          {recettesSorted.filter(r => !selectedRecettes.includes(r.id)).map(r => (
+            <option key={r.id} value={r.id}>{r.nom} ({r.categorie})</option>
           ))}
-        </div>
+        </select>
       </Card>
 
       {/* Étape 2 : Lots par ingrédient */}
