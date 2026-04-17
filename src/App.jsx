@@ -1554,20 +1554,41 @@ function LotsActifsTab({ data }) {
 // ── Lecture planning Google Sheet ──
 const SHEET_ID = "1IJ_I-JxafJpIF9H2pInXaET-IQw0KrTialE94rL2hoI";
 
-// Convertit une date JS en nom d'onglet DD/MM/YY (lundi de la semaine)
-function getOngletSemaine(dateStr) {
+// GIDs des onglets — synchronisés depuis commandes.html
+const ONGLETS_GID = [
+  {g:"784016522",n:"25/12/23"},{g:"915093093",n:"15/12/25"},{g:"1564905807",n:"08/12/25"},
+  {g:"745810776",n:"02/12/25"},{g:"750359579",n:"24/11/25"},{g:"1492293636",n:"17/11/25"},
+  {g:"658682002",n:"11/11/25"},{g:"1470174700",n:"03/11/25"},{g:"1868118366",n:"27/10/25"},
+  {g:"475155385",n:"20/10/25"},{g:"1781313425",n:"13/10/25"},{g:"849636766",n:"06/10/25"},
+  {g:"822288033",n:"29/09/25"},{g:"508272418",n:"22/09/25"},{g:"535491550",n:"15/09/25"},
+  {g:"1195585331",n:"08/09/25"},{g:"839993531",n:"01/09/25"},{g:"1835349786",n:"25/08/25"},
+  {g:"998167865",n:"18/08/25"},{g:"1305254368",n:"11/08/25"},{g:"2020692799",n:"04/08/25"},
+  {g:"1281957263",n:"28/07/25"},{g:"2145923261",n:"22/07/25"},{g:"1893182498",n:"14/07/25"},
+  {g:"699449302",n:"07/07/25"},{g:"306207613",n:"30/06/25"},{g:"304318694",n:"23/06/25"},
+  {g:"1451338602",n:"16/06/25"},{g:"2006264587",n:"9/06/25"},{g:"1740974321",n:"02/06/25"},
+  {g:"445484817",n:"19/05/25"},{g:"430806259",n:"12/05/25"},{g:"1003675794",n:"05/05/25"},
+  {g:"1302133986",n:"28/04/25"},{g:"1886773834",n:"21/04/25"},{g:"1166307452",n:"13/04/26"},
+  {g:"2062644190",n:"06/04/25"},{g:"1942480222",n:"30/03/26"},{g:"1855293143",n:"23/03/26"},
+  {g:"1213026894",n:"16/03/26"},{g:"1561179333",n:"10/03/25"},{g:"2011408948",n:"02/03/26"},
+  {g:"1575689539",n:"23/02/26"},{g:"375230417",n:"16/02/26"},{g:"883980928",n:"03/02/25"}
+];
+
+// Trouve le GID de l'onglet correspondant à la semaine d'une date
+function getGidSemaine(dateStr) {
   const d = new Date(dateStr);
-  const jour = d.getDay(); // 0=dim, 1=lun...
+  const jour = d.getDay();
   const diffLundi = (jour === 0 ? -6 : 1 - jour);
   const lundi = new Date(d);
   lundi.setDate(d.getDate() + diffLundi);
   const dd = String(lundi.getDate()).padStart(2, "0");
   const mm = String(lundi.getMonth() + 1).padStart(2, "0");
   const yy = String(lundi.getFullYear()).slice(-2);
-  return `${dd}/${mm}/${yy}`;
+  const nomOnglet = `${dd}/${mm}/${yy}`;
+  const found = ONGLETS_GID.find(o => o.n === nomOnglet);
+  return { gid: found?.g || null, nomOnglet };
 }
 
-// Formate une date JS en "Lundi", "Mardi"... pour matcher col A du planning
+// Formate une date en jour de semaine français
 function getJourSemaine(dateStr) {
   return new Date(dateStr).toLocaleDateString("fr-FR", { weekday: "long" });
 }
@@ -1579,32 +1600,36 @@ function normalise(str) {
     .replace(/[^a-z0-9\s]/g, "").trim();
 }
 
-// Trouve les recettes dans l'appli qui correspondent à un nom du planning
+// Trouve la recette correspondant à un nom du planning
 function matcherRecette(nomPlanning, recettes) {
   const n = normalise(nomPlanning);
-  // 1. Correspondance exacte
   let found = recettes.find(r => normalise(r.nom) === n);
   if (found) return found;
-  // 2. Le nom du planning est contenu dans le nom de la recette
   found = recettes.find(r => normalise(r.nom).includes(n));
   if (found) return found;
-  // 3. Le nom de la recette est contenu dans le nom du planning
   found = recettes.find(r => n.includes(normalise(r.nom)));
   return found || null;
 }
 
 async function lirePlanningGoogleSheet(dateStr, recettes) {
-  const onglet = getOngletSemaine(dateStr);
+  const { gid, nomOnglet } = getGidSemaine(dateStr);
   const jourCible = normalise(getJourSemaine(dateStr));
 
-  // URL CSV export de Google Sheets (lecture publique)
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(onglet)}&range=A16:E80`;
+  let url;
+  if (gid) {
+    // Utilise le GID — méthode fiable (même source que commandes.html)
+    url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}&range=A16:E80`;
+  } else {
+    // Fallback par nom d'onglet si GID non trouvé (semaines futures)
+    url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(nomOnglet)}&range=A16:E80`;
+  }
 
   const resp = await fetch(url);
-  if (!resp.ok) throw new Error(`Onglet "${onglet}" introuvable`);
+  if (!resp.ok) throw new Error(`Onglet "${nomOnglet}" introuvable`);
   const csv = await resp.text();
+  if (csv.includes("error") || csv.length < 10) throw new Error(`Onglet "${nomOnglet}" vide ou introuvable`);
 
-  // Parser CSV simple
+  // Parser CSV
   const lignes = csv.split("\n").map(l =>
     l.split(",").map(c => c.replace(/^"|"$/g, "").trim())
   );
@@ -1617,18 +1642,16 @@ async function lirePlanningGoogleSheet(dateStr, recettes) {
     const colB = (cols[1] || "").trim().toUpperCase();
     const colC = (cols[2] || "").trim();
 
-    // Col A peut contenir le jour (Lundi, Mardi...) ou une date
     if (colA && ["lundi","mardi","mercredi","jeudi","vendredi","samedi","dimanche"].some(j => colA.includes(j))) {
       jourActuel = colA;
     }
 
-    // Si on est sur le bon jour et qu'il y a un parfum en col C
     if (jourActuel.includes(jourCible) && colB !== "OFF" && colC && colC.length > 1) {
-      parfumsDuJour.push(colC);
+      // Dédupliquer les doublons (même parfum = 2 mix, on l'affiche une fois)
+      if (!parfumsDuJour.includes(colC)) parfumsDuJour.push(colC);
     }
   }
 
-  // Matcher avec les recettes de l'appli
   const recettesIds = [];
   const nonTrouves = [];
 
@@ -1641,7 +1664,7 @@ async function lirePlanningGoogleSheet(dateStr, recettes) {
     }
   }
 
-  return { recettesIds, parfumsDuJour, nonTrouves, onglet };
+  return { recettesIds, parfumsDuJour, nonTrouves, nomOnglet, gid };
 }
 
 // ── Session HACCP ──
