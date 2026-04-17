@@ -1551,6 +1551,99 @@ function LotsActifsTab({ data }) {
   );
 }
 
+// ── Lecture planning Google Sheet ──
+const SHEET_ID = "1IJ_I-JxafJpIF9H2pInXaET-IQw0KrTialE94rL2hoI";
+
+// Convertit une date JS en nom d'onglet DD/MM/YY (lundi de la semaine)
+function getOngletSemaine(dateStr) {
+  const d = new Date(dateStr);
+  const jour = d.getDay(); // 0=dim, 1=lun...
+  const diffLundi = (jour === 0 ? -6 : 1 - jour);
+  const lundi = new Date(d);
+  lundi.setDate(d.getDate() + diffLundi);
+  const dd = String(lundi.getDate()).padStart(2, "0");
+  const mm = String(lundi.getMonth() + 1).padStart(2, "0");
+  const yy = String(lundi.getFullYear()).slice(-2);
+  return `${dd}/${mm}/${yy}`;
+}
+
+// Formate une date JS en "Lundi", "Mardi"... pour matcher col A du planning
+function getJourSemaine(dateStr) {
+  return new Date(dateStr).toLocaleDateString("fr-FR", { weekday: "long" });
+}
+
+// Normalise une chaîne pour comparaison souple (sans accents, minuscule)
+function normalise(str) {
+  return (str || "").toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s]/g, "").trim();
+}
+
+// Trouve les recettes dans l'appli qui correspondent à un nom du planning
+function matcherRecette(nomPlanning, recettes) {
+  const n = normalise(nomPlanning);
+  // 1. Correspondance exacte
+  let found = recettes.find(r => normalise(r.nom) === n);
+  if (found) return found;
+  // 2. Le nom du planning est contenu dans le nom de la recette
+  found = recettes.find(r => normalise(r.nom).includes(n));
+  if (found) return found;
+  // 3. Le nom de la recette est contenu dans le nom du planning
+  found = recettes.find(r => n.includes(normalise(r.nom)));
+  return found || null;
+}
+
+async function lirePlanningGoogleSheet(dateStr, recettes) {
+  const onglet = getOngletSemaine(dateStr);
+  const jourCible = normalise(getJourSemaine(dateStr));
+
+  // URL CSV export de Google Sheets (lecture publique)
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(onglet)}&range=A16:E80`;
+
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error(`Onglet "${onglet}" introuvable`);
+  const csv = await resp.text();
+
+  // Parser CSV simple
+  const lignes = csv.split("\n").map(l =>
+    l.split(",").map(c => c.replace(/^"|"$/g, "").trim())
+  );
+
+  const parfumsDuJour = [];
+  let jourActuel = "";
+
+  for (const cols of lignes) {
+    const colA = normalise(cols[0] || "");
+    const colB = (cols[1] || "").trim().toUpperCase();
+    const colC = (cols[2] || "").trim();
+
+    // Col A peut contenir le jour (Lundi, Mardi...) ou une date
+    if (colA && ["lundi","mardi","mercredi","jeudi","vendredi","samedi","dimanche"].some(j => colA.includes(j))) {
+      jourActuel = colA;
+    }
+
+    // Si on est sur le bon jour et qu'il y a un parfum en col C
+    if (jourActuel.includes(jourCible) && colB !== "OFF" && colC && colC.length > 1) {
+      parfumsDuJour.push(colC);
+    }
+  }
+
+  // Matcher avec les recettes de l'appli
+  const recettesIds = [];
+  const nonTrouves = [];
+
+  for (const nom of parfumsDuJour) {
+    const recette = matcherRecette(nom, recettes);
+    if (recette && !recettesIds.includes(recette.id)) {
+      recettesIds.push(recette.id);
+    } else if (!recette) {
+      nonTrouves.push(nom);
+    }
+  }
+
+  return { recettesIds, parfumsDuJour, nonTrouves, onglet };
+}
+
 // ── Session HACCP ──
 function SessionHaccp({ data, onBack }) {
   const [dateSession, setDateSession] = useState(new Date().toISOString().slice(0, 10));
@@ -1563,6 +1656,8 @@ function SessionHaccp({ data, onBack }) {
   const [copied, setCopied] = useState(false);
   const [saving, setSaving] = useState(false);
   const [step, setStep] = useState(1);
+  const [planningMsg, setPlanningMsg] = useState("");
+  const [planningLoading, setPlanningLoading] = useState(false);
 
   useEffect(() => {
     sbFetch("lots_actifs", "GET", null, "?actif=eq.true&order=ingredient_id&select=*").then(rows => {
@@ -1572,6 +1667,26 @@ function SessionHaccp({ data, onBack }) {
 
   const toggleRecette = (id) => {
     setSelectedRecettes(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id]);
+  };
+
+  const lirePlanning = async () => {
+    setPlanningLoading(true);
+    setPlanningMsg("");
+    try {
+      const { recettesIds, parfumsDuJour, nonTrouves, onglet } = await lirePlanningGoogleSheet(dateSession, data.recettes);
+      if (parfumsDuJour.length === 0) {
+        setPlanningMsg(`⚠️ Aucun parfum trouvé pour ce jour dans l'onglet "${onglet}"`);
+      } else {
+        setSelectedRecettes(recettesIds);
+        let msg = `✅ ${recettesIds.length} parfum${recettesIds.length > 1 ? "s" : ""} importé${recettesIds.length > 1 ? "s" : ""} depuis le planning (onglet ${onglet})`;
+        if (nonTrouves.length > 0) msg += ` — Non trouvés dans l'appli : ${nonTrouves.join(", ")}`;
+        setPlanningMsg(msg);
+      }
+    } catch (err) {
+      setPlanningMsg(`❌ Erreur : ${err.message}`);
+    }
+    setPlanningLoading(false);
+    setTimeout(() => setPlanningMsg(""), 8000);
   };
 
   const getIng = (id) => data.ingredients.find(i => i.id === id);
@@ -1674,6 +1789,19 @@ function SessionHaccp({ data, onBack }) {
             <input type="date" value={dateTurbinage} onChange={e => setDateTurbinage(e.target.value)}
               style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: `1.5px solid ${C.lightMint}`, fontFamily: F.body, fontSize: 13, color: C.text, background: C.white, outline: "none", boxSizing: "border-box" }} />
           </div>
+        </div>
+
+        {/* Bouton lecture planning */}
+        <div style={{ marginBottom: 12 }}>
+          <button onClick={lirePlanning} disabled={planningLoading}
+            style={{ background: planningLoading ? C.muted : C.gold, border: "none", borderRadius: 9, color: C.darkGreen, fontFamily: F.body, fontWeight: 700, fontSize: 13, padding: "9px 18px", cursor: planningLoading ? "not-allowed" : "pointer", opacity: planningLoading ? 0.7 : 1, display: "flex", alignItems: "center", gap: 7 }}>
+            {planningLoading ? "⏳ Lecture en cours..." : "📅 Lire le planning Google Sheet"}
+          </button>
+          {planningMsg && (
+            <div style={{ marginTop: 8, fontFamily: F.body, fontSize: 12, color: planningMsg.startsWith("✅") ? C.green : planningMsg.startsWith("⚠️") ? "#856404" : C.error, background: planningMsg.startsWith("✅") ? C.s1 : planningMsg.startsWith("⚠️") ? "#FFF3CD" : "#FFE5E5", borderRadius: 7, padding: "7px 12px", lineHeight: 1.5 }}>
+              {planningMsg}
+            </div>
+          )}
         </div>
 
         <div style={{ fontFamily: F.body, fontSize: 12, color: C.muted, fontWeight: 600, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 8 }}>
