@@ -1353,7 +1353,7 @@ function LotForm({ initial, ingredients, onSave, onCancel }) {
   const [extractMsg, setExtractMsg] = useState("");
   const [lotsFacture, setLotsFacture] = useState([]); // lots extraits d'une facture multi-produits
   const fileRef = useRef();
-  const pdfRef = useRef();
+  const galleryRef = useRef();
 
   // Appel IA commun image ou PDF
   const extraireViaIA = async (content, maxTokens = 800) => {
@@ -1481,14 +1481,14 @@ function LotForm({ initial, ingredients, onSave, onCancel }) {
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
           <button onClick={() => fileRef.current?.click()} disabled={extracting}
             style={{ background: C.mint, border: "none", borderRadius: 8, color: C.white, fontFamily: F.body, fontSize: 13, fontWeight: 600, padding: "8px 14px", cursor: extracting ? "not-allowed" : "pointer", opacity: extracting ? 0.6 : 1 }}>
-            {extracting ? "⏳ Analyse..." : "📷 Photo étiquette"}
+            {extracting ? "⏳ Analyse..." : "📷 Prendre une photo"}
           </button>
-          <button onClick={() => pdfRef.current?.click()} disabled={extracting}
+          <button onClick={() => galleryRef.current?.click()} disabled={extracting}
             style={{ background: C.gold, border: "none", borderRadius: 8, color: C.darkGreen, fontFamily: F.body, fontSize: 13, fontWeight: 600, padding: "8px 14px", cursor: extracting ? "not-allowed" : "pointer", opacity: extracting ? 0.6 : 1 }}>
-            {extracting ? "⏳ Lecture..." : "📄 Importer facture PDF"}
+            {extracting ? "⏳ Analyse..." : "🖼️ Depuis la galerie"}
           </button>
           <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handlePhoto} style={{ display: "none" }} />
-          <input ref={pdfRef} type="file" accept="application/pdf" onChange={handlePdf} style={{ display: "none" }} />
+          <input ref={galleryRef} type="file" accept="image/*" onChange={handlePhoto} style={{ display: "none" }} />
         </div>
         {extractMsg && (
           <div style={{ fontFamily: F.body, fontSize: 12, color: extractMsg.startsWith("✅") ? C.green : "#856404", background: extractMsg.startsWith("✅") ? C.s1 : "#FFF3CD", borderRadius: 7, padding: "7px 12px", marginBottom: lotsFacture.length > 0 ? 8 : 0 }}>
@@ -1520,7 +1520,7 @@ function LotForm({ initial, ingredients, onSave, onCancel }) {
         <select value={ingredientId} onChange={e => setIngredientId(e.target.value)}
           style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: `1.5px solid ${C.lightMint}`, fontFamily: F.body, fontSize: 13, color: C.text, background: C.white, outline: "none" }}>
           <option value="">— Sélectionner —</option>
-          {ingsSorted.map(i => <option key={i.id} value={i.id}>{i.nomRecette}{i.bio ? " (Bio)" : ""}</option>)}
+          {ingsSorted.filter(i => i.id !== "ing_eau").map(i => <option key={i.id} value={i.id}>{i.nomRecette}{i.bio ? " (Bio)" : ""}</option>)}
         </select>
       </div>
 
