@@ -1351,13 +1351,31 @@ function LotForm({ initial, ingredients, onSave, onCancel }) {
   const [photo, setPhoto] = useState(null);
   const [extracting, setExtracting] = useState(false);
   const [extractMsg, setExtractMsg] = useState("");
+  const [lotsFacture, setLotsFacture] = useState([]); // lots extraits d'une facture multi-produits
   const fileRef = useRef();
+  const pdfRef = useRef();
+
+  // Appel IA commun image ou PDF
+  const extraireViaIA = async (content, maxTokens = 800) => {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: maxTokens,
+        messages: [{ role: "user", content }]
+      })
+    });
+    const data = await response.json();
+    return data.content?.map(c => c.text || "").join("") || "";
+  };
 
   const handlePhoto = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setPhoto(file);
     setExtracting(true);
+    setLotsFacture([]);
     setExtractMsg("Analyse de l'étiquette en cours...");
     try {
       const base64 = await new Promise((res, rej) => {
@@ -1367,23 +1385,10 @@ function LotForm({ initial, ingredients, onSave, onCancel }) {
         r.readAsDataURL(file);
       });
       const mediaType = file.type || "image/jpeg";
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 300,
-          messages: [{
-            role: "user",
-            content: [
-              { type: "image", source: { type: "base64", media_type: mediaType, data: base64 } },
-              { type: "text", text: "Lis cette étiquette de produit alimentaire. Extrait UNIQUEMENT le numéro de lot (ou batch number) et la date limite (DLC, DDM, DLUO, EXP, Best before). Réponds UNIQUEMENT en JSON : {\"lot\": \"valeur\", \"dlc\": \"valeur\"}. Si une valeur est absente, mets null." }
-            ]
-          }]
-        })
-      });
-      const data = await response.json();
-      const text = data.content?.map(c => c.text || "").join("") || "";
+      const text = await extraireViaIA([
+        { type: "image", source: { type: "base64", media_type: mediaType, data: base64 } },
+        { type: "text", text: "Lis cette étiquette de produit alimentaire. Extrait UNIQUEMENT le numéro de lot (ou batch number) et la date limite (DLC, DDM, DLUO, EXP, Best before). Réponds UNIQUEMENT en JSON : {\"lot\": \"valeur\", \"dlc\": \"valeur\"}. Si une valeur est absente, mets null." }
+      ]);
       const clean = text.replace(/```json|```/g, "").trim();
       const parsed = JSON.parse(clean);
       if (parsed.lot) setNumeroLot(parsed.lot);
@@ -1393,6 +1398,49 @@ function LotForm({ initial, ingredients, onSave, onCancel }) {
       setExtractMsg("⚠️ Extraction impossible — saisissez manuellement");
     }
     setExtracting(false);
+  };
+
+  const handlePdf = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setExtracting(true);
+    setLotsFacture([]);
+    setExtractMsg("Lecture de la facture PDF en cours...");
+    try {
+      const base64 = await new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = () => res(r.result.split(",")[1]);
+        r.onerror = rej;
+        r.readAsDataURL(file);
+      });
+      const text = await extraireViaIA([
+        { type: "document", source: { type: "base64", media_type: "application/pdf", data: base64 } },
+        { type: "text", text: "Cette facture fournisseur contient des produits avec leurs lots et dates de limite. Extrait TOUS les produits. Reponds UNIQUEMENT en JSON sans backticks : [{\"produit\": \"nom\", \"lot\": \"numero\", \"dlc\": \"date ou null\"}]. Tableau meme si un seul produit." }
+      ], 1000);
+      const clean = text.replace(/```json|```/g, "").trim();
+      const parsed = JSON.parse(clean);
+      if (!Array.isArray(parsed) || parsed.length === 0) throw new Error("Aucun produit trouvé");
+      if (parsed.length === 1) {
+        // Un seul produit → remplir directement
+        if (parsed[0].lot) setNumeroLot(parsed[0].lot);
+        if (parsed[0].dlc) setDlc(parsed[0].dlc);
+        setExtractMsg("✅ 1 produit trouvé — vérifiez et confirmez");
+      } else {
+        // Plusieurs produits → afficher la liste pour choisir
+        setLotsFacture(parsed);
+        setExtractMsg(`✅ ${parsed.length} produits trouvés dans la facture — sélectionnez celui à importer`);
+      }
+    } catch (err) {
+      setExtractMsg("⚠️ Extraction impossible — vérifiez que le PDF est une facture lisible");
+    }
+    setExtracting(false);
+  };
+
+  const appliquerLotFacture = (item) => {
+    if (item.lot) setNumeroLot(item.lot);
+    if (item.dlc) setDlc(item.dlc);
+    setLotsFacture([]);
+    setExtractMsg(`✅ Lot importé pour "${item.produit}" — vérifiez et confirmez`);
   };
 
   const handleSave = () => {
@@ -1416,18 +1464,45 @@ function LotForm({ initial, ingredients, onSave, onCancel }) {
         {initial ? "Modifier le lot" : "Nouveau lot"}
       </h3>
 
-      {/* Photo / extraction IA */}
+      {/* Photo + PDF / extraction IA */}
       <div style={{ marginBottom: 14 }}>
-        <div style={{ fontFamily: F.body, fontSize: 12, color: C.muted, fontWeight: 600, marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>
-          📷 Scanner étiquette ou facture
+        <div style={{ fontFamily: F.body, fontSize: 12, color: C.muted, fontWeight: 600, marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 }}>
+          📄 Importer depuis étiquette ou facture
         </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-          <button onClick={() => fileRef.current?.click()} style={{ background: C.mint, border: "none", borderRadius: 8, color: C.white, fontFamily: F.body, fontSize: 13, fontWeight: 600, padding: "8px 16px", cursor: "pointer" }}>
-            {extracting ? "Analyse..." : "📷 Prendre / choisir photo"}
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+          <button onClick={() => fileRef.current?.click()} disabled={extracting}
+            style={{ background: C.mint, border: "none", borderRadius: 8, color: C.white, fontFamily: F.body, fontSize: 13, fontWeight: 600, padding: "8px 14px", cursor: extracting ? "not-allowed" : "pointer", opacity: extracting ? 0.6 : 1 }}>
+            {extracting ? "⏳ Analyse..." : "📷 Photo étiquette"}
+          </button>
+          <button onClick={() => pdfRef.current?.click()} disabled={extracting}
+            style={{ background: C.gold, border: "none", borderRadius: 8, color: C.darkGreen, fontFamily: F.body, fontSize: 13, fontWeight: 600, padding: "8px 14px", cursor: extracting ? "not-allowed" : "pointer", opacity: extracting ? 0.6 : 1 }}>
+            {extracting ? "⏳ Lecture..." : "📄 Importer facture PDF"}
           </button>
           <input ref={fileRef} type="file" accept="image/*" capture="environment" onChange={handlePhoto} style={{ display: "none" }} />
-          {extractMsg && <span style={{ fontFamily: F.body, fontSize: 12, color: extractMsg.startsWith("✅") ? C.green : extractMsg.startsWith("⚠️") ? "#856404" : C.muted }}>{extractMsg}</span>}
+          <input ref={pdfRef} type="file" accept="application/pdf" onChange={handlePdf} style={{ display: "none" }} />
         </div>
+        {extractMsg && (
+          <div style={{ fontFamily: F.body, fontSize: 12, color: extractMsg.startsWith("✅") ? C.green : "#856404", background: extractMsg.startsWith("✅") ? C.s1 : "#FFF3CD", borderRadius: 7, padding: "7px 12px", marginBottom: lotsFacture.length > 0 ? 8 : 0 }}>
+            {extractMsg}
+          </div>
+        )}
+        {/* Sélecteur multi-produits facture */}
+        {lotsFacture.length > 0 && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+            {lotsFacture.map((item, i) => (
+              <div key={i} onClick={() => appliquerLotFacture(item)}
+                style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: C.white, border: `1.5px solid ${C.lightMint}`, borderRadius: 8, padding: "8px 12px", cursor: "pointer" }}>
+                <div>
+                  <div style={{ fontFamily: F.body, fontSize: 13, fontWeight: 600, color: C.darkGreen }}>{item.produit}</div>
+                  <div style={{ fontFamily: F.mono, fontSize: 11, color: C.muted, marginTop: 2 }}>
+                    Lot : {item.lot || "—"}{item.dlc ? ` · DDM : ${item.dlc}` : ""}
+                  </div>
+                </div>
+                <span style={{ background: C.green, color: C.white, borderRadius: 6, padding: "4px 10px", fontFamily: F.body, fontSize: 11, fontWeight: 700, flexShrink: 0 }}>Sélectionner</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Ingrédient */}
