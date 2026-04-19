@@ -1049,6 +1049,20 @@ function IngredientForm({ onSave, onCancel, initial, fournisseurs }) {
         <Input label="Stock actuel" value={stockActuel} onChange={setStock} type="number" placeholder="0" style={{ marginBottom: 0 }} />
       </div>
       <div style={{ marginBottom: 10 }} />
+      {/* Vocal fournisseur */}
+      <div style={{ marginBottom: 10 }}>
+        <div style={{ fontFamily: F.body, fontSize: 12, color: C.muted, fontWeight: 600, marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>
+          🎤 Dicter le fournisseur
+        </div>
+        <BoutonVocal
+          contexte="fournisseur"
+          ingredients={[{ id: initial?.id || "", nomRecette: nomRecette }]}
+          fournisseurs={fournisseurs}
+          onResultat={(res) => {
+            if (res.fournisseur_id) setFour(res.fournisseur_id);
+          }}
+        />
+      </div>
       <Select label="Fournisseur principal" value={fournisseurId} onChange={setFour} options={fournisseurs.map(f => ({ value: f.id, label: f.nom }))} placeholder="— Choisir —" />
       <Select label="Allergène" value={allergene} onChange={setAll} options={allerg} />
       <Toggle label="Issu de l'Agriculture Biologique (AB)" value={bio} onChange={setBio} />
@@ -1341,6 +1355,143 @@ function LotCard({ lot, ingredient, onEdit, onArchive }) {
   );
 }
 
+
+// ─── COMPOSANT VOCAL ──────────────────────────────────────────────────────────
+function BoutonVocal({ onResultat, contexte = "lot", ingredients = [], fournisseurs = [] }) {
+  const [etat, setEtat] = useState("idle"); // idle | ecoute | analyse | ok | erreur
+  const [msg, setMsg] = useState("");
+  const recognitionRef = useRef(null);
+
+  const demarrer = () => {
+    if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
+      setEtat("erreur");
+      setMsg("Reconnaissance vocale non supportée sur ce navigateur. Utilisez Chrome sur Android.");
+      return;
+    }
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SR();
+    recognition.lang = "fr-FR";
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognitionRef.current = recognition;
+
+    recognition.onstart = () => { setEtat("ecoute"); setMsg("Parlez maintenant..."); };
+    recognition.onerror = () => { setEtat("erreur"); setMsg("Micro inaccessible — vérifiez les permissions"); };
+    recognition.onend = () => { if (etat === "ecoute") setEtat("idle"); };
+
+    recognition.onresult = async (e) => {
+      const texte = e.results[0][0].transcript;
+      setEtat("analyse");
+      setMsg(`Compris : "${texte}" — Analyse en cours...`);
+
+      try {
+        const listeIngredients = ingredients.map(i => `${i.id}: ${i.nomRecette}`).join(", ");
+        const listeFournisseurs = fournisseurs.map(f => `${f.id}: ${f.nom}`).join(", ");
+
+        let prompt = "";
+        if (contexte === "lot") {
+          prompt = `Tu es un assistant pour une glacerie artisanale. L'utilisateur a dicté vocalement : "${texte}".
+Ingrédients disponibles : ${listeIngredients}.
+Fournisseurs disponibles : ${listeFournisseurs}.
+Extrais les informations de traçabilité. Réponds UNIQUEMENT en JSON :
+{"ingredient_id": "id_exact_ou_null", "numero_lot": "valeur_ou_null", "dlc": "valeur_ou_null", "notes": "valeur_ou_null"}`;
+        } else {
+          prompt = `Tu es un assistant pour une glacerie artisanale. L'utilisateur a dicté vocalement : "${texte}".
+Ingrédients disponibles : ${listeIngredients}.
+Fournisseurs disponibles : ${listeFournisseurs}.
+L'utilisateur veut mettre à jour le fournisseur d'un ingrédient. Réponds UNIQUEMENT en JSON :
+{"ingredient_id": "id_exact_ou_null", "fournisseur_id": "id_exact_ou_null", "confirmation": "phrase de confirmation courte en français"}`;
+        }
+
+        const response = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": process.env.REACT_APP_ANTHROPIC_KEY || "",
+            "anthropic-version": "2023-06-01",
+            "anthropic-dangerous-allow-browser": "true",
+          },
+          body: JSON.stringify({
+            model: "claude-sonnet-4-20250514",
+            max_tokens: 300,
+            messages: [{ role: "user", content: prompt }]
+          })
+        });
+
+        const data = await response.json();
+        const txt = data.content?.map(c => c.text || "").join("") || "";
+        const clean = txt.replace(/```json|```/g, "").trim();
+        const parsed = JSON.parse(clean);
+
+        setEtat("ok");
+        const confirmMsg = parsed.confirmation || `Détecté : ${parsed.ingredient_id || "?"} — Lot : ${parsed.numero_lot || "?"} — DLC : ${parsed.dlc || "?"}`;
+        setMsg(confirmMsg);
+        onResultat(parsed);
+        setTimeout(() => { setEtat("idle"); setMsg(""); }, 4000);
+      } catch {
+        setEtat("erreur");
+        setMsg("Analyse impossible — réessayez ou saisissez manuellement");
+        setTimeout(() => { setEtat("idle"); setMsg(""); }, 3000);
+      }
+    };
+
+    recognition.start();
+  };
+
+  const arreter = () => {
+    recognitionRef.current?.stop();
+    setEtat("idle");
+    setMsg("");
+  };
+
+  const couleur = etat === "ecoute" ? "#E53935" : etat === "ok" ? C.green : etat === "erreur" ? C.error : C.darkGreen;
+  const bg = etat === "ecoute" ? "#FFE5E5" : etat === "ok" ? C.s1 : etat === "erreur" ? "#FFE5E5" : C.cream;
+
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+        <button
+          onClick={etat === "ecoute" ? arreter : demarrer}
+          disabled={etat === "analyse"}
+          style={{
+            background: couleur, border: "none", borderRadius: 8,
+            color: C.white, fontFamily: F.body, fontSize: 13, fontWeight: 700,
+            padding: "9px 16px", cursor: etat === "analyse" ? "not-allowed" : "pointer",
+            display: "flex", alignItems: "center", gap: 7, opacity: etat === "analyse" ? 0.7 : 1,
+            transition: "background 0.2s"
+          }}>
+          {etat === "ecoute" ? "⏹ Arrêter" : etat === "analyse" ? "⏳ Analyse..." : "🎤 Dicter"}
+        </button>
+        {etat === "ecoute" && (
+          <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+            {[0,1,2].map(i => (
+              <div key={i} style={{
+                width: 4, borderRadius: 2, background: "#E53935",
+                animation: `pulse${i} 0.8s ease-in-out ${i * 0.15}s infinite alternate`,
+                height: 8 + i * 6
+              }} />
+            ))}
+          </div>
+        )}
+      </div>
+      {msg && (
+        <div style={{
+          marginTop: 8, fontFamily: F.body, fontSize: 12, padding: "7px 12px",
+          borderRadius: 7, background: bg,
+          color: couleur, lineHeight: 1.5
+        }}>
+          {msg}
+        </div>
+      )}
+      <style>{`
+        @keyframes pulse0 { from { height: 8px } to { height: 20px } }
+        @keyframes pulse1 { from { height: 14px } to { height: 6px } }
+        @keyframes pulse2 { from { height: 8px } to { height: 22px } }
+      `}</style>
+    </div>
+  );
+}
+
 // ── Formulaire ajout/modif lot ──
 function LotForm({ initial, ingredients, onSave, onCancel }) {
   const [ingredientId, setIngredientId] = useState(initial?.ingredient_id || "");
@@ -1472,6 +1623,24 @@ function LotForm({ initial, ingredients, onSave, onCancel }) {
       <h3 style={{ fontFamily: F.display, color: C.darkGreen, marginTop: 0, marginBottom: 14 }}>
         {initial ? "Modifier le lot" : "Nouveau lot"}
       </h3>
+
+      {/* Vocal */}
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ fontFamily: F.body, fontSize: 12, color: C.muted, fontWeight: 600, marginBottom: 8, textTransform: "uppercase", letterSpacing: 0.5 }}>
+          🎤 Dicter les infos du lot
+        </div>
+        <BoutonVocal
+          contexte="lot"
+          ingredients={ingredients}
+          fournisseurs={[]}
+          onResultat={(res) => {
+            if (res.ingredient_id) setIngredientId(res.ingredient_id);
+            if (res.numero_lot) setNumeroLot(res.numero_lot);
+            if (res.dlc) setDlc(res.dlc);
+            if (res.notes) setNotes(res.notes);
+          }}
+        />
+      </div>
 
       {/* Photo + PDF / extraction IA */}
       <div style={{ marginBottom: 14 }}>
