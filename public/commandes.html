@@ -87,13 +87,12 @@ input:focus,select:focus{border-color:var(--vert-clair);background:#fff}
 .tp{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:5px;font-size:11px;background:var(--beige-f);margin:2px}
 .tp.ok{background:#dcfce7;color:#166534}.tp.nok{background:#fee2e2;color:#991b1b}
 .abar{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
-/* Récapitulatif veille */
+/* Recap veille */
 .recap-table{width:100%;border-collapse:collapse;font-size:13px}
 .recap-table th{text-align:left;padding:9px 14px;background:var(--vert);color:rgba(255,255,255,.85);font-size:10px;letter-spacing:1px;text-transform:uppercase;position:sticky;top:0}
 .recap-table th:first-child{border-radius:7px 0 0 0;width:32px;text-align:center}
 .recap-table th:last-child{border-radius:0 7px 0 0}
 .recap-table td{padding:10px 14px;border-bottom:1px solid var(--beige-f);vertical-align:middle}
-.recap-table tr:last-child td{border-bottom:none}
 .recap-table tr.checked td{background:#f0fdf4;opacity:.65}
 .recap-table tr.checked td .ing-nom{text-decoration:line-through;color:var(--gris)}
 .recap-table tr:hover td{background:var(--beige)}
@@ -108,33 +107,70 @@ input:focus,select:focus{border-color:var(--vert-clair);background:#fff}
 .recap-stat .rs-lbl{font-size:11px;color:var(--gris);text-transform:uppercase;letter-spacing:.5px}
 .recap-progress{height:4px;background:var(--beige-f);border-radius:2px;margin-top:4px}
 .recap-progress-bar{height:100%;background:var(--vert);border-radius:2px;transition:width .3s}
+/* Fiche production */
+.fp-wrap{padding:4px 0}
+.fp-day{margin-bottom:22px;border:1px solid var(--beige-f);border-radius:var(--r);overflow:hidden;background:var(--blanc);box-shadow:var(--sh)}
+.fp-day-header{background:var(--vert);color:#fff;padding:12px 18px;display:flex;align-items:center;justify-content:space-between}
+.fp-day-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:600}
+.fp-day-meta{font-size:11px;color:rgba(255,255,255,.6)}
+.fp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:0}
+.fp-card{padding:12px 14px;border-right:1px solid var(--beige-f);border-bottom:1px solid var(--beige-f);display:flex;flex-direction:column;gap:8px;transition:background .15s}
+.fp-card:hover{background:var(--beige)}
+.fp-card.done{opacity:.5;background:#f0fdf4}
+.fp-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:6px}
+.fp-name{font-size:12px;font-weight:500;color:var(--texte);line-height:1.35;flex:1}
+.fp-name.barred{text-decoration:line-through;color:var(--gris)}
+.fp-badges{display:flex;gap:4px;flex-shrink:0;align-items:center}
+.fp-badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600;line-height:1.4}
+.fp-s{background:#dcfce7;color:#166534}
+.fp-l{background:#dbeafe;color:#1e40af}
+.fp-g{background:#fef9c3;color:#854d0e}
+.fp-v{background:#ede9fe;color:#5b21b6}
+.fp-mix{background:var(--beige-f);color:var(--gris);padding:1px 5px;border-radius:3px;font-size:10px;font-weight:500}
+.fp-ings{list-style:none;flex:1}
+.fp-ings li{display:flex;justify-content:space-between;align-items:baseline;gap:6px;padding:3px 0;border-bottom:1px dotted var(--beige-f);font-size:11px}
+.fp-ings li:last-child{border-bottom:none}
+.fp-iname{color:var(--texte);flex:1}
+.fp-iqte{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;color:var(--vert-clair);white-space:nowrap;flex-shrink:0}
+.fp-no-ing{font-size:11px;color:var(--gris);font-style:italic;padding:4px 0}
+.fp-tops{padding:6px 8px;background:var(--beige);border-radius:5px;font-size:11px}
+.fp-top-lbl{display:block;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--gris);margin-bottom:4px}
+.fp-top-item{display:flex;justify-content:space-between;align-items:baseline;padding:2px 0;color:var(--texte);border-bottom:1px dotted var(--beige-f)}
+.fp-top-item:last-child{border-bottom:none}
+.fp-top-nom{flex:1}
+.fp-top-qte{font-family:'DM Mono',monospace;font-size:10px;color:var(--vert-clair);white-space:nowrap}
+.fp-no-top{color:var(--gris);font-style:italic;font-size:11px}
+.fp-foot{display:flex;align-items:center;gap:6px;padding-top:6px;border-top:1px solid var(--beige-f);margin-top:auto}
+.fp-foot input[type=checkbox]{width:15px;height:15px;accent-color:var(--vert);cursor:pointer;flex-shrink:0}
+.fp-foot label{font-size:10px;color:var(--gris);cursor:pointer;text-transform:uppercase;letter-spacing:.5px}
+.fp-no-rec{font-size:11px;color:#991b1b;padding:8px 0;font-style:italic}
+.fp-actions{padding:12px 16px;background:var(--beige);border-top:1px solid var(--beige-f);display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap}
+.fp-actions-meta{font-size:12px;color:var(--gris)}
 #toast{position:fixed;bottom:20px;right:20px;background:var(--vert);color:#fff;padding:11px 18px;border-radius:8px;font-size:13px;box-shadow:0 4px 16px rgba(0,0,0,.2);transform:translateY(60px);opacity:0;transition:all .3s;z-index:999}
 #toast.show{transform:translateY(0);opacity:1}
 @media print{
   header,.card,.mc,.abar,.bf,.ef2,.tnav,.recap-stats{display:none!important}
-  .cs{display:block!important}.tpanel{display:block!important}
+  .cs{display:block!important}
+  .tpanel{display:none!important}
+  .tpanel.active{display:block!important}
   body{background:white}
-  .bc,.ec{page-break-inside:avoid;box-shadow:none;border:1px solid #ddd}
-  .bch,.ech{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .chk{display:none}
+  .bc,.fp-day{page-break-inside:avoid;box-shadow:none;border:1px solid #ddd}
+  .bch,.fp-day-header,.ech{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .fp-foot,.fp-actions,.fp-card:hover{display:none!important}
+  .fp-grid{display:grid;grid-template-columns:repeat(3,1fr)}
+  .fp-card{border:1px solid #eee;page-break-inside:avoid}
 }
 </style>
 </head>
 <body>
-
 <header>
   <div class="hbrand">
     <div class="logo">🍦</div>
-    <div>
-      <h1>La Tropicale Glacier</h1>
-      <p>Bons de commande</p>
-    </div>
+    <div><h1>La Tropicale Glacier</h1><p>Bons de commande</p></div>
   </div>
   <a href="https://latropicale-glacier.vercel.app" class="hback">← Retour à l'app</a>
 </header>
-
 <main>
-
 <div class="card">
   <h2>⚙️ Configuration</h2>
   <div class="g2">
@@ -152,7 +188,7 @@ input:focus,select:focus{border-color:var(--vert-clair);background:#fff}
     </label>
   </div>
   <div id="gidManuelDiv" style="display:none;margin-top:10px;padding:12px 14px;background:var(--beige);border-radius:7px;border:1px solid var(--beige-f);">
-    <label style="margin-bottom:6px;">GID de l'onglet <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--gris);">— ouvre le sheet, clique sur l'onglet voulu, copie le numéro après <strong>#gid=</strong> dans l'URL</span></label>
+    <label style="margin-bottom:6px;">GID de l'onglet</label>
     <input type="text" id="gidManuel" placeholder="ex: 3208226" style="width:200px;">
   </div>
   <div class="sb" id="statusBar"></div>
@@ -172,12 +208,11 @@ input:focus,select:focus{border-color:var(--vert-clair);background:#fff}
   <div class="pr" id="pr"></div>
   <div class="tnav" id="tnav"></div>
   <div class="abar">
-    <button class="btn btn-o" onclick="window.print()">🖨️ Imprimer</button>
+    <button class="btn btn-o" onclick="imprimerActif()">🖨️ Imprimer</button>
     <button class="btn btn-s" onclick="copierTout()">📋 Copier tout</button>
   </div>
   <div id="tc"></div>
 </div>
-
 </main>
 <div id="toast"></div>
 
@@ -185,117 +220,76 @@ input:focus,select:focus{border-color:var(--vert-clair);background:#fff}
 const SHEET_ID='1IJ_I-JxafJpIF9H2pInXaET-IQw0KrTialE94rL2hoI';
 const GOOGLE_API_KEY='AIzaSyBhYu07yyGNafYNCMkiA6Oit8ZpO4WxdA8';
 
-// Fournisseurs avec bon individuel (matching partiel sur le nom normalisé)
-const FOURNISSEURS_PRIORITAIRES=[
-  'fromentellerie',
-  'dipsa',
-  'gamme',   // Gamme des Chefs
-  'metro',
-  'tang',    // Tang Frères
-  'paris store',
-  'top asia'
+const FOURNISSEURS_PRIORITAIRES=['fromentellerie','dipsa','gamme','metro','tang','paris store','top asia'];
+
+// Ingrédients de base à exclure de la fiche de production
+const EXCLUSIONS_BASE=[
+  n=>n.includes('lin')&&(n.includes('farine')||n.includes('mixeo')),
+  n=>n.includes('mixeo'),
+  n=>n.includes('guar')&&!n.includes('guarana'),
+  n=>n.includes('sucre')&&n.includes('canne'),
+  n=>n.includes('poudre')&&n.includes('lait'),
+  n=>n==='eau',
+  n=>n.includes('lait')&&n.includes('entier'),
+  n=>n.includes('creme')&&(n.includes('crue')||n.includes('fraiche')),
+  n=>n.includes('sirop')&&n.includes('agave'),
+  n=>n.includes('inuline'),
+  n=>n.includes('glucose'),
 ];
 
 let S={recettes:[],ingredients:[],fournisseurs:[],planning:[],mapping:{},semaine:''};
 
-// ── Utilitaires ──
-function ss(msg,type='l'){
-  const b=document.getElementById('statusBar');
-  b.className='sb show sb-'+(type==='l'?'l':type==='ok'?'ok':'err');
-  b.innerHTML=type==='l'?`<div class="spin"></div><span>${msg}</span>`:`<span>${type==='ok'?'✅':'❌'}</span><span>${msg}</span>`;
-}
+function ss(msg,type='l'){const b=document.getElementById('statusBar');b.className='sb show sb-'+(type==='l'?'l':type==='ok'?'ok':'err');b.innerHTML=type==='l'?`<div class="spin"></div><span>${msg}</span>`:`<span>${type==='ok'?'✅':'❌'}</span><span>${msg}</span>`}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
 function norm(s){return(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,'').trim()}
 function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):''}
 function fqte(n){if(!n)return'0';if(Number.isInteger(n))return''+n;return n.toFixed(n<1?3:n<10?2:1).replace(/\.?0+$/,'')}
 function pdate(nom){const m=nom.match(/(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);if(!m)return null;let y=m[3]?parseInt(m[3]):new Date().getFullYear();if(y<100)y+=2000;return new Date(y,parseInt(m[2])-1,parseInt(m[1]))}
+function estPrioritaire(nom){const n=norm(nom||'');return FOURNISSEURS_PRIORITAIRES.some(k=>n.includes(k))}
+function estBaseExclue(nom){const n=norm(nom||'');return EXCLUSIONS_BASE.some(f=>f(n))}
 
-function estPrioritaire(nomFournisseur){
-  const n=norm(nomFournisseur||'');
-  return FOURNISSEURS_PRIORITAIRES.some(k=>n.includes(k));
-}
+function chargerConfig(){const c=JSON.parse(localStorage.getItem('tc_cfg')||'{}');if(c.url)document.getElementById('supabaseUrl').value=c.url;if(c.key)document.getElementById('supabaseKey').value=c.key;if(c.mapping)S.mapping=c.mapping;if(Object.keys(c).length)document.getElementById('saveConfig').checked=true}
+function saveConfig(){if(!document.getElementById('saveConfig').checked)return;localStorage.setItem('tc_cfg',JSON.stringify({url:document.getElementById('supabaseUrl').value.trim(),key:document.getElementById('supabaseKey').value.trim(),mapping:S.mapping}))}
 
-// ── Config ──
-function chargerConfig(){
-  const c=JSON.parse(localStorage.getItem('tc_cfg')||'{}');
-  if(c.url)document.getElementById('supabaseUrl').value=c.url;
-  if(c.key)document.getElementById('supabaseKey').value=c.key;
-  if(c.mapping)S.mapping=c.mapping;
-  if(Object.keys(c).length)document.getElementById('saveConfig').checked=true;
-}
-function saveConfig(){
-  if(!document.getElementById('saveConfig').checked)return;
-  localStorage.setItem('tc_cfg',JSON.stringify({url:document.getElementById('supabaseUrl').value.trim(),key:document.getElementById('supabaseKey').value.trim(),mapping:S.mapping}));
-}
-
-// ── Sélecteur semaines — chargement dynamique via Google Sheets API ──
 async function initSelect(){
   const sel=document.getElementById('semaineSelect');
-  sel.innerHTML='<option value="">⏳ Chargement des semaines…</option>';
-  sel.disabled=true;
+  sel.innerHTML='<option value="">⏳ Chargement des semaines…</option>';sel.disabled=true;
   try{
-    const url=`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}?key=${GOOGLE_API_KEY}&fields=sheets.properties(sheetId,title)`;
-    const res=await fetch(url);
-    if(!res.ok)throw new Error(`API Google Sheets: ${res.status}`);
+    const res=await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}?key=${GOOGLE_API_KEY}&fields=sheets.properties(sheetId,title)`);
+    if(!res.ok)throw new Error(`API ${res.status}`);
     const data=await res.json();
-    const datePattern=/^\d{1,2}\/\d{2}\/\d{2}$/;
-    const tabs=data.sheets
-      .filter(s=>datePattern.test(s.properties.title))
+    const tabs=data.sheets.filter(s=>/^\d{1,2}\/\d{2}\/\d{2}$/.test(s.properties.title))
       .map(s=>({g:String(s.properties.sheetId),n:s.properties.title}))
       .sort((a,b)=>{const pa=pdate(a.n),pb=pdate(b.n);return(!pa||!pb)?0:pb-pa});
     sel.innerHTML='<option value="">— Choisir une semaine —</option>';
     const today=new Date();let best=null,bd=Infinity;
-    for(const o of tabs){
-      const opt=document.createElement('option');opt.value=o.g;opt.textContent=o.n;sel.appendChild(opt);
-      const d=pdate(o.n);if(d){const diff=Math.abs(d-today);if(diff<bd){bd=diff;best=o.g}}
-    }
-    const optM=document.createElement('option');optM.value='__manuel__';optM.textContent='✏️ Autre semaine (saisir le GID)…';sel.appendChild(optM);
-    if(best)sel.value=best;
-    sel.disabled=false;
-  }catch(e){
-    console.error('Erreur chargement onglets:',e);
-    sel.innerHTML='<option value="">⚠ Erreur de chargement automatique</option><option value="__manuel__">✏️ Saisir le GID manuellement…</option>';
-    sel.disabled=false;
-    document.getElementById('gidManuelDiv').style.display='block';
-  }
+    for(const o of tabs){const opt=document.createElement('option');opt.value=o.g;opt.textContent=o.n;sel.appendChild(opt);const d=pdate(o.n);if(d){const diff=Math.abs(d-today);if(diff<bd){bd=diff;best=o.g}}}
+    const optM=document.createElement('option');optM.value='__manuel__';optM.textContent='✏️ Autre semaine (GID manuel)…';sel.appendChild(optM);
+    if(best)sel.value=best;sel.disabled=false;
+  }catch(e){sel.innerHTML='<option value="">⚠ Erreur — saisir GID manuel</option><option value="__manuel__">✏️ GID manuel…</option>';sel.disabled=false;document.getElementById('gidManuelDiv').style.display='block'}
 }
 
-function toggleGidManuel(){
-  const v=document.getElementById('semaineSelect').value;
-  document.getElementById('gidManuelDiv').style.display=v==='__manuel__'?'block':'none';
-}
+function toggleGidManuel(){document.getElementById('gidManuelDiv').style.display=document.getElementById('semaineSelect').value==='__manuel__'?'block':'none'}
 
-// ── Chargement ──
 async function lancerChargement(){
   const url=document.getElementById('supabaseUrl').value.trim();
   const key=document.getElementById('supabaseKey').value.trim();
   let gid=document.getElementById('semaineSelect').value;
-  if(gid==='__manuel__'){gid=document.getElementById('gidManuel')?.value?.trim()||'';if(!gid){ss('Veuillez saisir le GID de l\'onglet.','err');return}}
-  if(!url||!key){ss('Renseignez URL Supabase et clé.','err');return}
+  if(gid==='__manuel__'){gid=document.getElementById('gidManuel')?.value?.trim()||'';if(!gid){ss('Saisir le GID.','err');return}}
+  if(!url||!key){ss('Renseignez URL et clé Supabase.','err');return}
   if(!gid){ss('Choisissez une semaine.','err');return}
-  try{
-    ss('Chargement Supabase…');await chargerSupa(url,key);
-    ss('Lecture du planning…');await chargerPlanning(gid);
-    saveConfig();
+  try{ss('Chargement Supabase…');await chargerSupa(url,key);ss('Lecture du planning…');await chargerPlanning(gid);saveConfig();
     const jours=[...new Set(S.planning.map(p=>p.jour))];
     ss(`✓ ${S.recettes.length} recettes · ${S.planning.length} production(s) : ${jours.map(cap).join(', ')}`,'ok');
     afficherMapping();
   }catch(e){ss('Erreur : '+e.message,'err');console.error(e)}
 }
 
-async function supaGet(url,key,table,q=''){
-  const r=await fetch(`${url}/rest/v1/${table}?${q}`,{headers:{'apikey':key,'Authorization':'Bearer '+key}});
-  if(!r.ok)throw new Error(`Supabase ${table}: ${r.status}`);
-  return r.json();
-}
+async function supaGet(url,key,table,q=''){const r=await fetch(`${url}/rest/v1/${table}?${q}`,{headers:{'apikey':key,'Authorization':'Bearer '+key}});if(!r.ok)throw new Error(`Supabase ${table}: ${r.status}`);return r.json()}
 
 async function chargerSupa(url,key){
   const base=url.replace(/\/$/,'');
-  const[rec,ing,fou]=await Promise.all([
-    supaGet(base,key,'recettes','order=nom&select=*'),
-    supaGet(base,key,'ingredients','order=nom_recette&select=*'),
-    supaGet(base,key,'fournisseurs','order=nom&select=*')
-  ]);
+  const[rec,ing,fou]=await Promise.all([supaGet(base,key,'recettes','order=nom&select=*'),supaGet(base,key,'ingredients','order=nom_recette&select=*'),supaGet(base,key,'fournisseurs','order=nom&select=*')]);
   S.recettes=rec.map(r=>({id:r.id,nom:r.nom||r.nom_recette||'',categorie:r.categorie||'',poudres:r.poudres||[],liquides:r.liquides||[],ingredients:r.ingredients||[],toppings:r.toppings||[]}));
   S.ingredients=ing.map(i=>({id:i.id,nomRecette:i.nom_recette||i.nomRecette||'',nomEtiquette:i.nom_etiquette||i.nomEtiquette||'',fournisseurId:i.fournisseur_id||i.fournisseurId||'',unite:i.unite||'kg',bio:i.bio||false}));
   S.fournisseurs=fou.map(f=>({id:f.id,nom:f.nom||'',contact:f.contact||'',jourCommande:f.jour_commande||f.jourCommande||'',jourLivraison:f.jour_livraison||f.jourLivraison||''}));
@@ -313,9 +307,8 @@ function parseCSV(csv){
 
 async function chargerPlanning(gid){
   const r=await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`);
-  if(!r.ok)throw new Error(`Sheet inaccessible (${r.status}) — vérifiez le partage public.`);
-  const csv=await r.text();
-  const lignes=parseCSV(csv);
+  if(!r.ok)throw new Error(`Sheet inaccessible (${r.status})`);
+  const csv=await r.text();const lignes=parseCSV(csv);
   S.planning=[];
   const JOURS=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
   let jour='',date='';
@@ -328,15 +321,12 @@ async function chargerPlanning(gid){
       let p=C,mx=1;const mX=p.match(/\s+[Xx]\s*(\d+)$/);
       if(mX){mx=parseInt(mX[1]);p=p.replace(/\s+[Xx]\s*\d+$/,'').trim()}
       const existing=S.planning.find(x=>x.parfum===p&&x.jour===jour);
-      if(existing){existing.mixCount+=mx;}
-      else{S.planning.push({jour,date,parfum:p,mixCount:mx,qteOutput:D,sgl:E});}
+      if(existing){existing.mixCount+=mx}else{S.planning.push({jour,date,parfum:p,mixCount:mx,qteOutput:D,sgl:E})}
     }
   }
-  const sel=document.getElementById('semaineSelect');
-  S.semaine=sel.options[sel.selectedIndex]?.text||'';
+  const sel=document.getElementById('semaineSelect');S.semaine=sel.options[sel.selectedIndex]?.text||'';
 }
 
-// ── Mapping ──
 function fuzzy(parfum){
   const nk=norm(parfum),mots=nk.split(/\s+/).filter(m=>m.length>2);
   for(const r of S.recettes)if(norm(r.nom)===nk)return r.id;
@@ -364,7 +354,6 @@ function afficherMapping(){
   document.getElementById('mappingCard').classList.add('show');
 }
 
-// ── Génération ──
 function genererCommandes(){
   const bMap={};
   for(const prod of S.planning){
@@ -378,237 +367,219 @@ function genererCommandes(){
       bMap[iid].q+=p*mx;bMap[iid].recs.add(prod.parfum);
     }
   }
-
-  const parFour={};   // fournisseurs prioritaires → bon individuel
-  const divers=[];    // tous les autres → bon consolidé
-
+  const parFour={};const divers=[];
   for(const[iid,b] of Object.entries(bMap)){
     const ing=S.ingredients.find(i=>i.id===iid);if(!ing)continue;
     let q=b.q,u=b.u;
-    if(u==='g'&&q>=1000){q/=1000;u='kg'}
-    if(u==='ml'&&q>=1000){q/=1000;u='L'}
+    if(u==='g'&&q>=1000){q/=1000;u='kg'}if(u==='ml'&&q>=1000){q/=1000;u='L'}
     const item={ing,qte:parseFloat(q.toFixed(3)),u,recs:[...b.recs]};
     const fou=S.fournisseurs.find(f=>f.id===ing.fournisseurId);
     const fouNom=fou?.nom||'';
-
-    if(fou&&estPrioritaire(fouNom)){
-      if(!parFour[fou.id])parFour[fou.id]={fou,lignes:[]};
-      parFour[fou.id].lignes.push(item);
-    }else{
-      divers.push({item,fouNom,fou});
-    }
+    if(fou&&estPrioritaire(fouNom)){if(!parFour[fou.id])parFour[fou.id]={fou,lignes:[]};parFour[fou.id].lignes.push(item)}
+    else divers.push({item,fouNom,fou});
   }
-
   afficherResultats(parFour,divers);
 }
 
 function afficherResultats(parFour,divers){
-  // Récap planning
   const ORDRE=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
   const pj={};for(const p of S.planning){if(!pj[p.jour])pj[p.jour]=[];pj[p.jour].push(p)}
   let rh='<h3>📅 Planning de la semaine</h3>';
   for(const j of ORDRE){if(!pj[j])continue;
     rh+=`<div class="pj"><span class="jl">${cap(j)}</span><div>${pj[j].map(p=>{const ok=!!S.mapping[norm(p.parfum)];return`<span class="tp ${ok?'ok':'nok'}">${ok?'✓':'⚠'} ${p.parfum}${p.mixCount>1?` ×${p.mixCount}`:''}</span>`}).join('')}</div></div>`}
   document.getElementById('pr').innerHTML=rh;
-
   const tnav=document.getElementById('tnav'),tc=document.getElementById('tc');
-  tnav.innerHTML='';tc.innerHTML='';
-  const tabs=[];
+  tnav.innerHTML='';tc.innerHTML='';const tabs=[];
 
-  // Bons prioritaires (un par fournisseur)
+  // Fiche production en premier
+  tabs.push({id:'fiche',label:'Fiche de production',icon:'📋',html:ficheProductionHtml()});
+
+  // Bons fournisseurs prioritaires
   for(const fou of S.fournisseurs.filter(f=>parFour[f.id]))
     tabs.push({id:`f_${fou.id}`,label:fou.nom,icon:'📦',html:bonHtml(parFour[fou.id])});
 
-  // Bon consolidé "Autres fournisseurs"
-  if(divers.length)
-    tabs.push({id:'divers',label:'Autres fournisseurs',icon:'🛒',html:diversHtml(divers)});
+  // Bon consolidé autres fournisseurs
+  if(divers.length)tabs.push({id:'divers',label:'Autres fournisseurs',icon:'🛒',html:diversHtml(divers)});
 
-  // Emails (fournisseurs prioritaires uniquement)
-  const eh=emailsHtml(parFour);
-  if(eh)tabs.push({id:'emails',label:'Emails fournisseurs',icon:'✉️',html:eh});
+  // Emails
+  const eh=emailsHtml(parFour);if(eh)tabs.push({id:'emails',label:'Emails fournisseurs',icon:'✉️',html:eh});
 
   // Récapitulatif veille
   tabs.push({id:'recap',label:'Récapitulatif veille',icon:'✅',html:recapHtml(parFour,divers)});
 
   tabs.forEach((tab,i)=>{
-    const btn=document.createElement('button');
-    btn.className='tbtn'+(i===0?' active':'');btn.textContent=`${tab.icon} ${tab.label}`;
-    btn.onclick=()=>activerTab(tab.id);tnav.appendChild(btn);
-    const panel=document.createElement('div');
-    panel.className='tpanel'+(i===0?' active':'');panel.id=`p_${tab.id}`;panel.innerHTML=tab.html;
-    tc.appendChild(panel);
+    const btn=document.createElement('button');btn.className='tbtn'+(i===0?' active':'');btn.textContent=`${tab.icon} ${tab.label}`;btn.onclick=()=>activerTab(tab.id);tnav.appendChild(btn);
+    const panel=document.createElement('div');panel.className='tpanel'+(i===0?' active':'');panel.id=`p_${tab.id}`;panel.innerHTML=tab.html;tc.appendChild(panel);
   });
 
   const cs=document.getElementById('cs');cs.classList.add('show');
-  document.getElementById('stitle').textContent=`Bons de commande — Semaine ${S.semaine}`;
-  const nbFour=Object.keys(parFour).length+(divers.length?1:0);
-  document.getElementById('ssub').textContent=`${S.planning.length} productions · ${nbFour} groupes fournisseurs · ${new Date().toLocaleDateString('fr-FR')}`;
-  cs.scrollIntoView({behavior:'smooth'});
-  toast(`${tabs.length} sections générées ✓`);
+  document.getElementById('stitle').textContent=`Semaine ${S.semaine}`;
+  document.getElementById('ssub').textContent=`${S.planning.length} productions · ${new Date().toLocaleDateString('fr-FR')}`;
+  cs.scrollIntoView({behavior:'smooth'});toast(`${tabs.length} sections générées ✓`);
 }
 
 function activerTab(id){
-  document.querySelectorAll('.tbtn').forEach((b,i)=>{
-    const panels=document.querySelectorAll('.tpanel');
-    const pid=panels[i]?.id?.replace('p_','');
-    b.classList.toggle('active',pid===id)
-  });
+  document.querySelectorAll('.tbtn').forEach((b,i)=>{const panels=document.querySelectorAll('.tpanel');const pid=panels[i]?.id?.replace('p_','');b.classList.toggle('active',pid===id)});
   document.querySelectorAll('.tpanel').forEach(p=>p.classList.toggle('active',p.id===`p_${id}`));
 }
 
-// ── Bon fournisseur prioritaire ──
-function bonHtml({fou,lignes}){
-  const rows=lignes.map(l=>`<tr>
-    <td><div style="font-weight:500">${l.ing.nomRecette}</div><div style="font-size:11px;color:var(--gris)">${l.ing.nomEtiquette||''} ${l.ing.bio?'🌿':''}</div></td>
-    <td><span class="qte">${fqte(l.qte)} ${l.u}</span></td>
-    <td>${l.recs.map(r=>`<span class="tr">${r}</span>`).join('')}</td>
-  </tr>`).join('');
-  const dl=JSON.stringify(lignes.map(l=>({n:l.ing.nomRecette,q:fqte(l.qte),u:l.u}))).replace(/'/g,'&#39;');
-  return`<div class="bc" data-fn="${fou.nom}" data-dl='${dl}'>
-    <div class="bch">
-      <div><div class="fn">${fou.nom}</div><div class="fc">${fou.contact||''}</div></div>
-      <div class="ji">
-        ${fou.jourCommande?`<div>📤 Commande : <strong>${cap(fou.jourCommande)}</strong></div>`:''}
-        ${fou.jourLivraison?`<div>📦 Livraison : <strong>${cap(fou.jourLivraison)}</strong></div>`:''}
+// ── Fiche de production ──
+function ficheProductionHtml(){
+  const ORDRE=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
+  const pj={};for(const p of S.planning){if(!pj[p.jour])pj[p.jour]=[];pj[p.jour].push(p)}
+  let html='<div class="fp-wrap">',fpIdx=0;
+
+  for(const jour of ORDRE){
+    if(!pj[jour])continue;
+    const prods=pj[jour];
+    let cardsHtml='';
+
+    for(const prod of prods){
+      const uid=`fp${fpIdx++}`;
+      const rid=S.mapping[norm(prod.parfum)];
+      const rec=rid?S.recettes.find(r=>r.id===rid):null;
+      const mx=prod.mixCount||1;
+
+      // Badge catégorie
+      const sgl=(prod.sgl||'').toUpperCase().trim();
+      const sglCls={'S':'fp-s','L':'fp-l','G':'fp-g','V':'fp-v'}[sgl]||'fp-s';
+      const sglBadge=sgl?`<span class="fp-badge ${sglCls}">${sgl}</span>`:'';
+      const mixBadge=mx>1?`<span class="fp-mix">×${mx}</span>`:'';
+
+      if(!rec){
+        cardsHtml+=`<div class="fp-card"><div class="fp-card-top"><div class="fp-name">${prod.parfum}</div><div class="fp-badges">${sglBadge}${mixBadge}</div></div><p class="fp-no-rec">⚠ Recette non associée</p></div>`;
+        continue;
+      }
+
+      // Ingrédients spécifiques (hors base)
+      const allIngs=[...(rec.poudres||[]),...(rec.liquides||[]),...(rec.ingredients||[])];
+      const ingsSpec=[];
+      for(const l of allIngs){
+        const iid=l.ingredientId||l.ingredient_id;
+        const ing=S.ingredients.find(i=>i.id===iid);
+        if(!ing||estBaseExclue(ing.nomRecette))continue;
+        let q=(parseFloat(l.poids)||0)*mx,u=l.unite||'g';
+        if(u==='g'&&q>=1000){q/=1000;u='kg'}if(u==='ml'&&q>=1000){q/=1000;u='L'}
+        ingsSpec.push({nom:ing.nomRecette,bio:ing.bio,qte:fqte(parseFloat(q.toFixed(3))),u});
+      }
+
+      // Toppings
+      const tops=[];
+      for(const l of (rec.toppings||[])){
+        const iid=l.ingredientId||l.ingredient_id;
+        const ing=S.ingredients.find(i=>i.id===iid);
+        if(!ing)continue;
+        let q=(parseFloat(l.poids)||0)*mx,u=l.unite||'g';
+        if(u==='g'&&q>=1000){q/=1000;u='kg'}if(u==='ml'&&q>=1000){q/=1000;u='L'}
+        tops.push({nom:ing.nomRecette,bio:ing.bio,qte:fqte(parseFloat(q.toFixed(3))),u});
+      }
+
+      const ingRows=ingsSpec.length
+        ?ingsSpec.map(i=>`<li><span class="fp-iname">${i.nom}${i.bio?' 🌿':''}</span><span class="fp-iqte">${i.qte} ${i.u}</span></li>`).join('')
+        :`<li><span class="fp-no-ing">Pas d'ingrédient spécifique</span></li>`;
+
+      const topSection=tops.length
+        ?`<div class="fp-tops"><span class="fp-top-lbl">Toppings</span>${tops.map(t=>`<div class="fp-top-item"><span class="fp-top-nom">${t.nom}${t.bio?' 🌿':''}</span><span class="fp-top-qte">${t.qte} ${t.u}</span></div>`).join('')}</div>`
+        :`<div class="fp-tops"><span class="fp-top-lbl">Toppings</span><span class="fp-no-top">Aucun</span></div>`;
+
+      cardsHtml+=`<div class="fp-card" id="fpcard_${uid}">
+        <div class="fp-card-top"><div class="fp-name" id="fpname_${uid}">${prod.parfum}</div><div class="fp-badges">${sglBadge}${mixBadge}</div></div>
+        <ul class="fp-ings">${ingRows}</ul>
+        ${topSection}
+        <div class="fp-foot">
+          <input type="checkbox" id="${uid}" onchange="toggleFp('${uid}')">
+          <label for="${uid}">Ingrédients prêts ✓</label>
+        </div>
+      </div>`;
+    }
+
+    const nb=prods.length;
+    html+=`<div class="fp-day">
+      <div class="fp-day-header"><span class="fp-day-name">${cap(jour)}</span><span class="fp-day-meta">${nb} turbinage${nb>1?'s':''}</span></div>
+      <div class="fp-grid">${cardsHtml}</div>
+      <div class="fp-actions">
+        <span class="fp-actions-meta" id="fpday_${jour}">0 / ${nb} prêts</span>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-s btn-sm" onclick="toutCocherJour('${jour}')">✅ Tout cocher</button>
+        </div>
       </div>
-    </div>
-    <table class="btab"><thead><tr><th>Ingrédient</th><th>Quantité</th><th>Pour les recettes</th></tr></thead>
-    <tbody>${rows}</tbody></table>
-    <div class="bf"><button class="btn btn-s btn-sm" onclick="copierBon(this)">📋 Copier ce bon</button></div>
-  </div>`;
+    </div>`;
+  }
+  html+='</div>';
+  return html;
 }
 
-// ── Bon consolidé "Autres fournisseurs" ──
+function toggleFp(uid){
+  const chk=document.getElementById(uid);
+  const card=document.getElementById(`fpcard_${uid}`);
+  const name=document.getElementById(`fpname_${uid}`);
+  if(card)card.classList.toggle('done',chk.checked);
+  if(name)name.classList.toggle('barred',chk.checked);
+  majFpCompteurs();
+}
+
+function majFpCompteurs(){
+  const ORDRE=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
+  const pj={};for(const p of S.planning){if(!pj[p.jour])pj[p.jour]=[];pj[p.jour].push(p)}
+  let fpIdx=0;
+  for(const jour of ORDRE){
+    if(!pj[jour])continue;
+    const nb=pj[jour].length;
+    let done=0;
+    for(let i=0;i<nb;i++){const chk=document.getElementById(`fp${fpIdx+i}`);if(chk?.checked)done++}
+    const el=document.getElementById(`fpday_${jour}`);
+    if(el)el.textContent=`${done} / ${nb} prêts`;
+    fpIdx+=nb;
+  }
+}
+
+function toutCocherJour(jour){
+  const ORDRE=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
+  const pj={};for(const p of S.planning){if(!pj[p.jour])pj[p.jour]=[];pj[p.jour].push(p)}
+  let fpIdx=0;
+  for(const j of ORDRE){
+    if(!pj[j])continue;
+    if(j===jour){for(let i=0;i<pj[j].length;i++){const id=`fp${fpIdx+i}`;const chk=document.getElementById(id);if(chk&&!chk.checked){chk.checked=true;toggleFp(id)}}break}
+    fpIdx+=pj[j].length;
+  }
+}
+
+function bonHtml({fou,lignes}){
+  const rows=lignes.map(l=>`<tr><td><div style="font-weight:500">${l.ing.nomRecette}</div><div style="font-size:11px;color:var(--gris)">${l.ing.nomEtiquette||''} ${l.ing.bio?'🌿':''}</div></td><td><span class="qte">${fqte(l.qte)} ${l.u}</span></td><td>${l.recs.map(r=>`<span class="tr">${r}</span>`).join('')}</td></tr>`).join('');
+  const dl=JSON.stringify(lignes.map(l=>({n:l.ing.nomRecette,q:fqte(l.qte),u:l.u}))).replace(/'/g,'&#39;');
+  return`<div class="bc" data-fn="${fou.nom}" data-dl='${dl}'><div class="bch"><div><div class="fn">${fou.nom}</div><div class="fc">${fou.contact||''}</div></div><div class="ji">${fou.jourCommande?`<div>📤 Commande : <strong>${cap(fou.jourCommande)}</strong></div>`:''} ${fou.jourLivraison?`<div>📦 Livraison : <strong>${cap(fou.jourLivraison)}</strong></div>`:''}</div></div><table class="btab"><thead><tr><th>Ingrédient</th><th>Quantité</th><th>Pour les recettes</th></tr></thead><tbody>${rows}</tbody></table><div class="bf"><button class="btn btn-s btn-sm" onclick="copierBon(this)">📋 Copier ce bon</button></div></div>`;
+}
+
 function diversHtml(divers){
-  // Trier par nom de fournisseur puis par ingrédient
   const sorted=[...divers].sort((a,b)=>(a.fouNom||'').localeCompare(b.fouNom||'')||(a.item.ing.nomRecette||'').localeCompare(b.item.ing.nomRecette||''));
-  const rows=sorted.map(({item:l,fouNom})=>`<tr>
-    <td><div style="font-weight:500">${l.ing.nomRecette}</div><div style="font-size:11px;color:var(--gris)">${l.ing.nomEtiquette||''} ${l.ing.bio?'🌿':''}</div></td>
-    <td><span class="tag-four">${fouNom||'Non défini'}</span></td>
-    <td><span class="qte">${fqte(l.qte)} ${l.u}</span></td>
-    <td>${l.recs.map(r=>`<span class="tr">${r}</span>`).join('')}</td>
-  </tr>`).join('');
+  const rows=sorted.map(({item:l,fouNom})=>`<tr><td><div style="font-weight:500">${l.ing.nomRecette}</div><div style="font-size:11px;color:var(--gris)">${l.ing.nomEtiquette||''} ${l.ing.bio?'🌿':''}</div></td><td><span class="tag-four">${fouNom||'Non défini'}</span></td><td><span class="qte">${fqte(l.qte)} ${l.u}</span></td><td>${l.recs.map(r=>`<span class="tr">${r}</span>`).join('')}</td></tr>`).join('');
   const dl=JSON.stringify(sorted.map(({item:l,fouNom})=>({n:l.ing.nomRecette,f:fouNom,q:fqte(l.qte),u:l.u}))).replace(/'/g,'&#39;');
-  return`<div class="bc" data-fn="Autres fournisseurs" data-dl='${dl}'>
-    <div class="bch" style="background:#4a7060">
-      <div><div class="fn">🛒 Autres fournisseurs</div>
-      <div class="fc">${sorted.length} ingrédient(s) — à commander / vérifier en stock</div></div>
-    </div>
-    <table class="btab"><thead><tr><th>Ingrédient</th><th>Fournisseur</th><th>Quantité</th><th>Pour les recettes</th></tr></thead>
-    <tbody>${rows}</tbody></table>
-    <div class="bf"><button class="btn btn-s btn-sm" onclick="copierDivers(this)">📋 Copier</button></div>
-  </div>`;
+  return`<div class="bc" data-fn="Autres fournisseurs" data-dl='${dl}'><div class="bch" style="background:#4a7060"><div><div class="fn">🛒 Autres fournisseurs</div><div class="fc">${sorted.length} ingrédient(s)</div></div></div><table class="btab"><thead><tr><th>Ingrédient</th><th>Fournisseur</th><th>Quantité</th><th>Pour les recettes</th></tr></thead><tbody>${rows}</tbody></table><div class="bf"><button class="btn btn-s btn-sm" onclick="copierDivers(this)">📋 Copier</button></div></div>`;
 }
 
-// ── Récapitulatif veille ──
 function recapHtml(parFour,divers){
-  // Construire la liste complète : prioritaires d'abord, puis divers, triés par fournisseur
   const tous=[];
-
-  // Fournisseurs prioritaires
-  for(const fid of Object.keys(parFour)){
-    const{fou,lignes}=parFour[fid];
-    for(const l of lignes)tous.push({item:l,fouNom:fou.nom,fouPrio:true,jourCmd:fou.jourCommande,jourLiv:fou.jourLivraison});
-  }
-  // Autres
-  for(const{item,fouNom,fou}of divers)
-    tous.push({item,fouNom,fouPrio:false,jourCmd:fou?.jourCommande||'',jourLiv:fou?.jourLivraison||''});
-
-  // Grouper par fournisseur
+  for(const fid of Object.keys(parFour)){const{fou,lignes}=parFour[fid];for(const l of lignes)tous.push({item:l,fouNom:fou.nom,fouPrio:true,jourCmd:fou.jourCommande,jourLiv:fou.jourLivraison})}
+  for(const{item,fouNom,fou}of divers)tous.push({item,fouNom,fouPrio:false,jourCmd:fou?.jourCommande||'',jourLiv:fou?.jourLivraison||''});
   const parFourNom={};
-  for(const entry of tous){
-    const k=entry.fouNom||'Non défini';
-    if(!parFourNom[k])parFourNom[k]={prio:entry.fouPrio,jourCmd:entry.jourCmd,items:[]};
-    parFourNom[k].items.push(entry);
-  }
-  // Trier : prioritaires d'abord, puis alpha
+  for(const entry of tous){const k=entry.fouNom||'Non défini';if(!parFourNom[k])parFourNom[k]={prio:entry.fouPrio,jourCmd:entry.jourCmd,items:[]};parFourNom[k].items.push(entry)}
   const groupes=Object.entries(parFourNom).sort(([an,a],[bn,b])=>(b.prio-a.prio)||an.localeCompare(bn));
-  const total=tous.length;
-
-  let rows='';
-  let idx=0;
+  const total=tous.length;let rows='',idx=0;
   for(const[fnm,grp]of groupes){
     const jCmd=grp.jourCmd?` · 📤 ${cap(grp.jourCmd)}`:'';
     rows+=`<tr class="recap-group-header"><td colspan="5">${grp.prio?'📦':'🛒'} ${fnm}${jCmd}</td></tr>`;
-    for(const{item:l}of grp.items){
-      const uid=`chk_${idx++}`;
-      rows+=`<tr id="row_${uid}">
-        <td class="check-cell"><input type="checkbox" class="chk" id="${uid}" onchange="toggleCheck('${uid}')"></td>
-        <td><div class="ing-nom" style="font-weight:500">${l.ing.nomRecette}</div><div style="font-size:11px;color:var(--gris)">${l.ing.nomEtiquette||''} ${l.ing.bio?'🌿':''}</div></td>
-        <td><span class="tag-four ${grp.prio?'prioritaire':''}">${fnm}</span></td>
-        <td><span class="qte">${fqte(l.qte)} ${l.u}</span></td>
-        <td style="font-size:12px">${l.recs.map(r=>`<span class="tr">${r}</span>`).join('')}</td>
-      </tr>`;
-    }
+    for(const{item:l}of grp.items){const uid=`chk_${idx++}`;rows+=`<tr id="row_${uid}"><td class="check-cell"><input type="checkbox" class="chk" id="${uid}" onchange="toggleCheck('${uid}')"></td><td><div class="ing-nom" style="font-weight:500">${l.ing.nomRecette}</div><div style="font-size:11px;color:var(--gris)">${l.ing.nomEtiquette||''} ${l.ing.bio?'🌿':''}</div></td><td><span class="tag-four ${grp.prio?'prioritaire':''}">${fnm}</span></td><td><span class="qte">${fqte(l.qte)} ${l.u}</span></td><td style="font-size:12px">${l.recs.map(r=>`<span class="tr">${r}</span>`).join('')}</td></tr>`}
   }
-
-  return`<div class="bc">
-    <div class="bch" style="background:#1a2e24">
-      <div><div class="fn">✅ Récapitulatif — Veille de production</div>
-      <div class="fc">Cochez chaque ingrédient confirmé en stock ou commandé</div></div>
-      <div class="ji"><div>Total : <strong id="recap-count">0 / ${total}</strong></div></div>
-    </div>
-    <div style="padding:16px 20px 0">
-      <div class="recap-stats">
-        <div class="recap-stat">
-          <span class="rs-val" id="recap-ok-count">0</span>
-          <span class="rs-lbl">✅ Confirmés</span>
-          <div class="recap-progress"><div class="recap-progress-bar" id="recap-bar" style="width:0%"></div></div>
-        </div>
-        <div class="recap-stat">
-          <span class="rs-val" id="recap-remaining">${total}</span>
-          <span class="rs-lbl">⏳ Restants</span>
-        </div>
-        <div class="recap-stat">
-          <span class="rs-val">${total}</span>
-          <span class="rs-lbl">📋 Total ingrédients</span>
-        </div>
-      </div>
-    </div>
-    <table class="recap-table">
-      <thead><tr><th>✓</th><th>Ingrédient</th><th>Fournisseur</th><th>Quantité</th><th>Parfums</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-    <div class="bf">
-      <button class="btn btn-s btn-sm" onclick="toutCocher()">✅ Tout cocher</button>
-      <button class="btn btn-s btn-sm" onclick="toutDecocher()">↩ Réinitialiser</button>
-      <button class="btn btn-s btn-sm" onclick="imprimerRecap()">🖨️ Imprimer récap</button>
-    </div>
-  </div>`;
+  return`<div class="bc"><div class="bch" style="background:#1a2e24"><div><div class="fn">✅ Récapitulatif — Veille de production</div><div class="fc">Cochez chaque ingrédient confirmé en stock ou commandé</div></div><div class="ji"><div>Total : <strong id="recap-count">0 / ${total}</strong></div></div></div><div style="padding:16px 20px 0"><div class="recap-stats"><div class="recap-stat"><span class="rs-val" id="recap-ok-count">0</span><span class="rs-lbl">✅ Confirmés</span><div class="recap-progress"><div class="recap-progress-bar" id="recap-bar" style="width:0%"></div></div></div><div class="recap-stat"><span class="rs-val" id="recap-remaining">${total}</span><span class="rs-lbl">⏳ Restants</span></div><div class="recap-stat"><span class="rs-val">${total}</span><span class="rs-lbl">📋 Total</span></div></div></div><table class="recap-table"><thead><tr><th>✓</th><th>Ingrédient</th><th>Fournisseur</th><th>Quantité</th><th>Parfums</th></tr></thead><tbody>${rows}</tbody></table><div class="bf"><button class="btn btn-s btn-sm" onclick="toutCocher()">✅ Tout cocher</button><button class="btn btn-s btn-sm" onclick="toutDecocher()">↩ Réinitialiser</button></div></div>`;
 }
 
-// ── Gestion des cases à cocher du récap ──
-function toggleCheck(uid){
-  const chk=document.getElementById(uid);
-  const row=document.getElementById(`row_${uid}`);
-  if(chk&&row){row.classList.toggle('checked',chk.checked);majCompteurs()}
-}
-function majCompteurs(){
-  const chks=document.querySelectorAll('.chk');
-  const total=chks.length,done=[...chks].filter(c=>c.checked).length;
-  const pct=total?Math.round(done/total*100):0;
-  const el=id=>document.getElementById(id);
-  if(el('recap-count'))el('recap-count').textContent=`${done} / ${total}`;
-  if(el('recap-ok-count'))el('recap-ok-count').textContent=done;
-  if(el('recap-remaining'))el('recap-remaining').textContent=total-done;
-  if(el('recap-bar'))el('recap-bar').style.width=pct+'%';
-}
-function toutCocher(){
-  document.querySelectorAll('.chk').forEach(c=>{c.checked=true;const row=document.getElementById(`row_${c.id}`);if(row)row.classList.add('checked')});
-  majCompteurs();
-}
-function toutDecocher(){
-  document.querySelectorAll('.chk').forEach(c=>{c.checked=false;const row=document.getElementById(`row_${c.id}`);if(row)row.classList.remove('checked')});
-  majCompteurs();
-}
-function imprimerRecap(){
-  activerTab('recap');setTimeout(()=>window.print(),200);
-}
+function toggleCheck(uid){const chk=document.getElementById(uid);const row=document.getElementById(`row_${uid}`);if(chk&&row){row.classList.toggle('checked',chk.checked);majCompteurs()}}
+function majCompteurs(){const chks=document.querySelectorAll('.chk');const total=chks.length,done=[...chks].filter(c=>c.checked).length;const pct=total?Math.round(done/total*100):0;const el=id=>document.getElementById(id);if(el('recap-count'))el('recap-count').textContent=`${done} / ${total}`;if(el('recap-ok-count'))el('recap-ok-count').textContent=done;if(el('recap-remaining'))el('recap-remaining').textContent=total-done;if(el('recap-bar'))el('recap-bar').style.width=pct+'%'}
+function toutCocher(){document.querySelectorAll('.chk').forEach(c=>{c.checked=true;const row=document.getElementById(`row_${c.id}`);if(row)row.classList.add('checked')});majCompteurs()}
+function toutDecocher(){document.querySelectorAll('.chk').forEach(c=>{c.checked=false;const row=document.getElementById(`row_${c.id}`);if(row)row.classList.remove('checked')});majCompteurs()}
 
-// ── Emails (fournisseurs prioritaires uniquement) ──
 function emailsHtml(parFour){
-  const cibles=S.fournisseurs.filter(f=>parFour[f.id]);
-  if(!cibles.length)return'';
+  const cibles=S.fournisseurs.filter(f=>parFour[f.id]);if(!cibles.length)return'';
   const dates=[...new Set(S.planning.map(p=>p.date).filter(Boolean))];
   const periode=dates.length>=2?`du ${dates[0]} au ${dates[dates.length-1]}`:dates[0]||S.semaine;
   return cibles.map(fou=>{
@@ -616,58 +587,16 @@ function emailsHtml(parFour){
     const lignes=parFour[fou.id]?.lignes||[];
     const liste=lignes.map(l=>`  - ${l.ing.nomRecette} : ${fqte(l.qte)} ${l.u}`).join('\n');
     const corps=`Bonjour,\n\nVeuillez trouver ci-dessous notre commande pour la semaine ${S.semaine} (${periode}) :\n\n${liste}\n\nMerci de confirmer la réception et de nous indiquer la date de livraison prévue.\n\nCordialement,\nLa Tropicale Glacier`;
-    return`<div class="ec">
-      <div class="ech"><div class="et">✉️ ${fou.nom}</div><div style="font-size:11px;opacity:.7">${fou.jourCommande?`À envoyer le : ${cap(fou.jourCommande)}`:''}</div></div>
-      <div class="ef">
-        <div class="efl"><label>À</label><div class="v"><input type="text" id="eto_${fou.id}" value="${email}" placeholder="email@fournisseur.fr" style="max-width:400px"></div></div>
-        <div class="efl"><label>Objet</label><div class="v"><input type="text" id="esub_${fou.id}" value="Commande La Tropicale Glacier — semaine ${S.semaine}" style="max-width:500px"></div></div>
-      </div>
-      <div class="eb"><textarea id="ebod_${fou.id}">${corps}</textarea></div>
-      <div class="ef2">
-        <button class="btn btn-s btn-sm" onclick="copierEmail('${fou.id}')">📋 Copier</button>
-        <button class="btn btn-p btn-sm" onclick="ouvrirEmail('${fou.id}')">📨 Ouvrir dans la messagerie</button>
-      </div>
-    </div>`;
+    return`<div class="ec"><div class="ech"><div class="et">✉️ ${fou.nom}</div><div style="font-size:11px;opacity:.7">${fou.jourCommande?`À envoyer le : ${cap(fou.jourCommande)}`:''}</div></div><div class="ef"><div class="efl"><label>À</label><div class="v"><input type="text" id="eto_${fou.id}" value="${email}" placeholder="email@fournisseur.fr" style="max-width:400px"></div></div><div class="efl"><label>Objet</label><div class="v"><input type="text" id="esub_${fou.id}" value="Commande La Tropicale Glacier — semaine ${S.semaine}" style="max-width:500px"></div></div></div><div class="eb"><textarea id="ebod_${fou.id}">${corps}</textarea></div><div class="ef2"><button class="btn btn-s btn-sm" onclick="copierEmail('${fou.id}')">📋 Copier</button><button class="btn btn-p btn-sm" onclick="ouvrirEmail('${fou.id}')">📨 Ouvrir dans la messagerie</button></div></div>`;
   }).join('');
 }
 
-function copierBon(btn){
-  const d=btn.closest('.bc');
-  const fn=d.dataset.fn;const ll=JSON.parse(d.dataset.dl||'[]');
-  let t=`BON DE COMMANDE — ${fn}\nSemaine ${S.semaine}\n${'─'.repeat(40)}\n`;
-  for(const l of ll)t+=`${l.n.padEnd(30)} ${(l.q+' '+l.u).padStart(10)}\n`;
-  navigator.clipboard.writeText(t).then(()=>toast('Bon copié !'));
-}
-function copierDivers(btn){
-  const d=btn.closest('.bc');
-  const ll=JSON.parse(d.dataset.dl||'[]');
-  let t=`AUTRES FOURNISSEURS — Semaine ${S.semaine}\n${'─'.repeat(40)}\n`;
-  for(const l of ll)t+=`${l.n.padEnd(28)} [${(l.f||'').padEnd(18)}] ${(l.q+' '+l.u).padStart(8)}\n`;
-  navigator.clipboard.writeText(t).then(()=>toast('Bon copié !'));
-}
-function copierEmail(fid){
-  const to=document.getElementById(`eto_${fid}`)?.value||'';
-  const sb=document.getElementById(`esub_${fid}`)?.value||'';
-  const bd=document.getElementById(`ebod_${fid}`)?.value||'';
-  navigator.clipboard.writeText(`À : ${to}\nObjet : ${sb}\n\n${bd}`).then(()=>toast('Email copié !'));
-}
-function ouvrirEmail(fid){
-  const to=encodeURIComponent(document.getElementById(`eto_${fid}`)?.value||'');
-  const sb=encodeURIComponent(document.getElementById(`esub_${fid}`)?.value||'');
-  const bd=encodeURIComponent(document.getElementById(`ebod_${fid}`)?.value||'');
-  window.location.href=`mailto:${to}?subject=${sb}&body=${bd}`;
-}
-function copierTout(){
-  const bons=document.querySelectorAll('.bc');
-  let t=`BONS DE COMMANDE — La Tropicale Glacier\nSemaine ${S.semaine}\n${'═'.repeat(50)}\n\n`;
-  for(const d of bons){
-    const ll=JSON.parse(d.dataset.dl||'[]');
-    t+=`▶ ${d.dataset.fn}\n${'─'.repeat(40)}\n`;
-    for(const l of ll)t+=`  ${l.n.padEnd(28)} ${(l.q+' '+l.u).padStart(10)}\n`;
-    t+='\n';
-  }
-  navigator.clipboard.writeText(t).then(()=>toast('Tout copié !'));
-}
+function imprimerActif(){window.print()}
+function copierBon(btn){const d=btn.closest('.bc');const fn=d.dataset.fn;const ll=JSON.parse(d.dataset.dl||'[]');let t=`BON DE COMMANDE — ${fn}\nSemaine ${S.semaine}\n${'─'.repeat(40)}\n`;for(const l of ll)t+=`${l.n.padEnd(30)} ${(l.q+' '+l.u).padStart(10)}\n`;navigator.clipboard.writeText(t).then(()=>toast('Bon copié !'))}
+function copierDivers(btn){const d=btn.closest('.bc');const ll=JSON.parse(d.dataset.dl||'[]');let t=`AUTRES FOURNISSEURS — Semaine ${S.semaine}\n${'─'.repeat(40)}\n`;for(const l of ll)t+=`${l.n.padEnd(28)} [${(l.f||'').padEnd(18)}] ${(l.q+' '+l.u).padStart(8)}\n`;navigator.clipboard.writeText(t).then(()=>toast('Bon copié !'))}
+function copierEmail(fid){const to=document.getElementById(`eto_${fid}`)?.value||'';const sb=document.getElementById(`esub_${fid}`)?.value||'';const bd=document.getElementById(`ebod_${fid}`)?.value||'';navigator.clipboard.writeText(`À : ${to}\nObjet : ${sb}\n\n${bd}`).then(()=>toast('Email copié !'))}
+function ouvrirEmail(fid){const to=encodeURIComponent(document.getElementById(`eto_${fid}`)?.value||'');const sb=encodeURIComponent(document.getElementById(`esub_${fid}`)?.value||'');const bd=encodeURIComponent(document.getElementById(`ebod_${fid}`)?.value||'');window.location.href=`mailto:${to}?subject=${sb}&body=${bd}`}
+function copierTout(){const bons=document.querySelectorAll('.bc');let t=`BONS DE COMMANDE — La Tropicale Glacier\nSemaine ${S.semaine}\n${'═'.repeat(50)}\n\n`;for(const d of bons){const ll=JSON.parse(d.dataset.dl||'[]');t+=`▶ ${d.dataset.fn}\n${'─'.repeat(40)}\n`;for(const l of ll)t+=`  ${l.n.padEnd(28)} ${(l.q+' '+l.u).padStart(10)}\n`;t+='\n'}navigator.clipboard.writeText(t).then(()=>toast('Tout copié !'))}
 
 window.addEventListener('DOMContentLoaded',()=>{chargerConfig();initSelect()});
 </script>
