@@ -116,7 +116,7 @@ input:focus,select:focus{border-color:var(--vert-clair);background:#fff}
   <div style="margin-top:12px;display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
     <div style="flex:1;min-width:220px;">
       <label>Semaine à charger</label>
-      <select id="semaineSelect" onchange="toggleGidManuel()"><option value="">— chargement… —</option></select>
+      <select id="semaineSelect" onchange="toggleGidManuel()"><option value="">⏳ Chargement des semaines…</option></select>
     </div>
     <button class="btn btn-p" onclick="lancerChargement()">🔄 Charger le planning</button>
     <label style="display:flex;align-items:center;gap:6px;text-transform:none;letter-spacing:0;font-size:13px;cursor:pointer;color:var(--texte);margin-bottom:0;">
@@ -125,7 +125,7 @@ input:focus,select:focus{border-color:var(--vert-clair);background:#fff}
   </div>
   <div id="gidManuelDiv" style="display:none;margin-top:10px;padding:12px 14px;background:var(--beige);border-radius:7px;border:1px solid var(--beige-f);">
     <label style="margin-bottom:6px;">GID de l'onglet <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--gris);">— ouvre le sheet, clique sur l'onglet voulu, copie le numéro après <strong>#gid=</strong> dans l'URL</span></label>
-    <input type="text" id="gidManuel" placeholder="ex: 1166307452" style="width:200px;">
+    <input type="text" id="gidManuel" placeholder="ex: 3208226" style="width:200px;">
   </div>
   <div class="sb" id="statusBar"></div>
 </div>
@@ -152,25 +152,7 @@ input:focus,select:focus{border-color:var(--vert-clair);background:#fff}
 
 <script>
 const SHEET_ID='1IJ_I-JxafJpIF9H2pInXaET-IQw0KrTialE94rL2hoI';
-
-// GIDs des onglets — tous vérifiés directement depuis Google Sheets
-const ONGLETS=[
-  {g:"784016522",n:"25/12/23"},{g:"915093093",n:"15/12/25"},{g:"1564905807",n:"08/12/25"},
-  {g:"745810776",n:"02/12/25"},{g:"750359579",n:"24/11/25"},{g:"1492293636",n:"17/11/25"},
-  {g:"658682002",n:"11/11/25"},{g:"1470174700",n:"03/11/25"},{g:"1868118366",n:"27/10/25"},
-  {g:"475155385",n:"20/10/25"},{g:"1781313425",n:"13/10/25"},{g:"849636766",n:"06/10/25"},
-  {g:"822288033",n:"29/09/25"},{g:"508272418",n:"22/09/25"},{g:"535491550",n:"15/09/25"},
-  {g:"1195585331",n:"08/09/25"},{g:"839993531",n:"01/09/25"},{g:"1835349786",n:"25/08/25"},
-  {g:"998167865",n:"18/08/25"},{g:"1305254368",n:"11/08/25"},{g:"2020692799",n:"04/08/25"},
-  {g:"1281957263",n:"28/07/25"},{g:"2145923261",n:"22/07/25"},{g:"1893182498",n:"14/07/25"},
-  {g:"699449302",n:"07/07/25"},{g:"306207613",n:"30/06/25"},{g:"304318694",n:"23/06/25"},
-  {g:"1451338602",n:"16/06/25"},{g:"2006264587",n:"9/06/25"},{g:"1740974321",n:"02/06/25"},
-  {g:"445484817",n:"19/05/25"},{g:"430806259",n:"12/05/25"},{g:"1003675794",n:"05/05/25"},
-  {g:"1302133986",n:"28/04/25"},{g:"1886773834",n:"21/04/25"},{g:"1166307452",n:"13/04/26"},
-  {g:"2062644190",n:"06/04/25"},{g:"1942480222",n:"30/03/26"},{g:"1855293143",n:"23/03/26"},
-  {g:"1213026894",n:"16/03/26"},{g:"1561179333",n:"10/03/25"},{g:"2011408948",n:"02/03/26"},
-  {g:"1575689539",n:"23/02/26"},{g:"375230417",n:"16/02/26"},{g:"883980928",n:"03/02/25"}
-];
+const GOOGLE_API_KEY='AIzaSyBhYu07yyGNafYNCMkiA6Oit8ZpO4WxdA8';
 
 let S={recettes:[],ingredients:[],fournisseurs:[],planning:[],mapping:{},semaine:''};
 
@@ -200,19 +182,44 @@ function saveConfig(){
   localStorage.setItem('tc_cfg',JSON.stringify({url:document.getElementById('supabaseUrl').value.trim(),key:document.getElementById('supabaseKey').value.trim(),mapping:S.mapping}));
 }
 
-// ── Sélecteur semaines ──
-function initSelect(){
-  const sorted=[...ONGLETS].sort((a,b)=>{const da=pdate(a.n),db=pdate(b.n);return(!da||!db)?0:db-da});
+// ── Sélecteur semaines — chargement dynamique via Google Sheets API ──
+async function initSelect(){
   const sel=document.getElementById('semaineSelect');
-  sel.innerHTML='<option value="">— Choisir une semaine —</option>';
-  const today=new Date();let best=null,bd=Infinity;
-  for(const o of sorted){
-    const opt=document.createElement('option');opt.value=o.g;opt.textContent=o.n;sel.appendChild(opt);
-    const d=pdate(o.n);if(d){const diff=Math.abs(d-today);if(diff<bd){bd=diff;best=o.g}}
+  sel.innerHTML='<option value="">⏳ Chargement des semaines…</option>';
+  sel.disabled=true;
+
+  try{
+    const url=`https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}?key=${GOOGLE_API_KEY}&fields=sheets.properties(sheetId,title)`;
+    const res=await fetch(url);
+    if(!res.ok)throw new Error(`API Google Sheets: ${res.status}`);
+    const data=await res.json();
+
+    // Filtre uniquement les onglets au format DD/MM/YY
+    const datePattern=/^\d{1,2}\/\d{2}\/\d{2}$/;
+    const tabs=data.sheets
+      .filter(s=>datePattern.test(s.properties.title))
+      .map(s=>({g:String(s.properties.sheetId),n:s.properties.title}))
+      .sort((a,b)=>{const pa=pdate(a.n),pb=pdate(b.n);return(!pa||!pb)?0:pb-pa});
+
+    sel.innerHTML='<option value="">— Choisir une semaine —</option>';
+    const today=new Date();let best=null,bd=Infinity;
+    for(const o of tabs){
+      const opt=document.createElement('option');opt.value=o.g;opt.textContent=o.n;sel.appendChild(opt);
+      const d=pdate(o.n);if(d){const diff=Math.abs(d-today);if(diff<bd){bd=diff;best=o.g}}
+    }
+    // Option saisie manuelle en dernier
+    const optM=document.createElement('option');optM.value='__manuel__';optM.textContent='✏️ Autre semaine (saisir le GID)…';sel.appendChild(optM);
+    if(best)sel.value=best;
+    sel.disabled=false;
+
+  }catch(e){
+    console.error('Erreur chargement onglets:',e);
+    // Fallback gracieux : saisie manuelle disponible
+    sel.innerHTML='<option value="">⚠ Erreur de chargement automatique</option><option value="__manuel__">✏️ Saisir le GID manuellement…</option>';
+    sel.disabled=false;
+    document.getElementById('gidManuelDiv').style.display='block';
+    console.warn('Fallback : utilisez le GID manuel (ex: 3208226 pour 25/05/26)');
   }
-  // Option pour saisie manuelle
-  const optM=document.createElement('option');optM.value='__manuel__';optM.textContent='✏️ Autre semaine (saisir le GID)…';sel.appendChild(optM);
-  if(best)sel.value=best;
 }
 
 function toggleGidManuel(){
@@ -278,7 +285,6 @@ async function chargerPlanning(gid){
     if(jour&&C&&C.toLowerCase()!=='parfums'){
       let p=C,mx=1;const mX=p.match(/\s+[Xx]\s*(\d+)$/);
       if(mX){mx=parseInt(mX[1]);p=p.replace(/\s+[Xx]\s*\d+$/,'').trim()}
-      // Si ce parfum existe déjà pour ce jour, incrémenter mixCount au lieu d'ajouter
       const existing=S.planning.find(x=>x.parfum===p&&x.jour===jour);
       if(existing){existing.mixCount+=mx;}
       else{S.planning.push({jour,date,parfum:p,mixCount:mx,qteOutput:D,sgl:E});}
@@ -344,7 +350,6 @@ function genererCommandes(){
 }
 
 function afficherResultats(parFour,stock){
-  // Planning récap
   const ORDRE=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
   const pj={};for(const p of S.planning){if(!pj[p.jour])pj[p.jour]=[];pj[p.jour].push(p)}
   let rh='<h3>📅 Planning de la semaine</h3>';
@@ -356,14 +361,11 @@ function afficherResultats(parFour,stock){
   tnav.innerHTML='';tc.innerHTML='';
   const tabs=[];
 
-  // Bons fournisseurs avec jour commande
   for(const fou of S.fournisseurs.filter(f=>parFour[f.id]))
     tabs.push({id:`f_${fou.id}`,label:fou.nom,icon:'📦',html:bonHtml(parFour[fou.id])});
 
-  // Stock commun
   if(stock.length)tabs.push({id:'stock',label:'En stock / Divers',icon:'🏪',html:stockHtml(stock)});
 
-  // Emails
   const eh=emailsHtml(parFour);
   if(eh)tabs.push({id:'emails',label:'Emails fournisseurs',icon:'✉️',html:eh});
 
