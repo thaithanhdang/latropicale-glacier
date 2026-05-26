@@ -36,12 +36,15 @@ input:focus,select:focus{border-color:var(--vert-clair);background:#fff}
 .spin{width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:sp .7s linear infinite;flex-shrink:0}
 @keyframes sp{to{transform:rotate(360deg)}}
 .mc{display:none}.mc.show{display:block}
+/* Tableau mapping */
 .mt{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
 .mt th{text-align:left;padding:8px 11px;background:var(--vert);color:rgba(255,255,255,.85);font-size:10px;letter-spacing:1px;text-transform:uppercase}
 .mt th:first-child{border-radius:7px 0 0 0}.mt th:last-child{border-radius:0 7px 0 0}
 .mt td{padding:8px 11px;border-bottom:1px solid var(--beige-f);vertical-align:middle}
 .mt tr:last-child td{border-bottom:none}.mt tr:nth-child(even) td{background:var(--beige)}
 .mt select{padding:4px 7px;font-size:12px;border-radius:5px}
+/* Séparateurs de jour dans le mapping */
+.mt-day-sep td{background:var(--vert-clair)!important;color:#fff;font-weight:600;font-size:11px;padding:6px 11px;letter-spacing:.8px;text-transform:uppercase;border:none}
 .badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:500;letter-spacing:.5px;text-transform:uppercase}
 .bj-lundi{background:#dbeafe;color:#1e40af}.bj-mardi{background:#dcfce7;color:#166534}
 .bj-mercredi{background:#fef9c3;color:#854d0e}.bj-jeudi{background:#fce7f3;color:#9d174d}
@@ -56,6 +59,7 @@ input:focus,select:focus{border-color:var(--vert-clair);background:#fff}
 .tbtn.active{background:var(--vert);color:#fff;border-color:var(--vert)}
 .tbtn:hover:not(.active){border-color:var(--vert)}
 .tpanel{display:none}.tpanel.active{display:block}
+/* Bons fournisseurs */
 .bc{background:var(--blanc);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:18px;border:1px solid var(--beige-f);overflow:hidden}
 .bch{background:var(--vert);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px}
 .bch .fn{font-family:'Playfair Display',serif;font-size:16px;font-weight:600}
@@ -69,6 +73,19 @@ input:focus,select:focus{border-color:var(--vert-clair);background:#fff}
 .qte{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--vert-clair);white-space:nowrap}
 .tr{display:inline-block;padding:1px 6px;background:var(--beige-f);border-radius:4px;font-size:10px;margin:1px 2px 1px 0}
 .bf{padding:10px 16px;background:var(--beige);border-top:1px solid var(--beige-f);display:flex;justify-content:flex-end;gap:8px}
+/* Tags livraison DIPSA / Gamme */
+.del-frais{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:500;background:#dcfce7;color:#166534;white-space:nowrap}
+.del-surgele{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:500;background:#e0f2fe;color:#0369a1;white-space:nowrap}
+/* Commandes habituelles */
+.hab-box{padding:12px 18px;background:#f8fdf9;border-bottom:1px solid #c6e9d0}
+.hab-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--gris);margin-bottom:8px}
+.hab-cols{display:flex;gap:20px;flex-wrap:wrap}
+.hab-col{flex:1;min-width:180px}
+.hab-col-title{font-size:10px;font-weight:600;color:var(--gris);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.hab-item{display:flex;align-items:center;gap:6px;font-size:11px;padding:2px 0;color:var(--texte)}
+.hab-dot-f{width:7px;height:7px;border-radius:50%;background:#16a34a;flex-shrink:0}
+.hab-dot-s{width:7px;height:7px;border-radius:50%;background:#0369a1;flex-shrink:0}
+/* Emails */
 .ec{background:var(--blanc);border-radius:var(--r);box-shadow:var(--sh);margin-bottom:18px;border:1px solid var(--beige-f);overflow:hidden}
 .ech{background:#2d5442;color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
 .ech .et{font-family:'Playfair Display',serif;font-size:15px;font-weight:600}
@@ -80,6 +97,7 @@ input:focus,select:focus{border-color:var(--vert-clair);background:#fff}
 .eb textarea{width:100%;min-height:180px;border:1.5px solid var(--beige-f);border-radius:7px;padding:12px;font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.6;resize:vertical;background:var(--beige);color:var(--texte)}
 .eb textarea:focus{outline:none;border-color:var(--vert-clair);background:#fff}
 .ef2{padding:10px 16px;background:var(--beige);border-top:1px solid var(--beige-f);display:flex;gap:8px;justify-content:flex-end}
+/* Planning récap */
 .pr{background:var(--blanc);border-radius:var(--r);box-shadow:var(--sh);padding:18px 22px;margin-bottom:20px;border:1px solid var(--beige-f)}
 .pr h3{font-family:'Playfair Display',serif;font-size:14px;margin-bottom:12px;color:var(--vert)}
 .pj{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}
@@ -87,7 +105,7 @@ input:focus,select:focus{border-color:var(--vert-clair);background:#fff}
 .tp{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:5px;font-size:11px;background:var(--beige-f);margin:2px}
 .tp.ok{background:#dcfce7;color:#166534}.tp.nok{background:#fee2e2;color:#991b1b}
 .abar{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
-/* Recap veille */
+/* Récap veille */
 .recap-table{width:100%;border-collapse:collapse;font-size:13px}
 .recap-table th{text-align:left;padding:9px 14px;background:var(--vert);color:rgba(255,255,255,.85);font-size:10px;letter-spacing:1px;text-transform:uppercase;position:sticky;top:0}
 .recap-table th:first-child{border-radius:7px 0 0 0;width:32px;text-align:center}
@@ -113,31 +131,34 @@ input:focus,select:focus{border-color:var(--vert-clair);background:#fff}
 .fp-day-header{background:var(--vert);color:#fff;padding:12px 18px;display:flex;align-items:center;justify-content:space-between}
 .fp-day-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:600}
 .fp-day-meta{font-size:11px;color:rgba(255,255,255,.6)}
-.fp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:0}
+.fp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0}
 .fp-card{padding:12px 14px;border-right:1px solid var(--beige-f);border-bottom:1px solid var(--beige-f);display:flex;flex-direction:column;gap:8px;transition:background .15s}
 .fp-card:hover{background:var(--beige)}
 .fp-card.done{opacity:.5;background:#f0fdf4}
 .fp-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:6px}
 .fp-name{font-size:12px;font-weight:500;color:var(--texte);line-height:1.35;flex:1}
 .fp-name.barred{text-decoration:line-through;color:var(--gris)}
-.fp-badges{display:flex;gap:4px;flex-shrink:0;align-items:center}
+.fp-badges{display:flex;flex-wrap:wrap;gap:3px;flex-shrink:0;align-items:center;justify-content:flex-end}
 .fp-badge{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;font-weight:600;line-height:1.4}
 .fp-s{background:#dcfce7;color:#166534}
 .fp-l{background:#dbeafe;color:#1e40af}
 .fp-g{background:#fef9c3;color:#854d0e}
 .fp-v{background:#ede9fe;color:#5b21b6}
 .fp-mix{background:var(--beige-f);color:var(--gris);padding:1px 5px;border-radius:3px;font-size:10px;font-weight:500}
+.fp-bio{background:#dcfce7;color:#166534;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
 .fp-ings{list-style:none;flex:1}
 .fp-ings li{display:flex;justify-content:space-between;align-items:baseline;gap:6px;padding:3px 0;border-bottom:1px dotted var(--beige-f);font-size:11px}
 .fp-ings li:last-child{border-bottom:none}
-.fp-iname{color:var(--texte);flex:1}
+.fp-iname{color:var(--texte);flex:1;line-height:1.3}
+.fp-ibio{font-size:9px;font-weight:700;color:#166534;flex-shrink:0}
 .fp-iqte{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;color:var(--vert-clair);white-space:nowrap;flex-shrink:0}
 .fp-no-ing{font-size:11px;color:var(--gris);font-style:italic;padding:4px 0}
-.fp-tops{padding:6px 8px;background:var(--beige);border-radius:5px;font-size:11px}
-.fp-top-lbl{display:block;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--gris);margin-bottom:4px}
-.fp-top-item{display:flex;justify-content:space-between;align-items:baseline;padding:2px 0;color:var(--texte);border-bottom:1px dotted var(--beige-f)}
-.fp-top-item:last-child{border-bottom:none}
-.fp-top-nom{flex:1}
+.fp-tops{padding:7px 9px;background:var(--beige);border-radius:6px;font-size:11px}
+.fp-top-lbl{display:block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--gris);margin-bottom:5px}
+.fp-top-row{display:flex;justify-content:space-between;align-items:baseline;padding:2px 0;border-bottom:1px dotted var(--beige-f)}
+.fp-top-row:last-child{border-bottom:none}
+.fp-top-nom{flex:1;font-size:11px;color:var(--texte)}
+.fp-top-bio{font-size:9px;font-weight:700;color:#166534;margin:0 3px}
 .fp-top-qte{font-family:'DM Mono',monospace;font-size:10px;color:var(--vert-clair);white-space:nowrap}
 .fp-no-top{color:var(--gris);font-style:italic;font-size:11px}
 .fp-foot{display:flex;align-items:center;gap:6px;padding-top:6px;border-top:1px solid var(--beige-f);margin-top:auto}
@@ -155,8 +176,8 @@ input:focus,select:focus{border-color:var(--vert-clair);background:#fff}
   .tpanel.active{display:block!important}
   body{background:white}
   .bc,.fp-day{page-break-inside:avoid;box-shadow:none;border:1px solid #ddd}
-  .bch,.fp-day-header,.ech{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .fp-foot,.fp-actions,.fp-card:hover{display:none!important}
+  .bch,.fp-day-header,.ech,.hab-box{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .fp-foot,.fp-actions{display:none!important}
   .fp-grid{display:grid;grid-template-columns:repeat(3,1fr)}
   .fp-card{border:1px solid #eee;page-break-inside:avoid}
 }
@@ -196,9 +217,11 @@ input:focus,select:focus{border-color:var(--vert-clair);background:#fff}
 
 <div class="card mc" id="mappingCard">
   <h2>🗺️ Correspondance parfums ↔ recettes</h2>
-  <p style="font-size:13px;color:var(--gris);margin-bottom:12px;">Vérifiez et corrigez avant de générer les bons.</p>
-  <table class="mt"><thead><tr><th>Jour</th><th>Parfum (planning)</th><th>Recette associée</th><th>Statut</th></tr></thead>
-  <tbody id="mappingBody"></tbody></table>
+  <p style="font-size:13px;color:var(--gris);margin-bottom:12px;">Organisé par jour · vérifiez et corrigez avant de générer les bons.</p>
+  <table class="mt">
+    <thead><tr><th>Jour</th><th>Parfum (planning)</th><th>Recette associée</th><th>Statut</th></tr></thead>
+    <tbody id="mappingBody"></tbody>
+  </table>
   <div style="margin-top:14px;"><button class="btn btn-p" onclick="genererCommandes()">📋 Générer les bons de commande</button></div>
 </div>
 
@@ -208,7 +231,7 @@ input:focus,select:focus{border-color:var(--vert-clair);background:#fff}
   <div class="pr" id="pr"></div>
   <div class="tnav" id="tnav"></div>
   <div class="abar">
-    <button class="btn btn-o" onclick="imprimerActif()">🖨️ Imprimer</button>
+    <button class="btn btn-o" onclick="window.print()">🖨️ Imprimer</button>
     <button class="btn btn-s" onclick="copierTout()">📋 Copier tout</button>
   </div>
   <div id="tc"></div>
@@ -219,23 +242,41 @@ input:focus,select:focus{border-color:var(--vert-clair);background:#fff}
 <script>
 const SHEET_ID='1IJ_I-JxafJpIF9H2pInXaET-IQw0KrTialE94rL2hoI';
 const GOOGLE_API_KEY='AIzaSyBhYu07yyGNafYNCMkiA6Oit8ZpO4WxdA8';
+const ORDRE_JOURS=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
 
 const FOURNISSEURS_PRIORITAIRES=['fromentellerie','dipsa','gamme','metro','tang','paris store','top asia'];
 
 // Ingrédients de base à exclure de la fiche de production
 const EXCLUSIONS_BASE=[
-  n=>n.includes('lin')&&(n.includes('farine')||n.includes('mixeo')),
+  n=>n==='lin'||n==='farine de lin'||(n.includes('lin')&&(n.includes('farine')||n.includes('mixeo'))),
   n=>n.includes('mixeo'),
   n=>n.includes('guar')&&!n.includes('guarana'),
-  n=>n.includes('sucre')&&n.includes('canne'),
+  n=>n==='sucre'||(n.includes('sucre')&&n.includes('canne')),
   n=>n.includes('poudre')&&n.includes('lait'),
   n=>n==='eau',
-  n=>n.includes('lait')&&n.includes('entier'),
-  n=>n.includes('creme')&&(n.includes('crue')||n.includes('fraiche')),
-  n=>n.includes('sirop')&&n.includes('agave'),
+  n=>(n==='lait'||n.includes('lait entier'))&&!n.includes('coco')&&!n.includes('soja'),
+  n=>n.includes('creme')&&(n.includes('crue')||n.includes('fraiche')||n.includes('fraîche')),
+  n=>n.includes('sirop')&&n.includes('agave')||n==='agave',
   n=>n.includes('inuline'),
   n=>n.includes('glucose'),
 ];
+
+// Produits frais DIPSA (livraison J, commander le jour même)
+const DIPSA_FRAIS_KEYS=[
+  'framboise bio','fruit de la passion bio','passion bio','mangue alphonso bio',
+  'litchi','citron jaune bio'
+];
+
+// Commandes habituelles par fournisseur
+const HABITUELS={
+  dipsa:{
+    frais:['Framboise bio (1 kg)','Fruit de la Passion bio (1 kg)','Mangue Alphonso bio','Litchi frais','Citron jaune bio (1 kg)'],
+    surgele:['Passion bio (5 kg)','Framboise bio (5 kg)','Litchi (5 kg)','Cranberry bio']
+  },
+  gamme:{
+    surgele:['Citron Vert (Boiron)','Orange Sanguine (Boiron)','Groseille (Boiron)']
+  }
+};
 
 let S={recettes:[],ingredients:[],fournisseurs:[],planning:[],mapping:{},semaine:''};
 
@@ -247,6 +288,38 @@ function fqte(n){if(!n)return'0';if(Number.isInteger(n))return''+n;return n.toFi
 function pdate(nom){const m=nom.match(/(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);if(!m)return null;let y=m[3]?parseInt(m[3]):new Date().getFullYear();if(y<100)y+=2000;return new Date(y,parseInt(m[2])-1,parseInt(m[1]))}
 function estPrioritaire(nom){const n=norm(nom||'');return FOURNISSEURS_PRIORITAIRES.some(k=>n.includes(k))}
 function estBaseExclue(nom){const n=norm(nom||'');return EXCLUSIONS_BASE.some(f=>f(n))}
+
+// Tag livraison pour DIPSA et Gamme des Chefs
+function getDeliveryTag(fouNom,ingNom){
+  const fn=norm(fouNom||'');const n=norm(ingNom||'');
+  if(fn.includes('dipsa')){
+    const isFrais=DIPSA_FRAIS_KEYS.some(k=>n.includes(norm(k)));
+    return isFrais
+      ?'<span class="del-frais">🟢 Frais · Livraison J</span>'
+      :'<span class="del-surgele">❄️ Surgelé · Livraison J-1</span>';
+  }
+  if(fn.includes('gamme')){
+    return'<span class="del-surgele">❄️ Surgelé · Livraison J-1</span>';
+  }
+  return'';
+}
+
+// Bloc commandes habituelles pour DIPSA/Gamme
+function getHabBox(fouNom){
+  const fn=norm(fouNom||'');
+  let hab=null;
+  if(fn.includes('dipsa'))hab=HABITUELS.dipsa;
+  else if(fn.includes('gamme'))hab=HABITUELS.gamme;
+  if(!hab)return'';
+  let cols='';
+  if(hab.frais?.length){
+    cols+=`<div class="hab-col"><div class="hab-col-title">🟢 Toujours en frais (J)</div>${hab.frais.map(i=>`<div class="hab-item"><span class="hab-dot-f"></span>${i}</div>`).join('')}</div>`;
+  }
+  if(hab.surgele?.length){
+    cols+=`<div class="hab-col"><div class="hab-col-title">❄️ Toujours en surgelé (J-1)</div>${hab.surgele.map(i=>`<div class="hab-item"><span class="hab-dot-s"></span>${i}</div>`).join('')}</div>`;
+  }
+  return`<div class="hab-box"><div class="hab-title">Commandes habituelles</div><div class="hab-cols">${cols}</div></div>`;
+}
 
 function chargerConfig(){const c=JSON.parse(localStorage.getItem('tc_cfg')||'{}');if(c.url)document.getElementById('supabaseUrl').value=c.url;if(c.key)document.getElementById('supabaseKey').value=c.key;if(c.mapping)S.mapping=c.mapping;if(Object.keys(c).length)document.getElementById('saveConfig').checked=true}
 function saveConfig(){if(!document.getElementById('saveConfig').checked)return;localStorage.setItem('tc_cfg',JSON.stringify({url:document.getElementById('supabaseUrl').value.trim(),key:document.getElementById('supabaseKey').value.trim(),mapping:S.mapping}))}
@@ -278,7 +351,9 @@ async function lancerChargement(){
   if(gid==='__manuel__'){gid=document.getElementById('gidManuel')?.value?.trim()||'';if(!gid){ss('Saisir le GID.','err');return}}
   if(!url||!key){ss('Renseignez URL et clé Supabase.','err');return}
   if(!gid){ss('Choisissez une semaine.','err');return}
-  try{ss('Chargement Supabase…');await chargerSupa(url,key);ss('Lecture du planning…');await chargerPlanning(gid);saveConfig();
+  try{
+    ss('Chargement Supabase…');await chargerSupa(url,key);
+    ss('Lecture du planning…');await chargerPlanning(gid);saveConfig();
     const jours=[...new Set(S.planning.map(p=>p.jour))];
     ss(`✓ ${S.recettes.length} recettes · ${S.planning.length} production(s) : ${jours.map(cap).join(', ')}`,'ok');
     afficherMapping();
@@ -308,20 +383,18 @@ function parseCSV(csv){
 async function chargerPlanning(gid){
   const r=await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`);
   if(!r.ok)throw new Error(`Sheet inaccessible (${r.status})`);
-  const csv=await r.text();const lignes=parseCSV(csv);
-  S.planning=[];
-  const JOURS=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
+  const csv=await r.text();const lignes=parseCSV(csv);S.planning=[];
   let jour='',date='';
   for(const l of lignes.slice(15,80)){
     const A=(l[0]||'').trim(),B=(l[1]||'').trim(),C=(l[2]||'').trim(),D=(l[3]||'').trim(),E=(l[4]||'').trim();
-    if(JOURS.includes(A.toLowerCase())){jour=A.toLowerCase();date=''}
+    if(ORDRE_JOURS.includes(A.toLowerCase())){jour=A.toLowerCase();date=''}
     else if(A&&/^\d{1,2}[\/\-]\d{1,2}/.test(A))date=A;
     if(B.toUpperCase()==='OFF')continue;
     if(jour&&C&&C.toLowerCase()!=='parfums'){
       let p=C,mx=1;const mX=p.match(/\s+[Xx]\s*(\d+)$/);
       if(mX){mx=parseInt(mX[1]);p=p.replace(/\s+[Xx]\s*\d+$/,'').trim()}
-      const existing=S.planning.find(x=>x.parfum===p&&x.jour===jour);
-      if(existing){existing.mixCount+=mx}else{S.planning.push({jour,date,parfum:p,mixCount:mx,qteOutput:D,sgl:E})}
+      const ex=S.planning.find(x=>x.parfum===p&&x.jour===jour);
+      if(ex){ex.mixCount+=mx}else{S.planning.push({jour,date,parfum:p,mixCount:mx,qteOutput:D,sgl:E})}
     }
   }
   const sel=document.getElementById('semaineSelect');S.semaine=sel.options[sel.selectedIndex]?.text||'';
@@ -337,15 +410,26 @@ function fuzzy(parfum){
   if(best>=1&&mots.length<=2)return bid;return null;
 }
 
+// ── Mapping trié par jour ──
 function afficherMapping(){
-  const pu=[...new Map(S.planning.map(p=>[p.parfum,p])).values()];
+  // Dédupliquer puis trier chronologiquement par jour
+  const pu=[...new Map(S.planning.map(p=>[p.parfum,p])).values()]
+    .sort((a,b)=>ORDRE_JOURS.indexOf(a.jour)-ORDRE_JOURS.indexOf(b.jour));
   for(const p of pu){const k=norm(p.parfum);if(!S.mapping[k]){const m=fuzzy(p.parfum);if(m)S.mapping[k]=m}}
   const tb=document.getElementById('mappingBody');tb.innerHTML='';
+  let lastJour='';
   for(const p of pu){
+    // Séparateur de jour
+    if(p.jour!==lastJour){
+      lastJour=p.jour;
+      const sep=document.createElement('tr');sep.className='mt-day-sep';
+      sep.innerHTML=`<td colspan="4">${cap(p.jour)}</td>`;tb.appendChild(sep);
+    }
     const k=norm(p.parfum),rid=S.mapping[k]||'';
+    const isBio=/bio/i.test(p.parfum);
     const tr=document.createElement('tr');
     tr.innerHTML=`<td><span class="badge bj-${p.jour}">${cap(p.jour)}</span></td>
-    <td><strong>${p.parfum}</strong>${p.mixCount>1?` <em style="color:var(--gris);font-size:11px;">×${p.mixCount}</em>`:''}</td>
+    <td><strong>${p.parfum}</strong>${isBio?' <span class="fp-bio">BIO</span>':''}${p.mixCount>1?` <em style="color:var(--gris);font-size:11px;">×${p.mixCount}</em>`:''}</td>
     <td><select onchange="S.mapping['${k}']=this.value;saveConfig()"><option value="">— Non associé —</option>
     ${S.recettes.map(r=>`<option value="${r.id}"${r.id===rid?' selected':''}>${r.nom}</option>`).join('')}</select></td>
     <td><span class="badge ${rid?'b-ok':'b-err'}">${rid?'✓ OK':'⚠ Vérifier'}</span></td>`;
@@ -382,29 +466,19 @@ function genererCommandes(){
 }
 
 function afficherResultats(parFour,divers){
-  const ORDRE=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
   const pj={};for(const p of S.planning){if(!pj[p.jour])pj[p.jour]=[];pj[p.jour].push(p)}
   let rh='<h3>📅 Planning de la semaine</h3>';
-  for(const j of ORDRE){if(!pj[j])continue;
+  for(const j of ORDRE_JOURS){if(!pj[j])continue;
     rh+=`<div class="pj"><span class="jl">${cap(j)}</span><div>${pj[j].map(p=>{const ok=!!S.mapping[norm(p.parfum)];return`<span class="tp ${ok?'ok':'nok'}">${ok?'✓':'⚠'} ${p.parfum}${p.mixCount>1?` ×${p.mixCount}`:''}</span>`}).join('')}</div></div>`}
   document.getElementById('pr').innerHTML=rh;
   const tnav=document.getElementById('tnav'),tc=document.getElementById('tc');
   tnav.innerHTML='';tc.innerHTML='';const tabs=[];
 
-  // Fiche production en premier
   tabs.push({id:'fiche',label:'Fiche de production',icon:'📋',html:ficheProductionHtml()});
-
-  // Bons fournisseurs prioritaires
   for(const fou of S.fournisseurs.filter(f=>parFour[f.id]))
     tabs.push({id:`f_${fou.id}`,label:fou.nom,icon:'📦',html:bonHtml(parFour[fou.id])});
-
-  // Bon consolidé autres fournisseurs
   if(divers.length)tabs.push({id:'divers',label:'Autres fournisseurs',icon:'🛒',html:diversHtml(divers)});
-
-  // Emails
   const eh=emailsHtml(parFour);if(eh)tabs.push({id:'emails',label:'Emails fournisseurs',icon:'✉️',html:eh});
-
-  // Récapitulatif veille
   tabs.push({id:'recap',label:'Récapitulatif veille',icon:'✅',html:recapHtml(parFour,divers)});
 
   tabs.forEach((tab,i)=>{
@@ -425,36 +499,29 @@ function activerTab(id){
 
 // ── Fiche de production ──
 function ficheProductionHtml(){
-  const ORDRE=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
   const pj={};for(const p of S.planning){if(!pj[p.jour])pj[p.jour]=[];pj[p.jour].push(p)}
   let html='<div class="fp-wrap">',fpIdx=0;
-
-  for(const jour of ORDRE){
+  for(const jour of ORDRE_JOURS){
     if(!pj[jour])continue;
-    const prods=pj[jour];
-    let cardsHtml='';
-
+    const prods=pj[jour];let cardsHtml='';
     for(const prod of prods){
       const uid=`fp${fpIdx++}`;
       const rid=S.mapping[norm(prod.parfum)];
       const rec=rid?S.recettes.find(r=>r.id===rid):null;
       const mx=prod.mixCount||1;
-
-      // Badge catégorie
+      const isBio=/bio/i.test(prod.parfum)||(rec&&/bio/i.test(rec.nom));
       const sgl=(prod.sgl||'').toUpperCase().trim();
       const sglCls={'S':'fp-s','L':'fp-l','G':'fp-g','V':'fp-v'}[sgl]||'fp-s';
       const sglBadge=sgl?`<span class="fp-badge ${sglCls}">${sgl}</span>`:'';
       const mixBadge=mx>1?`<span class="fp-mix">×${mx}</span>`:'';
-
+      const bioBadge=isBio?`<span class="fp-bio">BIO</span>`:'';
       if(!rec){
-        cardsHtml+=`<div class="fp-card"><div class="fp-card-top"><div class="fp-name">${prod.parfum}</div><div class="fp-badges">${sglBadge}${mixBadge}</div></div><p class="fp-no-rec">⚠ Recette non associée</p></div>`;
+        cardsHtml+=`<div class="fp-card"><div class="fp-card-top"><div class="fp-name">${prod.parfum}</div><div class="fp-badges">${bioBadge}${sglBadge}${mixBadge}</div></div><p class="fp-no-rec">⚠ Recette non associée</p></div>`;
         continue;
       }
-
       // Ingrédients spécifiques (hors base)
-      const allIngs=[...(rec.poudres||[]),...(rec.liquides||[]),...(rec.ingredients||[])];
       const ingsSpec=[];
-      for(const l of allIngs){
+      for(const l of [...(rec.poudres||[]),...(rec.liquides||[]),...(rec.ingredients||[])]){
         const iid=l.ingredientId||l.ingredient_id;
         const ing=S.ingredients.find(i=>i.id===iid);
         if(!ing||estBaseExclue(ing.nomRecette))continue;
@@ -462,119 +529,98 @@ function ficheProductionHtml(){
         if(u==='g'&&q>=1000){q/=1000;u='kg'}if(u==='ml'&&q>=1000){q/=1000;u='L'}
         ingsSpec.push({nom:ing.nomRecette,bio:ing.bio,qte:fqte(parseFloat(q.toFixed(3))),u});
       }
-
       // Toppings
       const tops=[];
       for(const l of (rec.toppings||[])){
         const iid=l.ingredientId||l.ingredient_id;
-        const ing=S.ingredients.find(i=>i.id===iid);
-        if(!ing)continue;
+        const ing=S.ingredients.find(i=>i.id===iid);if(!ing)continue;
         let q=(parseFloat(l.poids)||0)*mx,u=l.unite||'g';
         if(u==='g'&&q>=1000){q/=1000;u='kg'}if(u==='ml'&&q>=1000){q/=1000;u='L'}
         tops.push({nom:ing.nomRecette,bio:ing.bio,qte:fqte(parseFloat(q.toFixed(3))),u});
       }
-
       const ingRows=ingsSpec.length
-        ?ingsSpec.map(i=>`<li><span class="fp-iname">${i.nom}${i.bio?' 🌿':''}</span><span class="fp-iqte">${i.qte} ${i.u}</span></li>`).join('')
+        ?ingsSpec.map(i=>`<li><span class="fp-iname">${i.nom}</span>${i.bio?'<span class="fp-ibio">BIO</span>':''}<span class="fp-iqte">${i.qte} ${i.u}</span></li>`).join('')
         :`<li><span class="fp-no-ing">Pas d'ingrédient spécifique</span></li>`;
-
       const topSection=tops.length
-        ?`<div class="fp-tops"><span class="fp-top-lbl">Toppings</span>${tops.map(t=>`<div class="fp-top-item"><span class="fp-top-nom">${t.nom}${t.bio?' 🌿':''}</span><span class="fp-top-qte">${t.qte} ${t.u}</span></div>`).join('')}</div>`
+        ?`<div class="fp-tops"><span class="fp-top-lbl">Toppings</span>${tops.map(t=>`<div class="fp-top-row"><span class="fp-top-nom">${t.nom}</span>${t.bio?'<span class="fp-top-bio">BIO</span>':''}<span class="fp-top-qte">${t.qte} ${t.u}</span></div>`).join('')}</div>`
         :`<div class="fp-tops"><span class="fp-top-lbl">Toppings</span><span class="fp-no-top">Aucun</span></div>`;
-
       cardsHtml+=`<div class="fp-card" id="fpcard_${uid}">
-        <div class="fp-card-top"><div class="fp-name" id="fpname_${uid}">${prod.parfum}</div><div class="fp-badges">${sglBadge}${mixBadge}</div></div>
-        <ul class="fp-ings">${ingRows}</ul>
-        ${topSection}
-        <div class="fp-foot">
-          <input type="checkbox" id="${uid}" onchange="toggleFp('${uid}')">
-          <label for="${uid}">Ingrédients prêts ✓</label>
-        </div>
+        <div class="fp-card-top"><div class="fp-name" id="fpname_${uid}">${prod.parfum}</div><div class="fp-badges">${bioBadge}${sglBadge}${mixBadge}</div></div>
+        <ul class="fp-ings">${ingRows}</ul>${topSection}
+        <div class="fp-foot"><input type="checkbox" id="${uid}" onchange="toggleFp('${uid}')"><label for="${uid}">Ingrédients prêts ✓</label></div>
       </div>`;
     }
-
-    const nb=prods.length;
     html+=`<div class="fp-day">
-      <div class="fp-day-header"><span class="fp-day-name">${cap(jour)}</span><span class="fp-day-meta">${nb} turbinage${nb>1?'s':''}</span></div>
+      <div class="fp-day-header"><span class="fp-day-name">${cap(jour)}</span><span class="fp-day-meta">${prods.length} turbinage${prods.length>1?'s':''}</span></div>
       <div class="fp-grid">${cardsHtml}</div>
       <div class="fp-actions">
-        <span class="fp-actions-meta" id="fpday_${jour}">0 / ${nb} prêts</span>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-s btn-sm" onclick="toutCocherJour('${jour}')">✅ Tout cocher</button>
-        </div>
+        <span class="fp-actions-meta" id="fpday_${jour}">0 / ${prods.length} prêts</span>
+        <button class="btn btn-s btn-sm" onclick="toutCocherJour('${jour}')">✅ Tout cocher</button>
       </div>
     </div>`;
   }
-  html+='</div>';
-  return html;
+  return html+'</div>';
 }
 
 function toggleFp(uid){
-  const chk=document.getElementById(uid);
-  const card=document.getElementById(`fpcard_${uid}`);
-  const name=document.getElementById(`fpname_${uid}`);
-  if(card)card.classList.toggle('done',chk.checked);
-  if(name)name.classList.toggle('barred',chk.checked);
-  majFpCompteurs();
+  const chk=document.getElementById(uid);const card=document.getElementById(`fpcard_${uid}`);const name=document.getElementById(`fpname_${uid}`);
+  if(card)card.classList.toggle('done',chk.checked);if(name)name.classList.toggle('barred',chk.checked);majFpCompteurs();
 }
-
 function majFpCompteurs(){
-  const ORDRE=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
   const pj={};for(const p of S.planning){if(!pj[p.jour])pj[p.jour]=[];pj[p.jour].push(p)}
   let fpIdx=0;
-  for(const jour of ORDRE){
-    if(!pj[jour])continue;
-    const nb=pj[jour].length;
-    let done=0;
-    for(let i=0;i<nb;i++){const chk=document.getElementById(`fp${fpIdx+i}`);if(chk?.checked)done++}
-    const el=document.getElementById(`fpday_${jour}`);
-    if(el)el.textContent=`${done} / ${nb} prêts`;
-    fpIdx+=nb;
-  }
+  for(const jour of ORDRE_JOURS){if(!pj[jour])continue;const nb=pj[jour].length;let done=0;for(let i=0;i<nb;i++){const c=document.getElementById(`fp${fpIdx+i}`);if(c?.checked)done++}const el=document.getElementById(`fpday_${jour}`);if(el)el.textContent=`${done} / ${nb} prêts`;fpIdx+=nb}
 }
-
 function toutCocherJour(jour){
-  const ORDRE=['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
   const pj={};for(const p of S.planning){if(!pj[p.jour])pj[p.jour]=[];pj[p.jour].push(p)}
   let fpIdx=0;
-  for(const j of ORDRE){
-    if(!pj[j])continue;
-    if(j===jour){for(let i=0;i<pj[j].length;i++){const id=`fp${fpIdx+i}`;const chk=document.getElementById(id);if(chk&&!chk.checked){chk.checked=true;toggleFp(id)}}break}
-    fpIdx+=pj[j].length;
-  }
+  for(const j of ORDRE_JOURS){if(!pj[j])continue;if(j===jour){for(let i=0;i<pj[j].length;i++){const id=`fp${fpIdx+i}`;const c=document.getElementById(id);if(c&&!c.checked){c.checked=true;toggleFp(id)}}break}fpIdx+=pj[j].length}
 }
 
+// ── Bon fournisseur — avec colonne livraison pour DIPSA/Gamme ──
 function bonHtml({fou,lignes}){
-  const rows=lignes.map(l=>`<tr><td><div style="font-weight:500">${l.ing.nomRecette}</div><div style="font-size:11px;color:var(--gris)">${l.ing.nomEtiquette||''} ${l.ing.bio?'🌿':''}</div></td><td><span class="qte">${fqte(l.qte)} ${l.u}</span></td><td>${l.recs.map(r=>`<span class="tr">${r}</span>`).join('')}</td></tr>`).join('');
+  const fn=norm(fou.nom||'');
+  const showDel=fn.includes('dipsa')||fn.includes('gamme');
+  const extraTh=showDel?'<th>Livraison</th>':'';
+  const habBox=getHabBox(fou.nom);
+  const rows=lignes.map(l=>{
+    const delTd=showDel?`<td style="padding:8px 12px">${getDeliveryTag(fou.nom,l.ing.nomRecette)}</td>`:'';
+    return`<tr><td><div style="font-weight:500">${l.ing.nomRecette}</div><div style="font-size:11px;color:var(--gris)">${l.ing.nomEtiquette||''}${l.ing.bio?' <span style="font-size:9px;font-weight:700;color:#166534">BIO</span>':''}</div></td><td><span class="qte">${fqte(l.qte)} ${l.u}</span></td><td>${l.recs.map(r=>`<span class="tr">${r}</span>`).join('')}</td>${delTd}</tr>`;
+  }).join('');
   const dl=JSON.stringify(lignes.map(l=>({n:l.ing.nomRecette,q:fqte(l.qte),u:l.u}))).replace(/'/g,'&#39;');
-  return`<div class="bc" data-fn="${fou.nom}" data-dl='${dl}'><div class="bch"><div><div class="fn">${fou.nom}</div><div class="fc">${fou.contact||''}</div></div><div class="ji">${fou.jourCommande?`<div>📤 Commande : <strong>${cap(fou.jourCommande)}</strong></div>`:''} ${fou.jourLivraison?`<div>📦 Livraison : <strong>${cap(fou.jourLivraison)}</strong></div>`:''}</div></div><table class="btab"><thead><tr><th>Ingrédient</th><th>Quantité</th><th>Pour les recettes</th></tr></thead><tbody>${rows}</tbody></table><div class="bf"><button class="btn btn-s btn-sm" onclick="copierBon(this)">📋 Copier ce bon</button></div></div>`;
+  return`<div class="bc" data-fn="${fou.nom}" data-dl='${dl}'>
+    <div class="bch"><div><div class="fn">${fou.nom}</div><div class="fc">${fou.contact||''}</div></div>
+    <div class="ji">${fou.jourCommande?`<div>📤 Commande : <strong>${cap(fou.jourCommande)}</strong></div>`:''} ${fou.jourLivraison?`<div>📦 Livraison : <strong>${cap(fou.jourLivraison)}</strong></div>`:''}</div></div>
+    ${habBox}
+    <table class="btab"><thead><tr><th>Ingrédient</th><th>Quantité</th><th>Pour les recettes</th>${extraTh}</tr></thead><tbody>${rows}</tbody></table>
+    <div class="bf"><button class="btn btn-s btn-sm" onclick="copierBon(this)">📋 Copier ce bon</button></div>
+  </div>`;
 }
 
 function diversHtml(divers){
   const sorted=[...divers].sort((a,b)=>(a.fouNom||'').localeCompare(b.fouNom||'')||(a.item.ing.nomRecette||'').localeCompare(b.item.ing.nomRecette||''));
-  const rows=sorted.map(({item:l,fouNom})=>`<tr><td><div style="font-weight:500">${l.ing.nomRecette}</div><div style="font-size:11px;color:var(--gris)">${l.ing.nomEtiquette||''} ${l.ing.bio?'🌿':''}</div></td><td><span class="tag-four">${fouNom||'Non défini'}</span></td><td><span class="qte">${fqte(l.qte)} ${l.u}</span></td><td>${l.recs.map(r=>`<span class="tr">${r}</span>`).join('')}</td></tr>`).join('');
+  const rows=sorted.map(({item:l,fouNom})=>`<tr><td><div style="font-weight:500">${l.ing.nomRecette}</div><div style="font-size:11px;color:var(--gris)">${l.ing.nomEtiquette||''}${l.ing.bio?' <span style="font-size:9px;font-weight:700;color:#166534">BIO</span>':''}</div></td><td><span class="tag-four">${fouNom||'Non défini'}</span></td><td><span class="qte">${fqte(l.qte)} ${l.u}</span></td><td>${l.recs.map(r=>`<span class="tr">${r}</span>`).join('')}</td></tr>`).join('');
   const dl=JSON.stringify(sorted.map(({item:l,fouNom})=>({n:l.ing.nomRecette,f:fouNom,q:fqte(l.qte),u:l.u}))).replace(/'/g,'&#39;');
   return`<div class="bc" data-fn="Autres fournisseurs" data-dl='${dl}'><div class="bch" style="background:#4a7060"><div><div class="fn">🛒 Autres fournisseurs</div><div class="fc">${sorted.length} ingrédient(s)</div></div></div><table class="btab"><thead><tr><th>Ingrédient</th><th>Fournisseur</th><th>Quantité</th><th>Pour les recettes</th></tr></thead><tbody>${rows}</tbody></table><div class="bf"><button class="btn btn-s btn-sm" onclick="copierDivers(this)">📋 Copier</button></div></div>`;
 }
 
 function recapHtml(parFour,divers){
   const tous=[];
-  for(const fid of Object.keys(parFour)){const{fou,lignes}=parFour[fid];for(const l of lignes)tous.push({item:l,fouNom:fou.nom,fouPrio:true,jourCmd:fou.jourCommande,jourLiv:fou.jourLivraison})}
-  for(const{item,fouNom,fou}of divers)tous.push({item,fouNom,fouPrio:false,jourCmd:fou?.jourCommande||'',jourLiv:fou?.jourLivraison||''});
+  for(const fid of Object.keys(parFour)){const{fou,lignes}=parFour[fid];for(const l of lignes)tous.push({item:l,fouNom:fou.nom,fouPrio:true,jourCmd:fou.jourCommande})}
+  for(const{item,fouNom,fou}of divers)tous.push({item,fouNom,fouPrio:false,jourCmd:fou?.jourCommande||''});
   const parFourNom={};
-  for(const entry of tous){const k=entry.fouNom||'Non défini';if(!parFourNom[k])parFourNom[k]={prio:entry.fouPrio,jourCmd:entry.jourCmd,items:[]};parFourNom[k].items.push(entry)}
+  for(const e of tous){const k=e.fouNom||'Non défini';if(!parFourNom[k])parFourNom[k]={prio:e.fouPrio,jourCmd:e.jourCmd,items:[]};parFourNom[k].items.push(e)}
   const groupes=Object.entries(parFourNom).sort(([an,a],[bn,b])=>(b.prio-a.prio)||an.localeCompare(bn));
   const total=tous.length;let rows='',idx=0;
   for(const[fnm,grp]of groupes){
-    const jCmd=grp.jourCmd?` · 📤 ${cap(grp.jourCmd)}`:'';
-    rows+=`<tr class="recap-group-header"><td colspan="5">${grp.prio?'📦':'🛒'} ${fnm}${jCmd}</td></tr>`;
-    for(const{item:l}of grp.items){const uid=`chk_${idx++}`;rows+=`<tr id="row_${uid}"><td class="check-cell"><input type="checkbox" class="chk" id="${uid}" onchange="toggleCheck('${uid}')"></td><td><div class="ing-nom" style="font-weight:500">${l.ing.nomRecette}</div><div style="font-size:11px;color:var(--gris)">${l.ing.nomEtiquette||''} ${l.ing.bio?'🌿':''}</div></td><td><span class="tag-four ${grp.prio?'prioritaire':''}">${fnm}</span></td><td><span class="qte">${fqte(l.qte)} ${l.u}</span></td><td style="font-size:12px">${l.recs.map(r=>`<span class="tr">${r}</span>`).join('')}</td></tr>`}
+    rows+=`<tr class="recap-group-header"><td colspan="5">${grp.prio?'📦':'🛒'} ${fnm}${grp.jourCmd?` · 📤 ${cap(grp.jourCmd)}`:''}</td></tr>`;
+    for(const{item:l}of grp.items){const uid=`chk_${idx++}`;rows+=`<tr id="row_${uid}"><td class="check-cell"><input type="checkbox" class="chk" id="${uid}" onchange="toggleCheck('${uid}')"></td><td><div class="ing-nom" style="font-weight:500">${l.ing.nomRecette}${l.ing.bio?' <span style="font-size:9px;font-weight:700;color:#166534">BIO</span>':''}</div><div style="font-size:11px;color:var(--gris)">${l.ing.nomEtiquette||''}</div></td><td><span class="tag-four ${grp.prio?'prioritaire':''}">${fnm}</span></td><td><span class="qte">${fqte(l.qte)} ${l.u}</span></td><td style="font-size:12px">${l.recs.map(r=>`<span class="tr">${r}</span>`).join('')}</td></tr>`}
   }
   return`<div class="bc"><div class="bch" style="background:#1a2e24"><div><div class="fn">✅ Récapitulatif — Veille de production</div><div class="fc">Cochez chaque ingrédient confirmé en stock ou commandé</div></div><div class="ji"><div>Total : <strong id="recap-count">0 / ${total}</strong></div></div></div><div style="padding:16px 20px 0"><div class="recap-stats"><div class="recap-stat"><span class="rs-val" id="recap-ok-count">0</span><span class="rs-lbl">✅ Confirmés</span><div class="recap-progress"><div class="recap-progress-bar" id="recap-bar" style="width:0%"></div></div></div><div class="recap-stat"><span class="rs-val" id="recap-remaining">${total}</span><span class="rs-lbl">⏳ Restants</span></div><div class="recap-stat"><span class="rs-val">${total}</span><span class="rs-lbl">📋 Total</span></div></div></div><table class="recap-table"><thead><tr><th>✓</th><th>Ingrédient</th><th>Fournisseur</th><th>Quantité</th><th>Parfums</th></tr></thead><tbody>${rows}</tbody></table><div class="bf"><button class="btn btn-s btn-sm" onclick="toutCocher()">✅ Tout cocher</button><button class="btn btn-s btn-sm" onclick="toutDecocher()">↩ Réinitialiser</button></div></div>`;
 }
 
-function toggleCheck(uid){const chk=document.getElementById(uid);const row=document.getElementById(`row_${uid}`);if(chk&&row){row.classList.toggle('checked',chk.checked);majCompteurs()}}
-function majCompteurs(){const chks=document.querySelectorAll('.chk');const total=chks.length,done=[...chks].filter(c=>c.checked).length;const pct=total?Math.round(done/total*100):0;const el=id=>document.getElementById(id);if(el('recap-count'))el('recap-count').textContent=`${done} / ${total}`;if(el('recap-ok-count'))el('recap-ok-count').textContent=done;if(el('recap-remaining'))el('recap-remaining').textContent=total-done;if(el('recap-bar'))el('recap-bar').style.width=pct+'%'}
+function toggleCheck(uid){const c=document.getElementById(uid);const row=document.getElementById(`row_${uid}`);if(c&&row){row.classList.toggle('checked',c.checked);majCompteurs()}}
+function majCompteurs(){const cs=document.querySelectorAll('.chk');const total=cs.length,done=[...cs].filter(c=>c.checked).length,pct=total?Math.round(done/total*100):0;const el=id=>document.getElementById(id);if(el('recap-count'))el('recap-count').textContent=`${done} / ${total}`;if(el('recap-ok-count'))el('recap-ok-count').textContent=done;if(el('recap-remaining'))el('recap-remaining').textContent=total-done;if(el('recap-bar'))el('recap-bar').style.width=pct+'%'}
 function toutCocher(){document.querySelectorAll('.chk').forEach(c=>{c.checked=true;const row=document.getElementById(`row_${c.id}`);if(row)row.classList.add('checked')});majCompteurs()}
 function toutDecocher(){document.querySelectorAll('.chk').forEach(c=>{c.checked=false;const row=document.getElementById(`row_${c.id}`);if(row)row.classList.remove('checked')});majCompteurs()}
 
@@ -585,14 +631,13 @@ function emailsHtml(parFour){
   return cibles.map(fou=>{
     const email=fou.contact?.match(/[\w.+-]+@[\w.-]+\.\w+/)?.[0]||'';
     const lignes=parFour[fou.id]?.lignes||[];
-    const liste=lignes.map(l=>`  - ${l.ing.nomRecette} : ${fqte(l.qte)} ${l.u}`).join('\n');
+    const liste=lignes.map(l=>`  - ${l.ing.nomRecette}${l.ing.bio?' (BIO)':''} : ${fqte(l.qte)} ${l.u}`).join('\n');
     const corps=`Bonjour,\n\nVeuillez trouver ci-dessous notre commande pour la semaine ${S.semaine} (${periode}) :\n\n${liste}\n\nMerci de confirmer la réception et de nous indiquer la date de livraison prévue.\n\nCordialement,\nLa Tropicale Glacier`;
     return`<div class="ec"><div class="ech"><div class="et">✉️ ${fou.nom}</div><div style="font-size:11px;opacity:.7">${fou.jourCommande?`À envoyer le : ${cap(fou.jourCommande)}`:''}</div></div><div class="ef"><div class="efl"><label>À</label><div class="v"><input type="text" id="eto_${fou.id}" value="${email}" placeholder="email@fournisseur.fr" style="max-width:400px"></div></div><div class="efl"><label>Objet</label><div class="v"><input type="text" id="esub_${fou.id}" value="Commande La Tropicale Glacier — semaine ${S.semaine}" style="max-width:500px"></div></div></div><div class="eb"><textarea id="ebod_${fou.id}">${corps}</textarea></div><div class="ef2"><button class="btn btn-s btn-sm" onclick="copierEmail('${fou.id}')">📋 Copier</button><button class="btn btn-p btn-sm" onclick="ouvrirEmail('${fou.id}')">📨 Ouvrir dans la messagerie</button></div></div>`;
   }).join('');
 }
 
-function imprimerActif(){window.print()}
-function copierBon(btn){const d=btn.closest('.bc');const fn=d.dataset.fn;const ll=JSON.parse(d.dataset.dl||'[]');let t=`BON DE COMMANDE — ${fn}\nSemaine ${S.semaine}\n${'─'.repeat(40)}\n`;for(const l of ll)t+=`${l.n.padEnd(30)} ${(l.q+' '+l.u).padStart(10)}\n`;navigator.clipboard.writeText(t).then(()=>toast('Bon copié !'))}
+function copierBon(btn){const d=btn.closest('.bc');const ll=JSON.parse(d.dataset.dl||'[]');let t=`BON DE COMMANDE — ${d.dataset.fn}\nSemaine ${S.semaine}\n${'─'.repeat(40)}\n`;for(const l of ll)t+=`${l.n.padEnd(30)} ${(l.q+' '+l.u).padStart(10)}\n`;navigator.clipboard.writeText(t).then(()=>toast('Bon copié !'))}
 function copierDivers(btn){const d=btn.closest('.bc');const ll=JSON.parse(d.dataset.dl||'[]');let t=`AUTRES FOURNISSEURS — Semaine ${S.semaine}\n${'─'.repeat(40)}\n`;for(const l of ll)t+=`${l.n.padEnd(28)} [${(l.f||'').padEnd(18)}] ${(l.q+' '+l.u).padStart(8)}\n`;navigator.clipboard.writeText(t).then(()=>toast('Bon copié !'))}
 function copierEmail(fid){const to=document.getElementById(`eto_${fid}`)?.value||'';const sb=document.getElementById(`esub_${fid}`)?.value||'';const bd=document.getElementById(`ebod_${fid}`)?.value||'';navigator.clipboard.writeText(`À : ${to}\nObjet : ${sb}\n\n${bd}`).then(()=>toast('Email copié !'))}
 function ouvrirEmail(fid){const to=encodeURIComponent(document.getElementById(`eto_${fid}`)?.value||'');const sb=encodeURIComponent(document.getElementById(`esub_${fid}`)?.value||'');const bd=encodeURIComponent(document.getElementById(`ebod_${fid}`)?.value||'');window.location.href=`mailto:${to}?subject=${sb}&body=${bd}`}
