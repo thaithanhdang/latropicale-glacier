@@ -544,7 +544,7 @@ function bonLivraisonHtml(fou,lines){
     return sep+`<tr>
       <td><div style="font-weight:500">${line.ing.nomRecette}${line.ing.bio?'<span class="bio-tag">BIO</span>':''}</div><div style="font-size:11px;color:var(--gris)">${line.ing.nomEtiquette||''}</div></td>
       <td>${typeTag}</td>
-      <td><span class="qte">${qFmt} ${u}</span></td>
+      <td><span class="qte">${qFmt} ${line.u}</span></td>
       <td>${line.recs.map(r=>`<span class="tr">${r}</span>`).join('')}</td>
     </tr>`;
   }).join('');
