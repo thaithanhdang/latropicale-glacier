@@ -428,8 +428,12 @@ function fuzzy(parfum){
 }
 
 function afficherMapping(){
-  const pu=[...new Map(S.planning.map(p=>[p.parfum,p])).values()]
-    .sort((a,b)=>ORDRE_JOURS.indexOf(a.jour)-ORDRE_JOURS.indexOf(b.jour));
+  // Déduplication par parfum+jour (un même parfum peut apparaître sur plusieurs jours)
+  const pu=[...new Map(S.planning.map(p=>[p.parfum+'__'+p.jour,p])).values()]
+    .sort((a,b)=>{
+      const di=ORDRE_JOURS.indexOf(a.jour)-ORDRE_JOURS.indexOf(b.jour);
+      return di!==0?di:a.parfum.localeCompare(b.parfum);
+    });
   for(const p of pu){const k=norm(p.parfum);if(!S.mapping[k]){const m=fuzzy(p.parfum);if(m)S.mapping[k]=m}}
   const tb=document.getElementById('mappingBody');tb.innerHTML='';let lastJour='';
   for(const p of pu){
@@ -462,8 +466,8 @@ function buildLivraisonLines(fouId, fouNom){
       const ing=S.ingredients.find(i=>i.id===iid);
       if(!ing||ing.fournisseurId!==fouId)continue;
       const fn=norm(fouNom);
-      let frais=fn.includes('dipsa')?isDipsaFrais(ing.nomRecette):false;
-      // Gamme des Chefs : toujours surgelé
+      // Gamme des Chefs : TOUJOURS surgelé, isDipsaFrais uniquement pour DIPSA
+      let frais=fn.includes('dipsa')&&!fn.includes('gamme')&&isDipsaFrais(ing.nomRecette);
       let type=frais?'frais':'surgele';
       // Livraison = J si frais, J-1 si surgelé
       let livraisonJour=frais?prod.jour:jourPrecedent(prod.jour);
