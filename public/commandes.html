@@ -264,6 +264,19 @@ const DIPSA_SURGELE_KEYS=['citron bergamotte','bergamotte'];
 const DIPSA_DUAL_KEYS=['framboise bio','passion bio','fruit de la passion bio','litchi'];
 const DIPSA_SURGELE_UNIT=5; // kg par colis surgelé
 
+// Emails fournisseurs (priorité sur le champ contact Supabase)
+const EMAILS_FOURNISSEURS={
+  'dipsa':'laura.l.andre@dipsa-sa.com',
+  'gamme':'commandeparis@gammedeschefs.com',
+};
+function getEmailFournisseur(fouNom,contactSupabase){
+  const fn=norm(fouNom||'');
+  for(const[key,email]of Object.entries(EMAILS_FOURNISSEURS)){
+    if(fn.includes(key))return email;
+  }
+  return contactSupabase?.match(/[\w.+-]+@[\w.-]+\.\w+/)?.[0]||'';
+}
+
 // Colisage Gamme des Chefs
 const GAMME_PUREE_COLIS=6;  // purées : 6×1 kg
 const GAMME_BILLE_COLIS=5;  // fruits en bille : 5×1 kg
@@ -734,7 +747,7 @@ function emailsHtml(parFour){
   const dates=[...new Set(S.planning.map(p=>p.date).filter(Boolean))];
   const periode=dates.length>=2?`du ${dates[0]} au ${dates[dates.length-1]}`:dates[0]||S.semaine;
   return cibles.map(fou=>{
-    const email=fou.contact?.match(/[\w.+-]+@[\w.-]+\.\w+/)?.[0]||'';
+    const email=getEmailFournisseur(fou.nom,fou.contact);
     let liste='';
     if(estLivraisonJour(fou.nom)){
       // Email structuré par jour de livraison
@@ -754,7 +767,7 @@ function emailsHtml(parFour){
       liste=parFour[fou.id].lignes.map(l=>`  - ${l.ing.nomRecette}${l.ing.bio?' (BIO)':''} : ${fqte(l.qte)} ${l.u}`).join('\n');
     }
     const corps=`Bonjour,\n\nVeuillez trouver ci-dessous notre commande pour la semaine ${S.semaine} (${periode}) :\n${liste}\nMerci de confirmer la réception et les dates de livraison.\n\nCordialement,\nLa Tropicale Glacier`;
-    return`<div class="ec"><div class="ech"><div class="et">✉️ ${fou.nom}</div><div style="font-size:11px;opacity:.7">${estLivraisonJour(fou.nom)?'À envoyer le lundi matin':fou.jourCommande?`À envoyer le : ${cap(fou.jourCommande)}`:''}</div></div><div class="ef"><div class="efl"><label>À</label><div class="v"><input type="text" id="eto_${fou.id}" value="${email}" placeholder="email@fournisseur.fr" style="max-width:400px"></div></div><div class="efl"><label>Objet</label><div class="v"><input type="text" id="esub_${fou.id}" value="Commande La Tropicale Glacier — semaine ${S.semaine}" style="max-width:500px"></div></div></div><div class="eb"><textarea id="ebod_${fou.id}">${corps}</textarea></div><div class="ef2"><button class="btn btn-s btn-sm" onclick="copierEmail('${fou.id}')">📋 Copier</button><button class="btn btn-p btn-sm" onclick="ouvrirEmail('${fou.id}')">📨 Ouvrir dans la messagerie</button></div></div>`;
+    return`<div class="ec"><div class="ech"><div class="et">✉️ ${fou.nom}</div><div style="font-size:11px;opacity:.7">${estLivraisonJour(fou.nom)?'À envoyer le lundi matin':fou.jourCommande?`À envoyer le : ${cap(fou.jourCommande)}`:''}</div></div><div class="ef"><div class="efl"><label>À</label><div class="v"><input type="text" id="eto_${fou.id}" value="${email}" placeholder="email@fournisseur.fr" style="max-width:400px"></div></div><div class="efl"><label>Objet</label><div class="v"><input type="text" id="esub_${fou.id}" value="Commande La Tropicale Glacier — semaine ${S.semaine}" style="max-width:500px"></div></div></div><div class="eb"><textarea id="ebod_${fou.id}">${corps}</textarea></div><div class="ef2"><button class="btn btn-s btn-sm" onclick="copierEmail('${fou.id}')">📋 Copier</button><button class="btn btn-p btn-sm" onclick="ouvrirEmail('${fou.id}')">📨 Ouvrir dans Gmail</button></div></div>`;
   }).join('');
 }
 
@@ -775,7 +788,14 @@ function copierBonLivraison(btn){
 function copierBon(btn){const d=btn.closest('.bc');const ll=JSON.parse(d.dataset.dl||'[]');let t=`BON DE COMMANDE — ${d.dataset.fn}\nSemaine ${S.semaine}\n${'─'.repeat(40)}\n`;for(const l of ll)t+=`${l.n.padEnd(30)} ${(l.q+' '+l.u).padStart(10)}\n`;navigator.clipboard.writeText(t).then(()=>toast('Bon copié !'))}
 function copierDivers(btn){const d=btn.closest('.bc');const ll=JSON.parse(d.dataset.dl||'[]');let t=`AUTRES FOURNISSEURS — Semaine ${S.semaine}\n${'─'.repeat(40)}\n`;for(const l of ll)t+=`${l.n.padEnd(28)} [${(l.f||'').padEnd(18)}] ${(l.q+' '+l.u).padStart(8)}\n`;navigator.clipboard.writeText(t).then(()=>toast('Copié !'))}
 function copierEmail(fid){const to=document.getElementById(`eto_${fid}`)?.value||'';const sb=document.getElementById(`esub_${fid}`)?.value||'';const bd=document.getElementById(`ebod_${fid}`)?.value||'';navigator.clipboard.writeText(`À : ${to}\nObjet : ${sb}\n\n${bd}`).then(()=>toast('Email copié !'))}
-function ouvrirEmail(fid){const to=encodeURIComponent(document.getElementById(`eto_${fid}`)?.value||'');const sb=encodeURIComponent(document.getElementById(`esub_${fid}`)?.value||'');const bd=encodeURIComponent(document.getElementById(`ebod_${fid}`)?.value||'');window.location.href=`mailto:${to}?subject=${sb}&body=${bd}`}
+function ouvrirEmail(fid){
+  const to=encodeURIComponent(document.getElementById(`eto_${fid}`)?.value||'');
+  const sb=encodeURIComponent(document.getElementById(`esub_${fid}`)?.value||'');
+  const bd=encodeURIComponent(document.getElementById(`ebod_${fid}`)?.value||'');
+  // Ouvre Gmail compose (latropicaleglacier@gmail.com)
+  const gmailUrl=`https://mail.google.com/mail/?view=cm&fs=1&to=${to}&su=${sb}&body=${bd}&authuser=latropicaleglacier@gmail.com`;
+  window.open(gmailUrl,'_blank');
+}
 function copierTout(){const bons=document.querySelectorAll('.bc');let t=`BONS DE COMMANDE — La Tropicale Glacier\nSemaine ${S.semaine}\n${'═'.repeat(50)}\n\n`;for(const d of bons){const ll=JSON.parse(d.dataset.dl||'[]');if(!ll.length)continue;t+=`▶ ${d.dataset.fn||''}\n${'─'.repeat(40)}\n`;for(const l of ll)t+=`  ${(l.n||'').padEnd(28)} ${((l.q||'')+' '+(l.u||'')).padStart(10)}\n`;t+='\n'}navigator.clipboard.writeText(t).then(()=>toast('Tout copié !'))}
 
 window.addEventListener('DOMContentLoaded',()=>{chargerConfig();initSelect()});
