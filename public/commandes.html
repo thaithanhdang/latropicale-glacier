@@ -246,10 +246,18 @@ const EXCLUSIONS_BASE=[
 ];
 
 // Purées fraîches chez DIPSA : livraison le jour J de la production
-const DIPSA_FRAIS_KEYS=['framboise bio','fruit de la passion bio','passion bio','mangue alphonso bio','litchi','citron jaune bio'];
+// Purées fraîches DIPSA : livraison le jour J de la production
+const DIPSA_FRAIS_KEYS=[
+  'framboise bio','fruit de la passion bio','passion bio',
+  'mangue alphonso bio','litchi',
+  'citron jaune bio','citron bio','puree citron','purée citron'
+];
 
 const HABITUELS={
-  dipsa:{frais:['Framboise bio (1 kg)','Fruit de la Passion bio (1 kg)','Mangue Alphonso bio','Litchi frais','Citron jaune bio (1 kg)'],surgele:['Passion bio (5 kg)','Framboise bio (5 kg)','Litchi (5 kg)','Cranberry bio']},
+  dipsa:{
+    frais:['Framboise bio (1 kg)','Fruit de la Passion bio (1 kg)','Mangue Alphonso bio','Litchi frais','Citron jaune bio (frais, 1 kg)'],
+    surgele:['Passion bio (5 kg)','Framboise bio (5 kg)','Litchi (5 kg)','Cranberry']
+  },
   gamme:{surgele:['Citron Vert (Boiron)','Orange Sanguine (Boiron)','Groseille (Boiron)']}
 };
 
@@ -259,7 +267,9 @@ function ss(msg,type='l'){const b=document.getElementById('statusBar');b.classNa
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
 function norm(s){return(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,'').trim()}
 function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):''}
-function fqte(n){if(!n)return'0';if(Number.isInteger(n))return''+n;return n.toFixed(n<1?3:n<10?2:1).replace(/\.?0+$/,'')}
+function fqte(n){if(!n)return'0';if(Number.isInteger(n))return''+n;return n.toFixed(n<1?3:n<10?2:1).replace(/.?0+$/,'')}
+function toGrams(q,u){const un=norm(u||'g').replace(/[^a-z]/g,'');if(un==='kg')return q*1000;if(un==='l')return q*1000;if(un==='ml')return q;return q;}
+function fromGrams(g){if(g>=1000)return{q:parseFloat((g/1000).toFixed(3)),u:'kg'};return{q:parseFloat(g.toFixed(1)),u:'g'};}
 function pdate(nom){const m=nom.match(/(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);if(!m)return null;let y=m[3]?parseInt(m[3]):new Date().getFullYear();if(y<100)y+=2000;return new Date(y,parseInt(m[2])-1,parseInt(m[1]))}
 function estPrioritaire(nom){const n=norm(nom||'');return FOURNISSEURS_PRIORITAIRES.some(k=>n.includes(k))}
 function estLivraisonJour(nom){const n=norm(nom||'');return FOURNISSEURS_LIVRAISON_JOUR.some(k=>n.includes(k))}
@@ -406,15 +416,18 @@ function buildLivraisonLines(fouId, fouNom){
       const livraisonJour=frais?prod.jour:jourPrecedent(prod.jour);
       const type=frais?'frais':'surgele';
       const key=`${iid}__${livraisonJour}__${type}`;
-      if(!map[key])map[key]={ing,livraisonJour,type,q:0,u:l.unite||'g',recs:[]};
-      map[key].q+=(parseFloat(l.poids)||0)*mx;
+      if(!map[key])map[key]={ing,livraisonJour,type,g:0,recs:[]};
+      map[key].g+=toGrams((parseFloat(l.poids)||0)*mx, l.unite||'g');
       // Mémoriser le parfum avec son jour de production
       const label=`${prod.parfum} (${cap(prod.jour)})`;
       if(!map[key].recs.includes(label))map[key].recs.push(label);
     }
   }
   // Trier par jour de livraison puis par nom d'ingrédient
-  return Object.values(map).sort((a,b)=>{
+  return Object.values(map).map(item=>{
+    const {q,u}=fromGrams(item.g);
+    return {...item,q,u};
+  }).sort((a,b)=>{
     const di=ORDRE_JOURS.indexOf(a.livraisonJour)-ORDRE_JOURS.indexOf(b.livraisonJour);
     return di!==0?di:a.ing.nomRecette.localeCompare(b.ing.nomRecette);
   });
@@ -429,16 +442,15 @@ function genererCommandes(){
     for(const l of [...(rec.poudres||[]),...(rec.liquides||[]),...(rec.ingredients||[]),...(rec.toppings||[])]){
       const iid=l.ingredientId||l.ingredient_id;if(!iid)continue;
       const p=parseFloat(l.poids)||0;
-      if(!bMap[iid])bMap[iid]={q:0,u:l.unite||'g',recs:new Set()};
-      bMap[iid].q+=p*mx;bMap[iid].recs.add(prod.parfum);
+      if(!bMap[iid])bMap[iid]={g:0,recs:new Set()};
+      bMap[iid].g+=toGrams(p*mx,l.unite||'g');bMap[iid].recs.add(prod.parfum);
     }
   }
   const parFour={};const divers=[];
   for(const[iid,b] of Object.entries(bMap)){
     const ing=S.ingredients.find(i=>i.id===iid);if(!ing)continue;
-    let q=b.q,u=b.u;
-    if(u==='g'&&q>=1000){q/=1000;u='kg'}if(u==='ml'&&q>=1000){q/=1000;u='L'}
-    const item={ing,qte:parseFloat(q.toFixed(3)),u,recs:[...b.recs]};
+    const {q,u}=fromGrams(b.g);
+    const item={ing,qte:q,u,recs:[...b.recs]};
     const fou=S.fournisseurs.find(f=>f.id===ing.fournisseurId);
     const fouNom=fou?.nom||'';
     // DIPSA et Gamme ont leur propre bon avec colonnes livraison — on les inclut quand même dans parFour pour le récap
@@ -494,9 +506,7 @@ function bonLivraisonHtml(fou,lines){
   // Grouper les lignes par jour de livraison pour les séparateurs visuels
   let lastJour='';
   const rows=lines.map(line=>{
-    let q=line.q,u=line.u;
-    if(u==='g'&&q>=1000){q/=1000;u='kg'}if(u==='ml'&&q>=1000){q/=1000;u='L'}
-    const qFmt=fqte(parseFloat(q.toFixed(3)));
+    const qFmt=fqte(line.q);
     const typeTag=line.type==='frais'
       ?'<span class="del-frais">🟢 Frais</span>'
       :'<span class="del-surgele">❄️ Surgelé</span>';
@@ -514,7 +524,7 @@ function bonLivraisonHtml(fou,lines){
   }).join('');
 
   // Données pour copier/email
-  const dl=JSON.stringify(lines.map(l=>{let q=l.q,u=l.u;if(u==='g'&&q>=1000){q/=1000;u='kg'}if(u==='ml'&&q>=1000){q/=1000;u='L'}return{n:l.ing.nomRecette,bio:l.ing.bio,lj:l.livraisonJour,type:l.type,q:fqte(parseFloat(q.toFixed(3))),u,recs:l.recs}})).replace(/'/g,'&#39;');
+  const dl=JSON.stringify(lines.map(l=>({n:l.ing.nomRecette,bio:l.ing.bio,lj:l.livraisonJour,type:l.type,q:fqte(l.q),u:l.u,recs:l.recs}))).replace(/'/g,'&#39;');
 
   return`<div class="bc" data-fn="${fou.nom}" data-dl='${dl}'>
     <div class="bch">
@@ -567,15 +577,15 @@ function ficheProductionHtml(){
         const iid=l.ingredientId||l.ingredient_id;const ing=S.ingredients.find(i=>i.id===iid);
         if(!ing||estBaseExclue(ing.nomRecette))continue;
         let q=(parseFloat(l.poids)||0)*mx,u=l.unite||'g';
-        if(u==='g'&&q>=1000){q/=1000;u='kg'}if(u==='ml'&&q>=1000){q/=1000;u='L'}
-        ingsSpec.push({nom:ing.nomRecette,bio:ing.bio,qte:fqte(parseFloat(q.toFixed(3))),u});
+        const cI=fromGrams(toGrams(q,u));
+        ingsSpec.push({nom:ing.nomRecette,bio:ing.bio,qte:fqte(cI.q),u:cI.u});
       }
       const tops=[];
       for(const l of (rec.toppings||[])){
         const iid=l.ingredientId||l.ingredient_id;const ing=S.ingredients.find(i=>i.id===iid);if(!ing)continue;
         let q=(parseFloat(l.poids)||0)*mx,u=l.unite||'g';
-        if(u==='g'&&q>=1000){q/=1000;u='kg'}if(u==='ml'&&q>=1000){q/=1000;u='L'}
-        tops.push({nom:ing.nomRecette,bio:ing.bio,qte:fqte(parseFloat(q.toFixed(3))),u});
+        const cT=fromGrams(toGrams(q,u));
+        tops.push({nom:ing.nomRecette,bio:ing.bio,qte:fqte(cT.q),u:cT.u});
       }
       const ingRows=ingsSpec.length?ingsSpec.map(i=>`<li><span class="fp-iname">${i.nom}${i.bio?'<span class="bio-tag" style="margin-left:3px">BIO</span>':''}</span><span class="fp-iqte">${i.qte} ${i.u}</span></li>`).join(''):`<li><span class="fp-no-ing">Pas d'ingrédient spécifique</span></li>`;
       const topSection=tops.length?`<div class="fp-tops"><span class="fp-top-lbl">Toppings</span>${tops.map(t=>`<div class="fp-top-row"><span class="fp-top-nom">${t.nom}${t.bio?'<span class="bio-tag" style="margin-left:3px">BIO</span>':''}</span><span class="fp-top-qte">${t.qte} ${t.u}</span></div>`).join('')}</div>`:`<div class="fp-tops"><span class="fp-top-lbl">Toppings</span><span class="fp-no-top">Aucun</span></div>`;
@@ -627,10 +637,8 @@ function emailsHtml(parFour){
           lastJour=line.livraisonJour;
           liste+=`\nLIVRAISON ${cap(line.livraisonJour).toUpperCase()} :\n`;
         }
-        let q=line.q,u=line.u;
-        if(u==='g'&&q>=1000){q/=1000;u='kg'}if(u==='ml'&&q>=1000){q/=1000;u='L'}
         const typeLabel=line.type==='frais'?'🟢 frais':'❄️ surgelé';
-        liste+=`  - ${line.ing.nomRecette}${line.ing.bio?' (BIO)':''} ${typeLabel} : ${fqte(parseFloat(q.toFixed(3)))} ${u}`;
+        liste+=`  - ${line.ing.nomRecette}${line.ing.bio?' (BIO)':''} ${typeLabel} : ${fqte(line.q)} ${line.u}`;
         liste+=`  [${line.recs.join(', ')}]\n`;
       }
     } else {
