@@ -259,6 +259,15 @@ const DIPSA_FRAIS_KEYS=[
 // citron bergamotte → surgelé 1 kg
 const DIPSA_SURGELE_KEYS=['citron bergamotte','bergamotte'];
 
+// Items DIPSA disponibles en FRAIS (1 kg) ET SURGELÉ (5 kg) → split auto
+// Règle : floor(qty/5)*5 kg en surgelé + reste en frais
+const DIPSA_DUAL_KEYS=['framboise bio','passion bio','fruit de la passion bio','litchi'];
+const DIPSA_SURGELE_UNIT=5; // kg par colis surgelé
+
+// Colisage Gamme des Chefs
+const GAMME_PUREE_COLIS=6;  // purées : 6×1 kg
+const GAMME_BILLE_COLIS=5;  // fruits en bille : 5×1 kg
+
 const HABITUELS={
   dipsa:{
     frais:[
@@ -288,10 +297,34 @@ function estPrioritaire(nom){const n=norm(nom||'');return FOURNISSEURS_PRIORITAI
 function estLivraisonJour(nom){const n=norm(nom||'');return FOURNISSEURS_LIVRAISON_JOUR.some(k=>n.includes(k))}
 function estBaseExclue(nom){const n=norm(nom||'');return EXCLUSIONS_BASE.some(f=>f(n))}
 function jourPrecedent(jour){const i=ORDRE_JOURS.indexOf(jour);return i>0?ORDRE_JOURS[i-1]:'dimanche'}
+function isDipsaDual(ingNom){
+  const n=norm(ingNom);
+  return DIPSA_DUAL_KEYS.some(k=>n.includes(norm(k)));
+}
+function estBilleGamme(ingNom){const n=norm(ingNom);return n.includes('bille')||n.includes('billes')}
+function estPureeGamme(ingNom){const n=norm(ingNom);return n.includes('puree')||n.includes('purée')}
+
+// Date réelle d'un jour de la semaine à partir de S.semaine (format DD/MM/YY = lundi)
+function dateDeJour(jourNom){
+  const idx=ORDRE_JOURS.indexOf(jourNom); // lundi=0
+  if(idx<0||!S.semaine)return cap(jourNom);
+  const parts=S.semaine.split('/');
+  if(parts.length<3)return cap(jourNom);
+  const[d,m,y]=parts;
+  const lundi=new Date(`20${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`);
+  lundi.setDate(lundi.getDate()+idx);
+  const dd=String(lundi.getDate()).padStart(2,'0');
+  const mm=String(lundi.getMonth()+1).padStart(2,'0');
+  return`${cap(jourNom)} ${dd}/${mm}`;
+}
+
 function isDipsaFrais(ingNom){
   const n=norm(ingNom);
-  // Si explicitement surgelé DIPSA → surgelé
+  // Explicitement surgelé → surgelé
   if(DIPSA_SURGELE_KEYS.some(k=>n.includes(norm(k))))return false;
+  // Purées de fruit et fruits en bille → surgelé par défaut sauf si dans FRAIS_KEYS
+  const estPureeBille=n.includes('puree')||n.includes('purée')||n.includes('bille')||n.includes('billes');
+  if(estPureeBille&&!DIPSA_FRAIS_KEYS.some(k=>n.includes(norm(k))))return false;
   return DIPSA_FRAIS_KEYS.some(k=>n.includes(norm(k)));
 }
 
@@ -449,13 +482,54 @@ function buildLivraisonLines(fouId, fouNom){
       if(!map[key].recs.includes(label))map[key].recs.push(label);
     }
   }
-  // Trier par jour de livraison puis par nom d'ingrédient
-  return Object.values(map).map(item=>{
+  // Post-processing : split DIPSA dual, arrondi colisage Gamme
+  const fn2=norm(fouNom);
+  const finalEntries=[];
+  for(const item of Object.values(map)){
+    if(fn2.includes('dipsa')&&isDipsaDual(item.ing.nomRecette)&&item.type==='frais'){
+      // Split : multiples de 5kg en surgelé + reste en frais
+      const totalKg=item.g/1000;
+      const prodJour=item.livraisonJour; // pour frais, livraisonJour=prodJour
+      const surgeleJour=jourPrecedent(prodJour);
+      if(surgeleJour==='lundi'){
+        // Lundi impossible → tout en frais (ex: production mardi)
+        finalEntries.push({...item});
+      } else {
+        const surgeleKg=Math.floor(totalKg/DIPSA_SURGELE_UNIT)*DIPSA_SURGELE_UNIT;
+        const fraisKg=parseFloat((totalKg-surgeleKg).toFixed(3));
+        if(surgeleKg>0){
+          const nbSacs=surgeleKg/DIPSA_SURGELE_UNIT;
+          finalEntries.push({...item,type:'surgele',livraisonJour:surgeleJour,g:surgeleKg*1000,colisageDisplay:`${nbSacs}×5kg`,neededKg:parseFloat(totalKg.toFixed(3))});
+          if(fraisKg>0)finalEntries.push({...item,type:'frais',livraisonJour:prodJour,g:fraisKg*1000});
+        } else {
+          finalEntries.push({...item}); // qty < 5kg → tout en frais
+        }
+      }
+    } else if(fn2.includes('gamme')){
+      // Arrondir au colisage supérieur
+      const kg=item.g/1000;
+      let colisageKg=0,colisageLbl='';
+      if(estBilleGamme(item.ing.nomRecette)){colisageKg=GAMME_BILLE_COLIS;colisageLbl=`${GAMME_BILLE_COLIS}×1kg`;}
+      else if(estPureeGamme(item.ing.nomRecette)){colisageKg=GAMME_PUREE_COLIS;colisageLbl=`${GAMME_PUREE_COLIS}×1kg`;}
+      if(colisageKg>0){
+        const nbColis=Math.ceil(kg/colisageKg);
+        const orderedKg=nbColis*colisageKg;
+        const colisageDisplay=`${nbColis}×${colisageLbl}`;
+        finalEntries.push({...item,g:orderedKg*1000,colisageDisplay,neededKg:parseFloat(kg.toFixed(3))});
+      } else {
+        finalEntries.push(item);
+      }
+    } else {
+      finalEntries.push(item);
+    }
+  }
+  // Convertir grammes → kg et trier par jour de livraison
+  return finalEntries.map(item=>{
     const {q,u}=fromGrams(item.g);
     return {...item,q,u};
   }).sort((a,b)=>{
     const di=ORDRE_JOURS.indexOf(a.livraisonJour)-ORDRE_JOURS.indexOf(b.livraisonJour);
-    return di!==0?di:a.ing.nomRecette.localeCompare(b.ing.nomRecette);
+    return di!==0?di:(a.ing.nomRecette+a.type).localeCompare(b.ing.nomRecette+b.type);
   });
 }
 
@@ -541,10 +615,14 @@ function bonLivraisonHtml(fou,lines){
       lastJour=line.livraisonJour;
       sep=`<tr class="day-sep"><td colspan="5">📅 Livraison ${cap(line.livraisonJour)}</td></tr>`;
     }
+    const colisageTd=line.colisageDisplay
+      ?`<td><strong style="font-family:'DM Mono',monospace;font-size:12px">${line.colisageDisplay}</strong>${line.neededKg?` <span style="font-size:11px;color:var(--gris)">(besoin : ${fqte(line.neededKg)} kg)</span>`:''}</td>`
+      :`<td></td>`;
     return sep+`<tr>
       <td><div style="font-weight:500">${line.ing.nomRecette}${line.ing.bio?'<span class="bio-tag">BIO</span>':''}</div><div style="font-size:11px;color:var(--gris)">${line.ing.nomEtiquette||''}</div></td>
       <td>${typeTag}</td>
       <td><span class="qte">${qFmt} ${line.u}</span></td>
+      ${colisageTd}
       <td>${line.recs.map(r=>`<span class="tr">${r}</span>`).join('')}</td>
     </tr>`;
   }).join('');
@@ -560,7 +638,7 @@ function bonLivraisonHtml(fou,lines){
     <div class="info-envoi">📬 Bon de commande unique envoyé le lundi — les dates de livraison souhaitées sont précisées ligne par ligne.</div>
     ${getHabBox(fou.nom)}
     <table class="btab">
-      <thead><tr><th>Ingrédient</th><th>Type</th><th>Quantité</th><th>Pour les recettes (jour de turbinage)</th></tr></thead>
+      <thead><tr><th>Ingrédient</th><th>Type</th><th>Qté commandée</th><th>Colisage</th><th>Pour les recettes</th></tr></thead>
       <tbody>${rows}</tbody>
     </table>
     <div class="bf">
@@ -661,11 +739,12 @@ function emailsHtml(parFour){
       for(const line of lines){
         if(line.livraisonJour!==lastJour){
           lastJour=line.livraisonJour;
-          liste+=`\nLIVRAISON ${cap(line.livraisonJour).toUpperCase()} :\n`;
+          liste+=`${liste?'\n':''}${dateDeJour(line.livraisonJour)}\n`;
         }
-        const typeLabel=line.type==='frais'?'🟢 frais':'❄️ surgelé';
-        liste+=`  - ${line.ing.nomRecette}${line.ing.bio?' (BIO)':''} ${typeLabel} : ${fqte(line.q)} ${line.u}`;
-        liste+=`  [${line.recs.join(', ')}]\n`;
+        const typeLabel=line.type==='frais'?'🟢 Frais':'❄️ Surgelé';
+        const qteLabel=line.colisageDisplay?line.colisageDisplay:`${fqte(line.q)} ${line.u}`;
+        const besoinInfo=line.neededKg?` (besoin : ${fqte(line.neededKg)} kg)`:'';
+        liste+=`${qteLabel}  ${line.ing.nomRecette}${line.ing.bio?' BIO':''}  ${typeLabel}${besoinInfo}\n`;
       }
     } else {
       liste=parFour[fou.id].lignes.map(l=>`  - ${l.ing.nomRecette}${l.ing.bio?' (BIO)':''} : ${fqte(l.qte)} ${l.u}`).join('\n');
