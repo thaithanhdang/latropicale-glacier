@@ -248,15 +248,28 @@ const EXCLUSIONS_BASE=[
 // Purées fraîches chez DIPSA : livraison le jour J de la production
 // Purées fraîches DIPSA : livraison le jour J de la production
 const DIPSA_FRAIS_KEYS=[
+  // Frais 1 kg — livraison le jour J de la production
   'framboise bio','fruit de la passion bio','passion bio',
-  'mangue alphonso bio','litchi',
-  'citron jaune bio','citron bio','puree citron','purée citron'
+  'mangue alphonso bio',
+  'litchi',
+  'citron jaune bio','citron bio','puree citron','purée citron',
+  'poivron rouge','poivron',
 ];
+// Clés surgelées DIPSA (tout ce qui n'est pas dans FRAIS_KEYS)
+// citron bergamotte → surgelé 1 kg
+const DIPSA_SURGELE_KEYS=['citron bergamotte','bergamotte'];
 
 const HABITUELS={
   dipsa:{
-    frais:['Framboise bio (1 kg)','Fruit de la Passion bio (1 kg)','Mangue Alphonso bio','Litchi frais','Citron jaune bio (frais, 1 kg)'],
-    surgele:['Passion bio (5 kg)','Framboise bio (5 kg)','Litchi (5 kg)','Cranberry']
+    frais:[
+      'Framboise bio (1 kg)','Fruit de la Passion bio (1 kg)',
+      'Mangue Alphonso bio (1 kg)','Litchi frais (1 kg)',
+      'Citron jaune bio (1 kg)','Poivron rouge (1 kg)'
+    ],
+    surgele:[
+      'Passion bio (5 kg)','Framboise bio (5 kg)','Litchi (5 kg)',
+      'Cranberry','Citron Bergamotte (1 kg)'
+    ]
   },
   gamme:{surgele:['Citron Vert (Boiron)','Orange Sanguine (Boiron)','Groseille (Boiron)']}
 };
@@ -275,7 +288,12 @@ function estPrioritaire(nom){const n=norm(nom||'');return FOURNISSEURS_PRIORITAI
 function estLivraisonJour(nom){const n=norm(nom||'');return FOURNISSEURS_LIVRAISON_JOUR.some(k=>n.includes(k))}
 function estBaseExclue(nom){const n=norm(nom||'');return EXCLUSIONS_BASE.some(f=>f(n))}
 function jourPrecedent(jour){const i=ORDRE_JOURS.indexOf(jour);return i>0?ORDRE_JOURS[i-1]:'dimanche'}
-function isDipsaFrais(ingNom){return DIPSA_FRAIS_KEYS.some(k=>norm(ingNom).includes(norm(k)))}
+function isDipsaFrais(ingNom){
+  const n=norm(ingNom);
+  // Si explicitement surgelé DIPSA → surgelé
+  if(DIPSA_SURGELE_KEYS.some(k=>n.includes(norm(k))))return false;
+  return DIPSA_FRAIS_KEYS.some(k=>n.includes(norm(k)));
+}
 
 function getHabBox(fouNom){
   const fn=norm(fouNom||'');
@@ -411,10 +429,18 @@ function buildLivraisonLines(fouId, fouNom){
       const ing=S.ingredients.find(i=>i.id===iid);
       if(!ing||ing.fournisseurId!==fouId)continue;
       const fn=norm(fouNom);
-      const frais=fn.includes('dipsa')&&isDipsaFrais(ing.nomRecette);
-      // Livraison = jour de production si frais, J-1 si surgelé
-      const livraisonJour=frais?prod.jour:jourPrecedent(prod.jour);
-      const type=frais?'frais':'surgele';
+      let frais=fn.includes('dipsa')?isDipsaFrais(ing.nomRecette):false;
+      // Gamme des Chefs : toujours surgelé
+      let type=frais?'frais':'surgele';
+      // Livraison = J si frais, J-1 si surgelé
+      let livraisonJour=frais?prod.jour:jourPrecedent(prod.jour);
+      // Règle : première livraison possible = MARDI (commande envoyée lundi matin)
+      // Si J-1 = lundi → livraison lundi impossible → forcer frais livraison mardi
+      if(livraisonJour==='lundi'){
+        livraisonJour=prod.jour; // = mardi au plus tôt
+        type='frais';
+        frais=true;
+      }
       const key=`${iid}__${livraisonJour}__${type}`;
       if(!map[key])map[key]={ing,livraisonJour,type,g:0,recs:[]};
       map[key].g+=toGrams((parseFloat(l.poids)||0)*mx, l.unite||'g');
