@@ -1936,6 +1936,7 @@ function SessionHaccp({ data, onBack }) {
   const [step, setStep] = useState(1);
   const [planningMsg, setPlanningMsg] = useState("");
   const [planningLoading, setPlanningLoading] = useState(false);
+  const [archivageEnCours, setArchivageEnCours] = useState({});
 
   useEffect(() => {
     sbFetch("lots_actifs", "GET", null, "?actif=eq.true&order=ingredient_id&select=*").then(rows => {
@@ -1972,8 +1973,8 @@ function SessionHaccp({ data, onBack }) {
 
   const recettesSelectionnees = data.recettes.filter(r => selectedRecettes.includes(r.id));
 
-  // Ingrédients uniques pour les recettes sélectionnées
-  const ingsUniques = getIngredientsUniques(recettesSelectionnees);
+  // Ingrédients uniques pour les recettes sélectionnées (hors eau du robinet)
+  const ingsUniques = getIngredientsUniques(recettesSelectionnees).filter(id => id !== "ing_eau");
 
   const toggleLot = (ingId, lotId) => {
     setLotsChoisis(prev => {
@@ -1983,16 +1984,54 @@ function SessionHaccp({ data, onBack }) {
     });
   };
 
+  const archiverLot = async (lotId, ingId, lotAGarderRaison) => {
+    setArchivageEnCours(prev => ({ ...prev, [lotId]: true }));
+    try {
+      await sbFetch("lots_actifs", "PATCH", { actif: false }, `?id=eq.${lotId}`);
+      setLotsDispos(prev => prev.filter(l => l.id !== lotId));
+      // Si le lot gardé n'était pas encore sélectionné, le sélectionner auto
+      setLotsChoisis(prev => {
+        const reste = (lotsDispos.filter(l => l.ingredient_id === ingId && l.id !== lotId));
+        if (reste.length === 1) return { ...prev, [ingId]: [reste[0].id] };
+        return prev;
+      });
+    } catch (err) {
+      alert("Erreur archivage : " + err.message);
+    }
+    setArchivageEnCours(prev => ({ ...prev, [lotId]: false }));
+  };
+
   const genererTexte = () => {
     const dateF = new Date(dateSession).toLocaleDateString("fr-FR", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+
+    // Collecter les ingrédients sans lot (hors eau)
+    const sansLot = [];
+    ingsUniques.forEach(ingId => {
+      const ing = getIng(ingId);
+      if (!ing) return;
+      const lotsIng = getLotsByIng(ingId);
+      const choixIds = lotsChoisis[ingId] || [];
+      const lotsAffich = choixIds.length > 0
+        ? lotsDispos.filter(l => choixIds.includes(l.id) && l.ingredient_id === ingId)
+        : lotsIng;
+      if (lotsAffich.length === 0) sansLot.push(ing.nomRecette);
+    });
+
     let t = `SESSION MIXES — ${dateF.charAt(0).toUpperCase() + dateF.slice(1)}\n`;
     if (dateTurbinage) t += `Turbinage prévu : ${new Date(dateTurbinage).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}\n`;
     t += "\n";
 
+    // Preamble : photos à prendre
+    if (sansLot.length > 0) {
+      t += `📸 PHOTOS À PRENDRE :\n`;
+      sansLot.forEach(nom => { t += `  • ${nom}\n`; });
+      t += `────────────────────\n\n`;
+    }
+
     recettesSelectionnees.forEach(r => {
       t += `━━━ ${r.nom.toUpperCase()} ━━━\n`;
       const lignes = getAllIngredientsFromRecette(r);
-      const ingIds = [...new Set(lignes.map(l => l.ingredientId).filter(Boolean))];
+      const ingIds = [...new Set(lignes.map(l => l.ingredientId).filter(Boolean))].filter(id => id !== "ing_eau");
 
       ingIds.forEach(ingId => {
         const ing = getIng(ingId);
@@ -2145,17 +2184,38 @@ function SessionHaccp({ data, onBack }) {
                       ✅ Lot : {lotsIng[0].numero_lot}{lotsIng[0].dlc ? ` — DLC : ${lotsIng[0].dlc}` : ""}
                     </div>
                   ) : (
-                    <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                      {lotsIng.map(lot => (
-                        <div key={lot.id} onClick={() => toggleLot(ingId, lot.id)}
-                          style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", borderRadius: 7, cursor: "pointer", background: choixIds.includes(lot.id) ? C.s1 : C.white, border: `1.5px solid ${choixIds.includes(lot.id) ? C.mint : C.lightMint}` }}>
-                          <div style={{ width: 16, height: 16, borderRadius: 4, border: `2px solid ${choixIds.includes(lot.id) ? C.green : C.lightMint}`, background: choixIds.includes(lot.id) ? C.green : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                            {choixIds.includes(lot.id) && <span style={{ color: C.white, fontSize: 10, fontWeight: 700 }}>✓</span>}
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                      <div style={{ fontFamily: F.body, fontSize: 12, color: "#721c24", background: "#f8d7da", borderRadius: 6, padding: "6px 10px", marginBottom: 2 }}>
+                        ⚠️ {lotsIng.length} lots actifs — sélectionnez celui utilisé et archivez l'autre
+                      </div>
+                      {lotsIng.map(lot => {
+                        const selected = choixIds.includes(lot.id);
+                        const enCours = archivageEnCours[lot.id];
+                        return (
+                          <div key={lot.id} style={{ background: selected ? C.s1 : C.white, border: `1.5px solid ${selected ? C.mint : C.lightMint}`, borderRadius: 7, padding: "8px 10px" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }} onClick={() => toggleLot(ingId, lot.id)}>
+                              <div style={{ width: 16, height: 16, borderRadius: 4, border: `2px solid ${selected ? C.green : C.lightMint}`, background: selected ? C.green : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                {selected && <span style={{ color: C.white, fontSize: 10, fontWeight: 700 }}>✓</span>}
+                              </div>
+                              <span style={{ fontFamily: F.mono, fontSize: 12, color: C.darkGreen, flex: 1 }}>Lot : {lot.numero_lot}{lot.dlc ? ` — DLC : ${lot.dlc}` : ""}</span>
+                              {lot.date_ouverture && <span style={{ fontFamily: F.body, fontSize: 11, color: C.muted }}>{lot.date_ouverture}</span>}
+                            </div>
+                            {selected && (
+                              <button
+                                onClick={() => {
+                                  const autresLots = lotsIng.filter(l => l.id !== lot.id);
+                                  if (window.confirm(`Archiver les ${autresLots.length} autre(s) lot(s) de "${ing.nomRecette}" ?\n${autresLots.map(l => `• ${l.numero_lot}`).join("\n")}\n\nIls resteront dans l'historique mais n'apparaîtront plus dans les sessions.`)) {
+                                    autresLots.forEach(l => archiverLot(l.id, ingId));
+                                  }
+                                }}
+                                disabled={enCours}
+                                style={{ marginTop: 6, background: "#dc3545", border: "none", borderRadius: 6, color: "#fff", fontFamily: F.body, fontSize: 11, fontWeight: 700, padding: "4px 10px", cursor: "pointer", opacity: enCours ? 0.6 : 1 }}>
+                                {enCours ? "Archivage…" : "🗃 Archiver les autres lots"}
+                              </button>
+                            )}
                           </div>
-                          <span style={{ fontFamily: F.mono, fontSize: 12, color: C.darkGreen }}>Lot : {lot.numero_lot}{lot.dlc ? ` — DLC : ${lot.dlc}` : ""}</span>
-                          {lot.date_ouverture && <span style={{ fontFamily: F.body, fontSize: 11, color: C.muted }}>ouvert le {lot.date_ouverture}</span>}
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
