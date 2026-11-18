@@ -361,7 +361,7 @@ function calcBioPct(lignes, ings) {
     const g = toGrams(l.poids, l.unite);
     total += g; if (ing.bio) bio += g;
   }
-  return total === 0 ? 0 : Math.round((bio / total) * 100);
+  return total === 0 ? 0 : Math.floor((bio / total) * 100 + 1e-9);
 }
 
 // Eau et sel de Guérande ne sont pas des ingrédients d'origine agricole :
