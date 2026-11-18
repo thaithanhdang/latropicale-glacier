@@ -364,23 +364,89 @@ function calcBioPct(lignes, ings) {
   return total === 0 ? 0 : Math.round((bio / total) * 100);
 }
 
+// Eau et sel de Guérande ne sont pas des ingrédients d'origine agricole :
+// exclus du calcul du % bio, et le sel n'a jamais d'astérisque sur l'étiquette.
+function isEau(ing) {
+  return ing.id === "ing_eau" || (ing.nomRecette || "").toLowerCase() === "eau";
+}
+function isSel(ing) {
+  return ing.id === "ing_sel_guerande" || /^sel\b/i.test(ing.nomRecette || "");
+}
+
 function calcBioPctStrict(lignes, ings) {
   let total = 0, bio = 0;
   for (const l of lignes) {
     const ing = ings.find(i => i.id === l.ingredientId);
     if (!ing || !l.poids) continue;
-    if (ing.id === "ing_eau" || ing.nomRecette.toLowerCase() === "eau") continue;
+    if (isEau(ing) || isSel(ing)) continue;
     const g = toGrams(l.poids, l.unite);
     total += g; if (ing.bio) bio += g;
   }
   return total === 0 ? 0 : (bio / total) * 100;
 }
 
+// Étiquette : si le % bio est entre 95 et 99,9 %, on déclasse (on retire l'astérisque)
+// un ou deux ingrédients bio pour passer strictement sous 95 %, en visant ~94 %.
+// La poudre de lait est préférée à efficacité égale. Les recettes ne sont pas modifiées.
+function buildEtiquette(lignes, ings) {
+  // Un même ingrédient présent sur plusieurs lignes n'apparaît qu'une fois sur l'étiquette.
+  const parNom = new Map();
+  for (const l of buildListeEtiquette(lignes, ings)) {
+    const cle = l.nom.trim().toLowerCase();
+    const prev = parNom.get(cle);
+    if (prev) { prev.poids += l.poids; prev.bio = prev.bio && l.bio; }
+    else parNom.set(cle, { ...l });
+  }
+  const liste = [...parNom.values()].sort((a, b) => b.poids - a.poids);
+  const pctReel = calcBioPctStrict(lignes, ings);
+  let total = 0, bio = 0;
+  for (const l of liste) {
+    if (l.eau || l.sel) continue;
+    total += l.poids; if (l.bio) bio += l.poids;
+  }
+  let declasses = [];
+  let pctAffiche = pctReel;
+  if (total > 0 && pctReel >= 95 && pctReel < 100) {
+    const candidats = liste.filter(l => l.bio && !l.eau && !l.sel);
+    const estPoudreLait = (c) => /poudre de lait|lait en poudre/i.test(c.map(x => x.nom).join(" "));
+    let best = null;
+    const essais = [];
+    candidats.forEach((a, i) => {
+      essais.push([a]);
+      candidats.slice(i + 1).forEach(b => essais.push([a, b]));
+    });
+    for (const taille of [1, 2]) {
+      for (const combo of essais.filter(c => c.length === taille)) {
+        const p = ((bio - combo.reduce((s, c) => s + c.poids, 0)) / total) * 100;
+        if (p >= 95) continue;
+        if (!best || p > best.p + 0.5 || (Math.abs(p - best.p) <= 0.5 && estPoudreLait(combo) && !estPoudreLait(best.combo))) {
+          best = { combo, p };
+        }
+      }
+      if (best) break;
+    }
+    if (best) {
+      declasses = best.combo.map(c => c.nom);
+      pctAffiche = best.p;
+    }
+  }
+  const items = liste.map(l => ({ ...l, etoile: l.bio && !l.sel && !declasses.includes(l.nom) }));
+  const texte = items.map(l => (l.etoile ? l.nom + "*" : l.nom)).join(", ");
+  const pctTronque = Math.floor(pctAffiche);
+  const mention = pctReel >= 100
+    ? "(* ingrédients d'origine agricole issus de l'AB - certifié par FR-BIO-09)"
+    : `(* ${pctTronque}% des ingrédients d'origine agricole sont issus de l'AB - certifié par FR-BIO-09)`;
+  return { items, texte, mention, pctReel, pctAffiche: pctTronque, declasses, logoAB: pctReel >= 100 };
+}
+
 function getBioAlert(lignes, ings) {
   const pct = calcBioPctStrict(lignes, ings);
-  if (pct >= 95 && pct < 100) return { type: "warning", pct: pct.toFixed(1), message: `Attention : ${pct.toFixed(1)}% bio (hors eau) — entre 95% et 99,9% : déclassez certains ingrédients bio pour descendre a 94% ou monter a 100%.` };
-  if (pct >= 100) return { type: "success", pct: "100", message: "100% bio (hors eau) — logo AB autorisé." };
-  return { type: "info", pct: pct.toFixed(1), message: `${pct.toFixed(1)}% des ingrédients d'origine agricole issus de l'AB (hors eau).` };
+  if (pct >= 95 && pct < 100) {
+    const et = buildEtiquette(lignes, ings);
+    return { type: "warning", pct: pct.toFixed(1), message: `${pct.toFixed(1)}% bio (hors eau et sel) — entre 95% et 99,9% : étiquette déclassée automatiquement (${et.declasses.join(", ")} sans *) → ${et.pctAffiche}% affiché, pas de logo AB.` };
+  }
+  if (pct >= 100) return { type: "success", pct: "100", message: "100% bio (hors eau et sel) — logo AB autorisé." };
+  return { type: "info", pct: pct.toFixed(1), message: `${pct.toFixed(1)}% des ingrédients d'origine agricole issus de l'AB (hors eau et sel).` };
 }
 
 function calcCout(lignes, ings) {
@@ -397,7 +463,7 @@ function buildListeEtiquette(lignes, ings) {
   return lignes.filter(l => l.poids > 0 && l.ingredientId)
     .map(l => {
       const ing = ings.find(i => i.id === l.ingredientId);
-      return { nom: ing?.nomEtiquette || ing?.nomRecette || "?", bio: ing?.bio || false, poids: toGrams(l.poids, l.unite) };
+      return { nom: ing?.nomEtiquette || ing?.nomRecette || "?", bio: ing?.bio || false, poids: toGrams(l.poids, l.unite), eau: ing ? isEau(ing) : false, sel: ing ? isSel(ing) : false };
     }).sort((a, b) => b.poids - a.poids);
 }
 
@@ -860,12 +926,11 @@ function RecetteDetail({ recette, data, onEdit, onClose }) {
   const cout = calcCout(allLignes, data.ingredients);
   const liste = buildListeEtiquette(allLignes, data.ingredients);
   const allergenes = [...new Set(allLignes.map(l => data.ingredients.find(i => i.id === l.ingredientId)?.allergene).filter(Boolean))];
-  const listeText = liste.map((l, i) => (l.bio ? l.nom + "*" : l.nom) + (i < liste.length - 1 ? ", " : "")).join("");
-  const bioPctStrict = calcBioPctStrict(allLignes, data.ingredients);
+  const etiquette = buildEtiquette(allLignes, data.ingredients);
+  const listeText = etiquette.texte;
+  const bioPctStrict = etiquette.pctReel;
   const bioAlert = getBioAlert(allLignes, data.ingredients);
-  const mentionBio = bioPctStrict >= 100
-    ? "(* ingrédients d'origine agricole issus de l'AB - certifié par FR-BIO-09)"
-    : `(* ${bioPctStrict.toFixed(0)}% des ingrédients d'origine agricole sont issus de l'AB - certifié par FR-BIO-09)`;
+  const mentionBio = etiquette.mention;
 
   const sections = [
     { label: "Poudres", lignes: recette.poudres, bg: C.s1 },
